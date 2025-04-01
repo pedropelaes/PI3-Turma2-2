@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">SuperId</string>
+    <string name="app_description">
+        Com nosso serviço, você poderá gerenciar suas senhas de forma simples e segura,
+        além de contar com um sistema de autenticação rápido e prático para acessar sites parceiros.
+        Basta deslizar para o lado e começar a usar nosso app com facilidade!
+    </string>
 </resources>

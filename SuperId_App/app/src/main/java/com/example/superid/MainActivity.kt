@@ -10,8 +10,15 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.waterfallPadding
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Scaffold
@@ -23,8 +30,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.superid.ui.theme.SuperIdTheme
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
@@ -38,7 +54,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-@Preview
+@Preview(showBackground = true)
 @Composable
 fun SuperID() {
     ViewPagerForInitialScreens()
@@ -98,8 +114,36 @@ fun ViewPagerForInitialScreens() { //view pager das paginas iniciais
 
 @Composable
 fun Screen1(){
+    val title_font = FontFamily(Font(R.font.fonte_titulo))
     InitialScreensDesign(R.drawable.lockers_background){
-        Text("Bem vindo ao SuperID", color = Color.White)
+        Column(modifier = Modifier){
+            Text(
+                buildAnnotatedString { //junta strings com estilos diferentes
+                    withStyle(
+                        style = SpanStyle(fontFamily = FontFamily.SansSerif ,fontSize = 50.sp, color = Color.White, fontWeight = FontWeight.Bold)){
+                        append("Bem vindo ao ")
+                    }
+                    withStyle(
+                        style = SpanStyle(fontFamily = title_font, fontSize = 40.sp, color = Color.Black, background = Color.White)){
+                        append("Super")
+                    }
+                    withStyle(
+                        style = SpanStyle(fontFamily = title_font, fontSize = 40.sp, color = Color(0xFF152034), background = Color.White)){
+                        append(" ID")
+                    }
+                },
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .wrapContentWidth()
+                    .padding(16.dp)
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(stringResource(R.string.app_description), color = Color.White ,fontSize = 20.sp,
+                fontFamily = FontFamily.SansSerif,
+                modifier = Modifier.wrapContentWidth()
+                    .padding(16.dp)
+            )
+        }
     }
 }
 @Composable
