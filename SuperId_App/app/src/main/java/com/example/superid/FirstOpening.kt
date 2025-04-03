@@ -1,10 +1,10 @@
 package com.example.superid
 
-import android.graphics.Paint.Align
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -18,23 +18,29 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.systemBarsPadding
-import androidx.compose.foundation.layout.waterfallPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Scaffold
+import androidx.compose.foundation.shape.CutCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -49,8 +55,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.view.WindowCompat
-import com.example.superid.ui.theme.SuperIdTheme
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 
@@ -64,7 +68,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-@Preview(showBackground = true)
+//@Preview(showBackground = true)
 @Composable
 fun SuperID() {
     ViewPagerForInitialScreens()
@@ -175,10 +179,60 @@ fun Screen1(){
 fun Screen2(){
     Text("Termos de condição", color = Color.White)
 }
-
+@Preview
 @Composable
 fun Screen3(){
-    Text("Tela de cadastro", color = Color.White)
+    val title_font = FontFamily(Font(R.font.fonte_titulo))
+    Column(modifier = Modifier){
+        Text(
+            buildAnnotatedString { //junta strings com estilos diferentes
+                withStyle(
+                    style = SpanStyle(fontFamily = FontFamily.SansSerif ,fontSize = 50.sp, color = Color.White, fontWeight = FontWeight.Bold)){
+                    append("Bem vindo ao ")
+                }
+                withStyle(
+                    style = SpanStyle(fontFamily = title_font, fontSize = 40.sp, color = Color.Black, background = Color.White)){
+                    append("Super")
+                }
+                withStyle(
+                    style = SpanStyle(fontFamily = title_font, fontSize = 40.sp, color = Color(0xFF152034), background = Color.White)){
+                    append(" ID")
+                }
+            },
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .wrapContentWidth()
+                .padding(16.dp)
+        )
+        Spacer(modifier = Modifier.padding(16.dp))
+        Button(onClick = {}, shape = RectangleShape,
+            border = BorderStroke(2.dp, Color.White),
+            colors = ButtonColors(
+                containerColor = Color.LightGray.copy(alpha = 0.5f),
+                contentColor = Color.White,
+                disabledContainerColor = Color.DarkGray,
+                disabledContentColor = Color.Red,
+            ),
+            modifier = Modifier.align(Alignment.CenterHorizontally).width(230.dp).height(60.dp)){
+            Text("Fazer Cadastro", fontSize = 20.sp, fontFamily = FontFamily.SansSerif, color = Color.White)
+        }
+        Spacer(modifier = Modifier.padding(16.dp))
+        Text("Já possuí conta?", fontSize = 18.sp, fontFamily = FontFamily.SansSerif, color = Color.White,
+            modifier = Modifier.wrapContentWidth().align(Alignment.CenterHorizontally).background(Color.LightGray.copy(alpha = 0.2f))
+        )
+        Spacer(modifier = Modifier.padding(3.dp))
+        Button(onClick = {}, shape = RectangleShape,
+            border = BorderStroke(2.dp, Color.White),
+            colors = ButtonColors(
+                containerColor = Color.LightGray.copy(alpha = 0.5f),
+                contentColor = Color.White,
+                disabledContainerColor = Color.DarkGray,
+                disabledContentColor = Color.Red,
+            ),
+            modifier = Modifier.align(Alignment.CenterHorizontally).width(230.dp).height(60.dp)){
+            Text("Fazer Login", fontSize = 20.sp, fontFamily = FontFamily.SansSerif, color = Color.White)
+        }
+    }
 }
 
 
@@ -252,6 +306,7 @@ private fun mostrarTermosDeUso(sharedPreferences: SharedPreferences) {
     builder.setCancelable(false)
     builder.show()
     //nao deixa o usuario fechar o termo sem aceitar
- */
 }
+ */
+
 
