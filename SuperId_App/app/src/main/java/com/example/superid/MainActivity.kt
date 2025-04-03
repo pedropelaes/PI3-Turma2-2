@@ -211,3 +211,45 @@ fun HorizontalPagerIndicator(
         }
     }
 }
+
+//ideia de codigo para usuario aceitar termos de uso
+override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    setContentView(R.layout.activity_id)
+
+    //verifica se ja aceitou alguma vez
+    val sharedPreferences = getSharedPreferences("AppPrefs", MODE_PRIVATE)
+    val aceitouTermos = sharedPreferences.getBoolean("aceitou_termos", false)
+
+    if (!aceitouTermos) {
+        mostrarTermosDeUso(sharedPreferences)
+    }
+}
+
+//exibir os termos
+private fun mostrarTermosDeUso(sharedPreferences: SharedPreferences) {
+    val builder = AlertDialog.Builder(this)
+    builder.setTitle("Termos de Uso")
+    // escrever os termos aqui
+    // builder.setMessage("exemplo")
+
+    builder.setPositiveButton("Aceitar") { dialog, _ ->
+
+        val editor = sharedPreferences.edit()
+        //salva se aceitou
+        editor.putBoolean("aceitou_termos", true)
+        editor.apply()
+        dialog.dismiss()
+    }
+
+    builder.setNegativeButton("Sair") { dialog, _ ->
+        dialog.dismiss()
+        finish()
+        //se o usuario nao aceitar os termos fecha o app
+    }
+
+    builder.setCancelable(false)
+    builder.show()
+    //nao deixa o usuario fechar o termo sem aceitar
+}
+
