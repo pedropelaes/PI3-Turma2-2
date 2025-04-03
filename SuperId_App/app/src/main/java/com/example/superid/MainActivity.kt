@@ -212,6 +212,7 @@ fun HorizontalPagerIndicator(
     }
 }
 
+/*
 //ideia de codigo para usuario aceitar termos de uso
 override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -251,5 +252,6 @@ private fun mostrarTermosDeUso(sharedPreferences: SharedPreferences) {
     builder.setCancelable(false)
     builder.show()
     //nao deixa o usuario fechar o termo sem aceitar
+ */
 }
 
