@@ -168,12 +168,12 @@ fun ViewPagerForInitialScreens() { //view pager das paginas iniciais
                             ),
                             modifier = Modifier.wrapContentWidth()
                         ) {
-                            Text("Voltar", fontSize = 15.sp, color = Color.White)
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack, // Ícone de voltar
                                 contentDescription = "Voltar",
                                 tint = Color.White
                             )
+                            Text("Voltar", fontSize = 15.sp, color = Color.White)
                         }
                         Spacer(modifier = Modifier.width(150.dp))
                     }
