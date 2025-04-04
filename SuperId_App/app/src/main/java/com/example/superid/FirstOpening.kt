@@ -1,5 +1,6 @@
 package com.example.superid
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -53,6 +54,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -209,33 +211,18 @@ fun ViewPagerForInitialScreens() { //view pager das paginas iniciais
 
 @Composable
 fun Screen1(){
-    val title_font = FontFamily(Font(R.font.fonte_titulo))
-    Column(modifier = Modifier){
-        Text(
-            buildAnnotatedString { //junta strings com estilos diferentes
-                withStyle(
-                    style = SpanStyle(fontFamily = FontFamily.SansSerif ,fontSize = 50.sp, color = Color.White, fontWeight = FontWeight.Bold)){
-                    append("Bem vindo ao ")
-                }
-                withStyle(
-                    style = SpanStyle(fontFamily = title_font, fontSize = 40.sp, color = Color.Black, background = Color.White)){
-                    append("Super")
-                }
-                withStyle(
-                    style = SpanStyle(fontFamily = title_font, fontSize = 40.sp, color = Color(0xFF152034), background = Color.White)){
-                    append(" ID")
-                }
-            },
-            textAlign = TextAlign.Center,
-            modifier = Modifier
-                .wrapContentWidth()
-                .padding(16.dp)
+    Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally){
+        Text("Bem vindo ao",fontFamily = FontFamily.SansSerif ,fontSize = 50.sp, color = Color.White,
+            fontWeight = FontWeight.Bold, modifier = Modifier.align(Alignment.CenterHorizontally)
         )
+        SuperIdTitle()
+
         Spacer(modifier = Modifier.height(16.dp))
         Text(stringResource(R.string.app_description), color = Color.White ,fontSize = 20.sp,
             fontFamily = FontFamily.SansSerif,
+            textAlign = TextAlign.Center,
             modifier = Modifier
-                .wrapContentWidth()
+                .fillMaxWidth()
                 .padding(16.dp)
         )
     }
@@ -248,24 +235,10 @@ fun Screen2(){
 @Preview
 @Composable
 fun Screen3(){
-    val title_font = FontFamily(Font(R.font.fonte_titulo))
+    val context = LocalContext.current
     Column(modifier = Modifier){
-        Text(
-            buildAnnotatedString { //junta strings com estilos diferentes
-                withStyle(
-                    style = SpanStyle(fontFamily = title_font, fontSize = 40.sp, color = Color.Black, background = Color.White)){
-                    append("Super")
-                }
-                withStyle(
-                    style = SpanStyle(fontFamily = title_font, fontSize = 40.sp, color = Color(0xFF152034), background = Color.White)){
-                    append(" ID")
-                }
-            },
-            textAlign = TextAlign.Center,
-            modifier = Modifier
-                .wrapContentWidth()
-                .padding(16.dp)
-        )
+        SuperIdTitle()
+
         Spacer(modifier = Modifier.padding(16.dp))
         Button(onClick = {}, shape = RectangleShape,
             border = BorderStroke(2.dp, Color.White),
@@ -286,7 +259,10 @@ fun Screen3(){
                 .background(Color.LightGray.copy(alpha = 0.2f))
         )
         Spacer(modifier = Modifier.padding(3.dp))
-        Button(onClick = {}, shape = RectangleShape,
+        Button(onClick = {
+            val intent = Intent(context, LogInActivity::class.java)
+            context.startActivity(intent)
+        }, shape = RectangleShape,
             border = BorderStroke(2.dp, Color.White),
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color(0xFF152034).copy(alpha = 0.5f)
@@ -330,6 +306,26 @@ fun HorizontalPagerIndicator(
             )
         }
     }
+}
+@Composable
+fun SuperIdTitle(modifier: Modifier = Modifier){
+    val title_font = FontFamily(Font(R.font.fonte_titulo))
+    Text(
+        buildAnnotatedString { //junta strings com estilos diferentes
+            withStyle(
+                style = SpanStyle(fontFamily = title_font, fontSize = 40.sp, color = Color.Black, background = Color.White)){
+                append("Super")
+            }
+            withStyle(
+                style = SpanStyle(fontFamily = title_font, fontSize = 40.sp, color = Color(0xFF152034), background = Color.White)){
+                append(" ID")
+            }
+        },
+        textAlign = TextAlign.Center,
+        modifier = Modifier
+            .wrapContentWidth()
+            .padding(16.dp)
+    )
 }
 
 /*
