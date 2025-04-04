@@ -55,6 +55,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.example.superid.SuperIdTitle
+import com.example.superid.ui.theme.ui.common.TextFieldDesignForLoginAndSignUp
 
 class LogInActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -118,44 +119,27 @@ fun LoginScreen(){
     var password by remember { mutableStateOf("") }
     Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally){
         SuperIdTitle()
+
         Spacer(modifier = Modifier.height(24.dp))
+        
         Text("Login:",fontFamily = FontFamily.SansSerif ,fontSize = 30.sp, color = Color.White,
             fontWeight = FontWeight.Bold, modifier = Modifier.align(Alignment.CenterHorizontally)
         )
+
         Spacer(modifier = Modifier.height(24.dp))
-        TextField(
-            value = email, label = { Text(stringResource(R.string.type_your_email)) },
-            onValueChange = { email = it },
-            singleLine = true,
-            shape = CircleShape,
-            colors = TextFieldDefaults.colors(
-                unfocusedTextColor = Color.White,
-                unfocusedLabelColor = Color.Gray,
-                unfocusedContainerColor = colorResource(R.color.field_text_background),
-                focusedContainerColor = colorResource(R.color.field_text_focused_background),
-                focusedTextColor = Color.White,
-                focusedLabelColor = Color.Black
-            ),
-            modifier = Modifier.wrapContentSize()
-            )
-        Spacer(modifier = Modifier.height(12.dp))
-        TextField(
-            value = password, label = { Text(stringResource(R.string.type_your_password)) },
-            onValueChange = { password = it },
-            singleLine = true,
-            shape = CircleShape,
-            visualTransformation = PasswordVisualTransformation(),
-            colors = TextFieldDefaults.colors(
-                unfocusedTextColor = Color.White,
-                unfocusedLabelColor = Color.Gray,
-                unfocusedContainerColor = colorResource(R.color.field_text_background),
-                focusedContainerColor = colorResource(R.color.field_text_focused_background),
-                focusedTextColor = Color.White,
-                focusedLabelColor = Color.Black
-            ),
-            modifier = Modifier.wrapContentSize()
+
+        TextFieldDesignForLoginAndSignUp(value = email, onValueChange = { email = it },
+            label = stringResource(R.string.type_your_email,)
         )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        TextFieldDesignForLoginAndSignUp(value = password, onValueChange = { password = it },
+            label = stringResource(R.string.type_your_password), isPassword = true
+        )
+
         Spacer(modifier = Modifier.height(24.dp))
+
         Button(
             onClick = {},
             border = BorderStroke(2.dp, Color.White),
@@ -167,5 +151,4 @@ fun LoginScreen(){
             Text("Fazer Login")
         }
     }
-
 }
