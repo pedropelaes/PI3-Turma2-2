@@ -53,6 +53,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.example.superid.ui.theme.ui.common.LoginAndSignUpDesign
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.example.superid.ui.theme.ui.common.SuperIdTitle
 import com.example.superid.ui.theme.ui.common.TextFieldDesignForLoginAndSignUp
@@ -70,48 +71,10 @@ class LogInActivity : AppCompatActivity() {
 @Preview
 @Composable
 fun Login(){
-    LoginDesign(imageResId = R.drawable.lockers_background, content = {
+    LoginAndSignUpDesign(imageResId = R.drawable.lockers_background, content = {
         LoginScreen()
     })
 }
-
-@Composable
-fun LoginDesign(
-    imageResId: Int,
-    statusBarColor: Color = Color(0xFF152034),
-    navigationBarColor: Color = Color(0xFF152034),
-    content: @Composable () -> Unit,
-) {
-    val systemUiController = rememberSystemUiController()
-    SideEffect { //aplicando as cores da barra de status e navegação
-        systemUiController.setStatusBarColor(statusBarColor, darkIcons = false)
-        systemUiController.setNavigationBarColor(navigationBarColor, darkIcons = false)
-    }
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-    ) {
-        Image(
-            painter = painterResource(id = imageResId),
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize()
-        )
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()),
-            verticalArrangement = Arrangement.SpaceBetween,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
-                content()
-            }
-        }
-    }
-}
-
 
 @Composable
 fun LoginScreen(){

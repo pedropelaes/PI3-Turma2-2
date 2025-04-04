@@ -182,27 +182,31 @@ fun ViewPagerForInitialScreens() { //view pager das paginas iniciais
                     }
                     if (pagerState.currentPage == 0){
                         Spacer(modifier = Modifier.width(250.dp))
+                    }else if(pagerState.currentPage == 2){
+                        Spacer(modifier = Modifier.width(240.dp))
                     }
-                    Button(
-                        onClick = {
-                            coroutineScope.launch {
-                                if (pagerState.currentPage < pagerState.pageCount - 1){
-                                    pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                    if (pagerState.currentPage < 2){
+                        Button(
+                            onClick = {
+                                coroutineScope.launch {
+                                    if (pagerState.currentPage < pagerState.pageCount - 1){
+                                        pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                                    }
                                 }
-                            }
-                        },
-                        shape = RectangleShape, border = BorderStroke(1.dp, Color.White),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color.Transparent
-                        ),
-                        modifier = Modifier.wrapContentWidth()
-                    ) {
-                        Text("Próximo", fontSize = 15.sp, color = Color.White)
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowForward, // Ícone de voltar
-                            contentDescription = "Voltar",
-                            tint = Color.White
-                        )
+                            },
+                            shape = RectangleShape, border = BorderStroke(1.dp, Color.White),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color.Transparent
+                            ),
+                            modifier = Modifier.wrapContentWidth()
+                        ) {
+                            Text("Próximo", fontSize = 15.sp, color = Color.White)
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowForward, // Ícone de voltar
+                                contentDescription = "Voltar",
+                                tint = Color.White
+                            )
+                        }
                     }
                 }
             })
@@ -241,7 +245,10 @@ fun Screen3(){
         SuperIdTitle()
 
         Spacer(modifier = Modifier.padding(16.dp))
-        Button(onClick = {}, shape = RectangleShape,
+        Button(onClick = {
+            val intent = Intent(context, SignUpActivity::class.java)
+            context.startActivity(intent)
+        }, shape = RectangleShape,
             border = BorderStroke(2.dp, Color.White),
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color(0xFF152034)
