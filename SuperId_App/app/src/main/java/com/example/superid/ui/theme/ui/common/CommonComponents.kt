@@ -1,6 +1,8 @@
 package com.example.superid.ui.theme.ui.common
 
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -14,8 +16,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.superid.R
 
 @Composable
@@ -43,5 +53,28 @@ fun TextFieldDesignForLoginAndSignUp(value: String, onValueChange: (String) -> U
             errorIndicatorColor = Color.Transparent,
         ),
         modifier = Modifier.wrapContentSize()
+    )
+}
+
+@Composable
+fun SuperIdTitle(modifier: Modifier = Modifier){
+    val title_font = FontFamily(Font(R.font.fonte_titulo))
+    Text(
+        buildAnnotatedString { //junta strings com estilos diferentes
+            withStyle(
+                style = SpanStyle(fontFamily = title_font, fontSize = 40.sp, color = Color.Black, background = Color.White)
+            ){
+                append("Super")
+            }
+            withStyle(
+                style = SpanStyle(fontFamily = title_font, fontSize = 40.sp, color = Color(0xFF152034), background = Color.White)
+            ){
+                append(" ID")
+            }
+        },
+        textAlign = TextAlign.Center,
+        modifier = Modifier
+            .wrapContentWidth()
+            .padding(16.dp)
     )
 }

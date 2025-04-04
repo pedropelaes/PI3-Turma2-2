@@ -72,6 +72,7 @@ import androidx.compose.ui.zIndex
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import com.example.superid.ui.theme.ui.common.SuperIdTitle
 
 
 class MainActivity : ComponentActivity() {
@@ -307,26 +308,7 @@ fun HorizontalPagerIndicator(
         }
     }
 }
-@Composable
-fun SuperIdTitle(modifier: Modifier = Modifier){
-    val title_font = FontFamily(Font(R.font.fonte_titulo))
-    Text(
-        buildAnnotatedString { //junta strings com estilos diferentes
-            withStyle(
-                style = SpanStyle(fontFamily = title_font, fontSize = 40.sp, color = Color.Black, background = Color.White)){
-                append("Super")
-            }
-            withStyle(
-                style = SpanStyle(fontFamily = title_font, fontSize = 40.sp, color = Color(0xFF152034), background = Color.White)){
-                append(" ID")
-            }
-        },
-        textAlign = TextAlign.Center,
-        modifier = Modifier
-            .wrapContentWidth()
-            .padding(16.dp)
-    )
-}
+
 
 /*
 //ideia de codigo para usuario aceitar termos de uso

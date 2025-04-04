@@ -54,7 +54,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
-import com.example.superid.SuperIdTitle
+import com.example.superid.ui.theme.ui.common.SuperIdTitle
 import com.example.superid.ui.theme.ui.common.TextFieldDesignForLoginAndSignUp
 
 class LogInActivity : AppCompatActivity() {
@@ -121,7 +121,7 @@ fun LoginScreen(){
         SuperIdTitle()
 
         Spacer(modifier = Modifier.height(24.dp))
-        
+
         Text("Login:",fontFamily = FontFamily.SansSerif ,fontSize = 30.sp, color = Color.White,
             fontWeight = FontWeight.Bold, modifier = Modifier.align(Alignment.CenterHorizontally)
         )
