@@ -5,4 +5,7 @@
         além de contar com um sistema de autenticação rápido e prático para acessar sites parceiros.
         Basta deslizar para o lado e começar a usar nosso app com facilidade!
     </string>
+    <string name="type_your_email">Digite seu email</string>
+    <string name="type_your_password">Digite sua senha</string>
+    <string name="type_your_name">Digite o seu nome</string>
 </resources>
