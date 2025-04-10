@@ -7,5 +7,7 @@
     </string>
     <string name="type_your_email">Digite seu email</string>
     <string name="type_your_password">Digite sua senha</string>
+    <string name="confirm_your_password">Confirme a sua senha</string>
+    <string name="passwords_must_match">As senhas precisam ser iguais para criar sua conta.</string>
     <string name="type_your_name">Digite o seu nome</string>
 </resources>
