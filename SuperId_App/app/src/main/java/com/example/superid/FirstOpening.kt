@@ -133,9 +133,11 @@ fun InitialScreensDesign(
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun ViewPagerForInitialScreens() { //view pager das paginas iniciais
+fun ViewPagerForInitialScreens() {
     val pagerState = rememberPagerState(pageCount = { 3 })
     val coroutineScope = rememberCoroutineScope()
+    var termsAccepted by remember { mutableStateOf(false) }
+
     Column {
         HorizontalPager(
             state = pagerState,
@@ -144,7 +146,7 @@ fun ViewPagerForInitialScreens() { //view pager das paginas iniciais
             InitialScreensDesign(R.drawable.lockers_background, content = {
                 when (page) {
                     0 -> Screen1()
-                    1 -> Screen2()
+                    1 -> Screen2(termsAccepted, onTermsAcceptedChange = { termsAccepted = it })
                     2 -> Screen3()
                 }
             }, bottomContent = {
@@ -154,25 +156,27 @@ fun ViewPagerForInitialScreens() { //view pager das paginas iniciais
                     modifier = Modifier.wrapContentWidth()
                 )
                 Row(
-                    modifier = Modifier.wrapContentWidth(), horizontalArrangement = Arrangement.SpaceBetween
-                ){
-                    if(pagerState.currentPage > 0){
+                    modifier = Modifier.wrapContentWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    if (pagerState.currentPage > 0) {
                         Button(
                             onClick = {
                                 coroutineScope.launch {
-                                    if (pagerState.currentPage > 0){
+                                    if (pagerState.currentPage > 0) {
                                         pagerState.animateScrollToPage(pagerState.currentPage - 1)
                                     }
                                 }
                             },
-                            shape = RectangleShape, border = BorderStroke(1.dp, Color.White),
+                            shape = RectangleShape,
+                            border = BorderStroke(1.dp, Color.White),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = Color.Transparent
                             ),
                             modifier = Modifier.wrapContentWidth()
                         ) {
                             Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowBack, // Ícone de voltar
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                 contentDescription = "Voltar",
                                 tint = Color.White
                             )
@@ -180,21 +184,29 @@ fun ViewPagerForInitialScreens() { //view pager das paginas iniciais
                         }
                         Spacer(modifier = Modifier.width(150.dp))
                     }
-                    if (pagerState.currentPage == 0){
+
+                    if (pagerState.currentPage == 0) {
                         Spacer(modifier = Modifier.width(250.dp))
-                    }else if(pagerState.currentPage == 2){
+                    } else if (pagerState.currentPage == 2) {
                         Spacer(modifier = Modifier.width(240.dp))
                     }
-                    if (pagerState.currentPage < 2){
+
+                    if (pagerState.currentPage < 2) {
                         Button(
                             onClick = {
                                 coroutineScope.launch {
-                                    if (pagerState.currentPage < pagerState.pageCount - 1){
+                                    // Impede de ir para a próxima tela se não aceitou os termos.
+                                    if (pagerState.currentPage == 1 && !termsAccepted) {
+                                        // Exibe uma mensagem (pode usar Snackbar ou Toast, por exemplo).
+                                        return@launch
+                                    }
+                                    if (pagerState.currentPage < pagerState.pageCount - 1) {
                                         pagerState.animateScrollToPage(pagerState.currentPage + 1)
                                     }
                                 }
                             },
-                            shape = RectangleShape, border = BorderStroke(1.dp, Color.White),
+                            shape = RectangleShape,
+                            border = BorderStroke(1.dp, Color.White),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = Color.Transparent
                             ),
@@ -202,8 +214,8 @@ fun ViewPagerForInitialScreens() { //view pager das paginas iniciais
                         ) {
                             Text("Próximo", fontSize = 15.sp, color = Color.White)
                             Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowForward, // Ícone de voltar
-                                contentDescription = "Voltar",
+                                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                                contentDescription = "Próximo",
                                 tint = Color.White
                             )
                         }
@@ -213,6 +225,7 @@ fun ViewPagerForInitialScreens() { //view pager das paginas iniciais
         }
     }
 }
+
 
 @Composable
 fun Screen1(){
@@ -234,55 +247,113 @@ fun Screen1(){
 }
 
 @Composable
-fun Screen2(){
-    Text("Termos de condição", color = Color.White)
+fun Screen2(termsAccepted: Boolean, onTermsAcceptedChange: (Boolean) -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.Start
+    ) {
+        Text(
+            "Termos de Condição",
+            color = Color.White,
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Bold
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            "Para usar o SuperID, você precisa aceitar nossos termos e condições.",
+            color = Color.White,
+            fontSize = 16.sp
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            androidx.compose.material3.Checkbox(
+                checked = termsAccepted,
+                onCheckedChange = { onTermsAcceptedChange(it) }
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                "Li e aceito os Termos e Condições",
+                color = Color.White,
+                fontSize = 16.sp
+            )
+        }
+    }
 }
+
+
 @Preview
 @Composable
-fun Screen3(){
+fun Screen3() {
     val context = LocalContext.current
-    Column(modifier = Modifier){
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+
         SuperIdTitle()
 
-        Spacer(modifier = Modifier.padding(16.dp))
-        Button(onClick = {
-            val intent = Intent(context, SignUpActivity::class.java)
-            context.startActivity(intent)
-        }, shape = RectangleShape,
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Button(
+            onClick = {
+                val intent = Intent(context, SignUpActivity::class.java)
+                context.startActivity(intent)
+            },
+            shape = RectangleShape,
             border = BorderStroke(2.dp, Color.White),
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color(0xFF152034)
             ),
             modifier = Modifier
-                .align(Alignment.CenterHorizontally)
                 .width(230.dp)
-                .height(60.dp)){
+                .height(60.dp)
+        ) {
             Text("Fazer Cadastro", fontSize = 20.sp, fontFamily = FontFamily.SansSerif, color = Color.White)
         }
-        Spacer(modifier = Modifier.padding(16.dp))
-        Text("Já possuí conta?", fontSize = 18.sp, fontFamily = FontFamily.SansSerif, color = Color.White,
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Text(
+            "Já possuí conta?",
+            fontSize = 18.sp,
+            fontFamily = FontFamily.SansSerif,
+            color = Color.White,
             modifier = Modifier
-                .wrapContentWidth()
-                .align(Alignment.CenterHorizontally)
                 .background(Color.LightGray.copy(alpha = 0.2f))
+                .padding(8.dp)
         )
-        Spacer(modifier = Modifier.padding(3.dp))
-        Button(onClick = {
-            val intent = Intent(context, LogInActivity::class.java)
-            context.startActivity(intent)
-        }, shape = RectangleShape,
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Button(
+            onClick = {
+                val intent = Intent(context, LogInActivity::class.java)
+                context.startActivity(intent)
+            },
+            shape = RectangleShape,
             border = BorderStroke(2.dp, Color.White),
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color(0xFF152034).copy(alpha = 0.5f)
             ),
             modifier = Modifier
-                .align(Alignment.CenterHorizontally)
                 .width(230.dp)
-                .height(60.dp)){
+                .height(60.dp)
+        ) {
             Text("Fazer Login", fontSize = 20.sp, fontFamily = FontFamily.SansSerif, color = Color.White)
         }
     }
 }
+
 
 
 @Composable
