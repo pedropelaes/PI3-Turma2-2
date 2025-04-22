@@ -75,7 +75,7 @@ import kotlinx.coroutines.launch
 import com.example.superid.ui.theme.ui.common.SuperIdTitle
 
 
-class MainActivity : ComponentActivity() {
+class FirstOpeningActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
