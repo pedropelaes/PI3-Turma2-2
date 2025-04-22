@@ -2,6 +2,7 @@ package com.example.superid
 
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -26,8 +27,10 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CutCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
@@ -134,10 +137,10 @@ fun InitialScreensDesign(
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun ViewPagerForInitialScreens() {
-    val pagerState = rememberPagerState(pageCount = { 3 })
+    val pagerState = rememberPagerState(pageCount = { 2 })
     val coroutineScope = rememberCoroutineScope()
     var termsAccepted by remember { mutableStateOf(false) }
-
+    val context = LocalContext.current
     Column {
         HorizontalPager(
             state = pagerState,
@@ -147,7 +150,6 @@ fun ViewPagerForInitialScreens() {
                 when (page) {
                     0 -> Screen1()
                     1 -> Screen2(termsAccepted, onTermsAcceptedChange = { termsAccepted = it })
-                    2 -> Screen3()
                 }
             }, bottomContent = {
                 HorizontalPagerIndicator(
@@ -197,8 +199,11 @@ fun ViewPagerForInitialScreens() {
                                 coroutineScope.launch {
                                     // Impede de ir para a próxima tela se não aceitou os termos.
                                     if (pagerState.currentPage == 1 && !termsAccepted) {
-                                        // Exibe uma mensagem (pode usar Snackbar ou Toast, por exemplo).
+                                        Toast.makeText(context, "É necessário aceitar os termos antes de prosseguir.", Toast.LENGTH_SHORT).show()
                                         return@launch
+                                    }else if(pagerState.currentPage == 1 && termsAccepted) {
+                                        val intent = Intent(context, SignUpActivity::class.java)
+                                        context.startActivity(intent)
                                     }
                                     if (pagerState.currentPage < pagerState.pageCount - 1) {
                                         pagerState.animateScrollToPage(pagerState.currentPage + 1)
@@ -263,12 +268,21 @@ fun Screen2(termsAccepted: Boolean, onTermsAcceptedChange: (Boolean) -> Unit) {
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            "Para usar o SuperID, você precisa aceitar nossos termos e condições.",
+            "Para usar o SuperID, você precisa aceitar nossos termos e condições:",
             color = Color.White,
             fontSize = 16.sp
         )
 
         Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            text = stringResource(R.string.terms),
+            color = Color.White,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(100.dp)
+                .verticalScroll(rememberScrollState())
+        )
 
         Row(
             verticalAlignment = Alignment.CenterVertically
@@ -286,75 +300,6 @@ fun Screen2(termsAccepted: Boolean, onTermsAcceptedChange: (Boolean) -> Unit) {
         }
     }
 }
-
-
-@Preview
-@Composable
-fun Screen3() {
-    val context = LocalContext.current
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-
-        SuperIdTitle()
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Button(
-            onClick = {
-                val intent = Intent(context, SignUpActivity::class.java)
-                context.startActivity(intent)
-            },
-            shape = RectangleShape,
-            border = BorderStroke(2.dp, Color.White),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF152034)
-            ),
-            modifier = Modifier
-                .width(230.dp)
-                .height(60.dp)
-        ) {
-            Text("Fazer Cadastro", fontSize = 20.sp, fontFamily = FontFamily.SansSerif, color = Color.White)
-        }
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        Text(
-            "Já possuí conta?",
-            fontSize = 18.sp,
-            fontFamily = FontFamily.SansSerif,
-            color = Color.White,
-            modifier = Modifier
-                .background(Color.LightGray.copy(alpha = 0.2f))
-                .padding(8.dp)
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        Button(
-            onClick = {
-                val intent = Intent(context, LogInActivity::class.java)
-                context.startActivity(intent)
-            },
-            shape = RectangleShape,
-            border = BorderStroke(2.dp, Color.White),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF152034).copy(alpha = 0.5f)
-            ),
-            modifier = Modifier
-                .width(230.dp)
-                .height(60.dp)
-        ) {
-            Text("Fazer Login", fontSize = 20.sp, fontFamily = FontFamily.SansSerif, color = Color.White)
-        }
-    }
-}
-
-
 
 @Composable
 fun HorizontalPagerIndicator(

@@ -11,4 +11,5 @@
     <string name="passwords_must_match">As senhas precisam ser iguais para criar sua conta.</string>
     <string name="type_your_name">Digite o seu nome</string>
     <string name="login_error">Erro ao fazer login, confira seus dados.</string>
+    <string name="terms">ESCREVER AQUI OS TERMOS</string>
 </resources>
