@@ -152,5 +152,24 @@ fun LoginScreen(){
         if(!success){
             Text(stringResource(R.string.login_error), color = Color.Red, fontWeight = FontWeight.Bold)
         }
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text("Ainda não possui conta?", color = Color.LightGray)
+        Button(
+            onClick = {
+                val intent = Intent(context, SignUpActivity::class.java)
+                context.startActivity(intent)
+            },
+            border = BorderStroke(2.dp, Color.White),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFF152034).copy(alpha = 0.5f)
+            ),
+            modifier = Modifier
+                .height(45.dp)
+                .width(160.dp)
+        ) {
+            Text("Fazer Cadastro")
+        }
+
     }
 }

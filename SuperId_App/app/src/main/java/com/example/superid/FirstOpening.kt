@@ -137,7 +137,7 @@ fun InitialScreensDesign(
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun ViewPagerForInitialScreens() { //view pager das paginas iniciais
-    val pagerState = rememberPagerState(pageCount = { 3 })
+    val pagerState = rememberPagerState(pageCount = { 2 })
     val coroutineScope = rememberCoroutineScope()
     var termsAccepted by remember { mutableStateOf(false) }
     val context = LocalContext.current

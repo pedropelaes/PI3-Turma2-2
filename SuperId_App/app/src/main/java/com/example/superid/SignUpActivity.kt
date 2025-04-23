@@ -168,7 +168,7 @@ fun SignUpScreen() {
             modifier = Modifier
                 .height(45.dp)
                 .width(160.dp)
-        ){
+        ) {
             Text("Login")
         }
     }
