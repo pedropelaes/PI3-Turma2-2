@@ -11,5 +11,56 @@
     <string name="passwords_must_match">As senhas precisam ser iguais para criar sua conta.</string>
     <string name="type_your_name">Digite o seu nome</string>
     <string name="login_error">Erro ao fazer login, confira seus dados.</string>
-    <string name="terms">ESCREVER AQUI OS TERMOS</string>
+    <string name="terms">Termos e Condições de Uso do SuperID:\n
+        Última atualização: 22/04/2025
+        \n\n
+        <b>1. Aceitação dos Termos</b>\n\n
+        Ao utilizar o aplicativo SuperID, você concorda integralmente com estes Termos e Condições de Uso. Caso não concorde com algum dos termos, não será possivel utilizar o aplicativo.
+        \n\n
+        <b>2. Descrição do Serviço</b>\n\n
+        O SuperID é uma solução de autenticação digital que permite o login sem senha em aplicativos e serviços digitais, armazenando credenciais de forma segura.
+        \n\n
+        <b>3. Cadastro e Autenticação</b>\n\n
+        Para utilizar o SuperID, é necessário criar uma conta fornecendo:
+        \n
+        - Nome completo\n
+        - E-mail válido\n
+        - Senha Mestre\n
+        \n
+        A autenticação é realizada por meio do serviço Firebase Authentication, da Google.
+        \n\n
+        <b>4. Coleta e Armazenamento de Dados</b>\n\n
+        O SuperID coleta e armazena os seguintes dados:
+        \n
+        - UID (Identificador único de usuário do Firebase)\n
+        - IMEI (Identificador do dispositivo)\n
+        \n
+        Esses dados são armazenados de forma segura no Firebase Firestore, garantindo a integridade e confidencialidade das informações.
+        \n\n
+        <b>5. Privacidade e Proteção de Dados</b>\n\n
+        Comprometemo-nos a proteger sua privacidade em conformidade com a Lei Geral de Proteção de Dados (LGPD). Os dados coletados são utilizados exclusivamente para:
+        \n
+        - Garantir a segurança e funcionalidade do aplicativo\n
+        - Melhorar a experiência do usuário\n
+        - Cumprir obrigações legais e regulatórias\n
+        \n
+        Não compartilhamos suas informações com terceiros sem seu consentimento explícito.
+        \n\n
+        <b>6. Direitos do Usuário</b>\n\n
+        Você tem o direito de:
+        \n
+        - Acessar quaisquer dados fornecidos por você, armazenados pelo aplicativo
+        \n\n
+        <b>7. Responsabilidades do Usuário</b>\n\n
+        Você se compromete a:
+        \n
+        - Fornecer informações verídicas e atualizadas\n
+        - Utilizar o aplicativo de forma ética e legal\n
+        - O uso indevido do SuperID pode resultar na suspensão ou encerramento da conta.
+        \n\n
+        <b>8. Modificações nos Termos</b>\n\n
+        Reservamo-nos o direito de alterar estes Termos e Condições de Uso a qualquer momento. As alterações serão comunicadas por meio do aplicativo ou por e-mail. O uso continuado do SuperID após as modificações constitui aceitação dos novos termos.
+        \n\n
+        <b>9. Contato</b>\n\n
+        Em caso de dúvidas ou solicitações relacionadas a estes Termos e Condições de Uso, entre em contato conosco pelo e-mail: pi3superid@gmail.com </string>
 </resources>

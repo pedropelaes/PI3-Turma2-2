@@ -136,11 +136,12 @@ fun SignUpScreen() {
                 result = msg
                 }
             },
-            enabled = if(masterPassword != confirmPassword) false else true,
+            enabled = if(masterPassword == confirmPassword && name.isNotEmpty() && email.isNotEmpty() && masterPassword.isNotEmpty()) true else false,
             //todo configurar cores do botão desabilitado
             border = BorderStroke(2.dp, Color.White),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF152034).copy(alpha = 0.5f)
+                containerColor = Color(0xFF152034).copy(alpha = 0.5f),
+                disabledContentColor = Color.DarkGray
             ),
             modifier = Modifier
                 .height(45.dp)
