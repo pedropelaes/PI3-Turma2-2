@@ -10,15 +10,18 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -30,6 +33,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CutCornerShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -58,6 +62,7 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -136,7 +141,7 @@ fun InitialScreensDesign(
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun ViewPagerForInitialScreens() {
+fun ViewPagerForInitialScreens() { //view pager das paginas iniciais
     val pagerState = rememberPagerState(pageCount = { 2 })
     val coroutineScope = rememberCoroutineScope()
     var termsAccepted by remember { mutableStateOf(false) }
@@ -176,6 +181,7 @@ fun ViewPagerForInitialScreens() {
                                 containerColor = Color.Transparent
                             ),
                             modifier = Modifier.wrapContentWidth()
+                                .padding(8.dp)
                         ) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -184,47 +190,45 @@ fun ViewPagerForInitialScreens() {
                             )
                             Text("Voltar", fontSize = 15.sp, color = Color.White)
                         }
-                        Spacer(modifier = Modifier.width(150.dp))
+                        Spacer(modifier = Modifier.width(120.dp))
                     }
 
                     if (pagerState.currentPage == 0) {
                         Spacer(modifier = Modifier.width(250.dp))
-                    } else if (pagerState.currentPage == 2) {
-                        Spacer(modifier = Modifier.width(240.dp))
                     }
 
-                    if (pagerState.currentPage < 2) {
-                        Button(
-                            onClick = {
-                                coroutineScope.launch {
-                                    // Impede de ir para a próxima tela se não aceitou os termos.
-                                    if (pagerState.currentPage == 1 && !termsAccepted) {
-                                        Toast.makeText(context, "É necessário aceitar os termos antes de prosseguir.", Toast.LENGTH_SHORT).show()
-                                        return@launch
-                                    }else if(pagerState.currentPage == 1 && termsAccepted) {
-                                        val intent = Intent(context, SignUpActivity::class.java)
-                                        context.startActivity(intent)
-                                    }
-                                    if (pagerState.currentPage < pagerState.pageCount - 1) {
-                                        pagerState.animateScrollToPage(pagerState.currentPage + 1)
-                                    }
+                    Button(
+                        onClick = {
+                            coroutineScope.launch {
+                                // Impede de ir para a próxima tela se não aceitou os termos.
+                                if (pagerState.currentPage == 1 && !termsAccepted) {
+                                    Toast.makeText(context, "É necessário aceitar os termos antes de prosseguir.", Toast.LENGTH_SHORT).show()
+                                    return@launch
+                                }else if(pagerState.currentPage == 1 && termsAccepted) {
+                                    val intent = Intent(context, SignUpActivity::class.java)
+                                    context.startActivity(intent)
                                 }
-                            },
-                            shape = RectangleShape,
-                            border = BorderStroke(1.dp, Color.White),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color.Transparent
-                            ),
-                            modifier = Modifier.wrapContentWidth()
-                        ) {
-                            Text("Próximo", fontSize = 15.sp, color = Color.White)
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                                contentDescription = "Próximo",
-                                tint = Color.White
-                            )
-                        }
+                                if (pagerState.currentPage < pagerState.pageCount - 1) {
+                                    pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                                }
+                            }
+                        },
+                        shape = RectangleShape,
+                        border = BorderStroke(1.dp, Color.White),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.Transparent
+                        ),
+                        modifier = Modifier.wrapContentWidth()
+                            .padding(8.dp)
+                    ) {
+                        Text("Próximo", fontSize = 15.sp, color = Color.White)
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                            contentDescription = "Próximo",
+                            tint = Color.White
+                        )
                     }
+
                 }
             })
         }
@@ -253,6 +257,7 @@ fun Screen1(){
 
 @Composable
 fun Screen2(termsAccepted: Boolean, onTermsAcceptedChange: (Boolean) -> Unit) {
+    val scrollState = rememberScrollState()
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -260,7 +265,7 @@ fun Screen2(termsAccepted: Boolean, onTermsAcceptedChange: (Boolean) -> Unit) {
         horizontalAlignment = Alignment.Start
     ) {
         Text(
-            "Termos de Condição",
+            "Termos e Condições:",
             color = Color.White,
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold
@@ -275,14 +280,7 @@ fun Screen2(termsAccepted: Boolean, onTermsAcceptedChange: (Boolean) -> Unit) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text(
-            text = stringResource(R.string.terms),
-            color = Color.White,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(100.dp)
-                .verticalScroll(rememberScrollState())
-        )
+        ScrollableTextWithScrollbar()
 
         Row(
             verticalAlignment = Alignment.CenterVertically
@@ -300,6 +298,7 @@ fun Screen2(termsAccepted: Boolean, onTermsAcceptedChange: (Boolean) -> Unit) {
         }
     }
 }
+
 
 @Composable
 fun HorizontalPagerIndicator(
@@ -327,6 +326,49 @@ fun HorizontalPagerIndicator(
                     .size(indicatorSize)
                     .clip(CircleShape)
                     .background(color)
+            )
+        }
+    }
+}
+
+@Composable
+fun ScrollableTextWithScrollbar() {
+    val scrollState = rememberScrollState()
+    val boxHeight = 500.dp
+    val scrollbarHeight = 60.dp
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(boxHeight)
+            .background(Color.LightGray.copy(0.15f))
+            .border(2.dp, shape = RectangleShape, color = Color.White)
+            .padding(8.dp)
+    ) {
+        Box {
+            Text(
+                text = stringResource(R.string.terms),
+                color = Color.White,
+                textAlign = TextAlign.Justify,
+                fontSize = 16.sp,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(scrollState)
+            )
+
+            // Cálculo do offset com o LocalDensity
+            val scrollProgress = scrollState.value.toFloat() / scrollState.maxValue.toFloat().coerceAtLeast(1f)
+            val offsetY = with(LocalDensity.current) {
+                ((boxHeight - scrollbarHeight) * scrollProgress).toPx()
+            }
+
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .offset(y = Dp(offsetY / LocalDensity.current.density))
+                    .width(4.dp)
+                    .height(scrollbarHeight)
+                    .background(Color.White.copy(alpha = 0.5f), shape = RoundedCornerShape(2.dp))
             )
         }
     }
