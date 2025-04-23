@@ -1,6 +1,8 @@
 package com.example.superid
 
+import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -21,6 +23,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -32,6 +35,12 @@ import androidx.core.view.WindowInsetsCompat
 import com.example.superid.ui.theme.ui.common.LoginAndSignUpDesign
 import com.example.superid.ui.theme.ui.common.SuperIdTitle
 import com.example.superid.ui.theme.ui.common.TextFieldDesignForLoginAndSignUp
+import com.google.android.gms.tasks.Task
+import com.google.firebase.auth.AuthResult
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.tasks.await
+
 
 class SignUpActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,11 +58,38 @@ fun SignUp(){
     }
 }
 
+fun PerformSignUp(email: String, password: String, onResult: (String) -> Unit){
+    val auth = Firebase.auth
+
+    auth.createUserWithEmailAndPassword(email, password)
+        .addOnCompleteListener { task ->
+            if (task.isSuccessful){
+                val user = auth.currentUser
+                user?.sendEmailVerification()
+                    ?.addOnCompleteListener{ verification ->
+                        if(verification.isSuccessful){
+                            Log.d("SIGNUP", "Email de verificação enviado.")
+                            onResult("Um email de verificação foi enviado para confirmar sua conta.")
+                        }else{
+                            Log.d("SIGNUP", "Erro ao mandar email de veriricação.")
+                            onResult("Erro ao enviar email de verificação, verifique o seu email.")
+                        }
+                    }
+            }else{
+                Log.d("SIGNUP", "Erro ao criar usuário ${task.exception?.message}.")
+                onResult("Erro ao criar sua conta, verifique seus dados.")
+            }
+        }
+}
+
 @Composable
 fun SignUpScreen() {
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var masterPassword by remember { mutableStateOf("") }
+    var confirmPassword by remember { mutableStateOf("") }
+    var result by remember { mutableStateOf("") }
+    val context = LocalContext.current
     Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally){
         SuperIdTitle()
 
@@ -80,18 +116,60 @@ fun SignUpScreen() {
         TextFieldDesignForLoginAndSignUp(value = masterPassword, onValueChange = { masterPassword = it },
             label = stringResource(R.string.type_your_password,), isPassword = true
         )
-        
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        TextFieldDesignForLoginAndSignUp(value = confirmPassword, onValueChange = { confirmPassword = it },
+            label = stringResource(R.string.confirm_your_password,), isPassword = true
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+
+        if(masterPassword != confirmPassword) {
+            Text(stringResource(R.string.passwords_must_match), color = Color.White)
+        }
+
         Spacer(modifier = Modifier.height(24.dp))
 
         Button(
-            onClick = {},
+            onClick = {
+                PerformSignUp(email, masterPassword){msg ->
+                result = msg
+                }
+            },
+            enabled = if(masterPassword != confirmPassword) false else true,
+            //todo configurar cores do botão desabilitado
             border = BorderStroke(2.dp, Color.White),
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color(0xFF152034).copy(alpha = 0.5f)
             ),
-            modifier = Modifier.height(45.dp).width(160.dp)
+            modifier = Modifier
+                .height(45.dp)
+                .width(160.dp)
         ){
             Text("Fazer Cadastro")
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(result, color = Color.Red, fontWeight = FontWeight.Bold)
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Text("Já possui conta?", color = Color.LightGray)
+        Button(
+            onClick = {
+                val intent = Intent(context, LogInActivity::class.java)
+                context.startActivity(intent)
+            },
+            border = BorderStroke(2.dp, Color.White),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFF152034).copy(alpha = 0.5f)
+            ),
+            modifier = Modifier
+                .height(45.dp)
+                .width(160.dp)
+        ){
+            Text("Login")
         }
     }
 }

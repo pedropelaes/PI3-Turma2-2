@@ -1,7 +1,10 @@
 package com.example.superid
 
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.provider.ContactsContract.CommonDataKinds.Email
+import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -57,6 +60,8 @@ import com.example.superid.ui.theme.ui.common.LoginAndSignUpDesign
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.example.superid.ui.theme.ui.common.SuperIdTitle
 import com.example.superid.ui.theme.ui.common.TextFieldDesignForLoginAndSignUp
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 
 class LogInActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -66,6 +71,26 @@ class LogInActivity : AppCompatActivity() {
             Login()
         }
     }
+}
+
+fun PerformLogin(email: String, password: String, context: Context, onResult: (Boolean) -> Unit){
+    val auth = Firebase.auth
+
+    val currentUser = auth.currentUser
+    if (currentUser != null){
+        auth.signOut()
+    }
+    auth.signInWithEmailAndPassword(email, password)
+        .addOnCompleteListener{task ->
+            if(task.isSuccessful){
+                Log.d("LOGIN", "Login efetuado.")
+                val intent = Intent(context, MainActivity::class.java)
+                context.startActivity(intent)
+            }else{
+                Log.d("LOGIN", "Login efetuado.")
+                onResult(false)
+            }
+        }
 }
 
 @Preview
@@ -80,6 +105,8 @@ fun Login(){
 fun LoginScreen(){
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var success by remember { mutableStateOf(true) }
+    val context = LocalContext.current
     Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally){
         SuperIdTitle()
 
@@ -104,14 +131,26 @@ fun LoginScreen(){
         Spacer(modifier = Modifier.height(24.dp))
 
         Button(
-            onClick = {},
+            onClick = {
+                PerformLogin(email, password, context) { result ->
+                    success = result
+                }
+            },
+            enabled = if(email.isNotEmpty() && password.isNotEmpty()) true else false,
             border = BorderStroke(2.dp, Color.White),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF152034).copy(alpha = 0.5f)
+                containerColor = Color(0xFF152034).copy(alpha = 0.5f),
+                disabledContentColor = Color.DarkGray
             ),
             modifier = Modifier.height(45.dp).width(160.dp)
         ){
             Text("Fazer Login")
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        if(!success){
+            Text(stringResource(R.string.login_error), color = Color.Red, fontWeight = FontWeight.Bold)
         }
     }
 }
