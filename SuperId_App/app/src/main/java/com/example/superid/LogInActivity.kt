@@ -10,6 +10,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,6 +26,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.TextButton
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
@@ -51,6 +53,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -146,30 +149,32 @@ fun LoginScreen(){
         ){
             Text("Fazer Login")
         }
+        Spacer(modifier = Modifier.height(2.dp))
+
+        TextButton(
+            onClick = {}
+        ) {
+            Text("Esqueceu sua senha?", textDecoration = TextDecoration.Underline, color = Color.White)
+        }
 
         Spacer(modifier = Modifier.height(8.dp))
 
         if(!success){
             Text(stringResource(R.string.login_error), color = Color.Red, fontWeight = FontWeight.Bold)
         }
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
         Text("Ainda não possui conta?", color = Color.LightGray)
-        Button(
+        TextButton(
             onClick = {
                 val intent = Intent(context, SignUpActivity::class.java)
                 context.startActivity(intent)
             },
-            border = BorderStroke(2.dp, Color.White),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF152034).copy(alpha = 0.5f)
-            ),
             modifier = Modifier
                 .height(45.dp)
                 .width(160.dp)
         ) {
-            Text("Fazer Cadastro")
+            Text("Fazer Cadastro", textDecoration = TextDecoration.Underline, color = Color.White)
         }
-
     }
 }

@@ -45,6 +45,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
@@ -73,8 +74,10 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -171,7 +174,7 @@ fun ViewPagerForInitialScreens() { //view pager das paginas iniciais
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     if (pagerState.currentPage > 0) {
-                        Button(
+                        TextButton(
                             onClick = {
                                 coroutineScope.launch {
                                     if (pagerState.currentPage > 0) {
@@ -179,11 +182,6 @@ fun ViewPagerForInitialScreens() { //view pager das paginas iniciais
                                     }
                                 }
                             },
-                            shape = RectangleShape,
-                            border = BorderStroke(1.dp, Color.White),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color.Transparent
-                            ),
                             modifier = Modifier.wrapContentWidth()
                                 .padding(8.dp)
                         ) {
@@ -192,7 +190,7 @@ fun ViewPagerForInitialScreens() { //view pager das paginas iniciais
                                 contentDescription = "Voltar",
                                 tint = Color.White
                             )
-                            Text("Voltar", fontSize = 15.sp, color = Color.White)
+                            Text("Voltar", fontSize = 15.sp, color = Color.White, textDecoration = TextDecoration.Underline)
                         }
                         Spacer(modifier = Modifier.width(120.dp))
                     }
@@ -201,7 +199,7 @@ fun ViewPagerForInitialScreens() { //view pager das paginas iniciais
                         Spacer(modifier = Modifier.width(250.dp))
                     }
 
-                    Button(
+                    TextButton(
                         onClick = {
                             coroutineScope.launch {
                                 // Impede de ir para a próxima tela se não aceitou os termos.
@@ -217,22 +215,16 @@ fun ViewPagerForInitialScreens() { //view pager das paginas iniciais
                                 }
                             }
                         },
-                        shape = RectangleShape,
-                        border = BorderStroke(1.dp, Color.White),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color.Transparent
-                        ),
                         modifier = Modifier.wrapContentWidth()
                             .padding(8.dp)
                     ) {
-                        Text("Próximo", fontSize = 15.sp, color = Color.White)
+                        Text("Próximo", fontSize = 15.sp, color = Color.White, textDecoration = TextDecoration.Underline)
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                             contentDescription = "Próximo",
                             tint = Color.White
                         )
                     }
-
                 }
             })
         }
