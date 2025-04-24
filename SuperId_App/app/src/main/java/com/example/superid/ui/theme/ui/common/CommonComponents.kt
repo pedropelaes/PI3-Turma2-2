@@ -30,8 +30,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -44,6 +46,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.superid.R
@@ -79,19 +82,23 @@ fun TextFieldDesignForLoginAndSignUp(value: String, onValueChange: (String) -> U
             .padding(4.dp)
     )
 }
-
+@Preview
 @Composable
 fun SuperIdTitle(modifier: Modifier = Modifier){
     val title_font = FontFamily(Font(R.font.fonte_titulo))
     Text(
         buildAnnotatedString { //junta strings com estilos diferentes
             withStyle(
-                style = SpanStyle(fontFamily = title_font, fontSize = 40.sp, color = Color.Black, background = Color.White)
+                style = SpanStyle(fontFamily = title_font, fontSize = 40.sp, color = Color.Black,
+                    shadow = Shadow(Color.DarkGray, offset = Offset(2f, 2f),blurRadius = 8f)
+                )
             ){
                 append("Super")
             }
             withStyle(
-                style = SpanStyle(fontFamily = title_font, fontSize = 40.sp, color = Color(0xFF152034), background = Color.White)
+                style = SpanStyle(fontFamily = title_font, fontSize = 40.sp, color = Color(0xFF152034),
+                    shadow = Shadow(Color.DarkGray, offset = Offset(2f, 2f),blurRadius = 8f)
+                )
             ){
                 append(" ID")
             }
