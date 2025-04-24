@@ -37,7 +37,9 @@ import com.example.superid.ui.theme.ui.common.SuperIdTitle
 import com.example.superid.ui.theme.ui.common.TextFieldDesignForLoginAndSignUp
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.AuthResult
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.tasks.await
 
@@ -58,13 +60,16 @@ fun SignUp(){
     }
 }
 
-fun PerformSignUp(email: String, password: String, onResult: (String) -> Unit){
+fun PerformSignUp(name: String,email: String, password: String, onResult: (String) -> Unit){
     val auth = Firebase.auth
 
     auth.createUserWithEmailAndPassword(email, password)
         .addOnCompleteListener { task ->
             if (task.isSuccessful){
                 val user = auth.currentUser
+                user?.let {
+                    SaveNewAccount(name, email, it.uid)
+                }
                 user?.sendEmailVerification()
                     ?.addOnCompleteListener{ verification ->
                         if(verification.isSuccessful){
@@ -78,6 +83,28 @@ fun PerformSignUp(email: String, password: String, onResult: (String) -> Unit){
             }else{
                 Log.d("SIGNUP", "Erro ao criar usuário ${task.exception?.message}.")
                 onResult("Erro ao criar sua conta, verifique seus dados.")
+            }
+        }
+}
+
+fun SaveNewAccount(name: String, email: String, uid: String, tries: Int = 0){
+    val db = Firebase.firestore
+
+    val taskDoc = hashMapOf(
+        "name" to name,
+        "email" to email,
+    )
+    db.collection("users").document(uid).set(taskDoc)
+        .addOnCompleteListener{task->
+            if(task.isSuccessful){
+                Log.d("SIGNUP", "Documento do usuário salvo no banco de dados.")
+            }
+        }
+        .addOnFailureListener{retry->
+            if (tries < 5){
+                SaveNewAccount(name, email, uid, tries + 1)
+            }else{
+                Log.d("SIGNUP", "Falha ao salvar usuário no banco de dados.")
             }
         }
 }
@@ -132,7 +159,7 @@ fun SignUpScreen() {
 
         Button(
             onClick = {
-                PerformSignUp(email, masterPassword){msg ->
+                PerformSignUp(name, email, masterPassword){msg ->
                 result = msg
                 }
             },
