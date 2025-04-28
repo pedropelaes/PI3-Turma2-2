@@ -238,7 +238,7 @@ fun ViewPagerForInitialScreens() { //view pager das paginas iniciais
 @Composable
 fun Screen1(){
     Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally){
-        Text("Bem vindo ao",fontFamily = FontFamily.SansSerif ,fontSize = 50.sp, color = Color.White,
+        Text("Bem-vindo ao",fontFamily = FontFamily.SansSerif ,fontSize = 50.sp, color = Color.White,
             fontWeight = FontWeight.Bold, modifier = Modifier.align(Alignment.CenterHorizontally)
         )
         SuperIdTitle()
