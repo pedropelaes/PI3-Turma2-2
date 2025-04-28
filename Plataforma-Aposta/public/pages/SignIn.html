@@ -5,48 +5,57 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tela de Login</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-        crossorigin="anonymous"></script>
+
+    <!-- Bootstrap e ícones -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
+    <!-- Estilos e scripts -->
+    <link rel="stylesheet" href="../style/SignIn.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" defer></script>
     <script src="../script/signIn.js" defer></script>
-    
-    <link rel="stylesheet" href="../style/signIn.css">
 </head>
 
 <body>
-    <header class="d-flex justify-content-between align-items-center p-3">
-        <img src="../assets/logo.png" alt="Logo" class="logo">
-        <div class="button-container">
-            <a href="../pages/signIn.html"><button id="login-btn" class="btn btn-primary me-2">Login</button></a>
-            <a href="../pages/signUp.html"><button id="signup-btn" class="btn btn-primary me-2">Cadastro</button></a>
-        </div>
-    </header>
-    <div class="container mt-5">
-        <div class="row justify-content-center">
-            <div class="col-md-6 form-container">
-                <h2 class="text-center mb-4">Entrar na Conta</h2>
-                <form onsubmit="performSignIn(event)">
-                    <div class="form-group mb-3">
-                        <label for="email">Email</label>
-                        <input type="email" class="form-control" id="fieldEmail" placeholder="Digite seu email" required>
-                    </div>
-                    <div class="form-group mb-3">
-                        <label for="senha">Senha</label>
-                        <input type="password" class="form-control" id="fieldPassword" placeholder="Digite sua senha" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary w-100">Entrar</button>
-                </form>
-                <div class="text-center mt-3">
-                    <button class="btn btn-danger w-100 mb-2" onclick="signInWithGoogle()">Entrar com Google</button>
-                    <a href="signInWithSuperId.html"><button class="btn btn-secondary w-100">Entrar com Super ID</button></a>
-                </div>
-                <div id="messageBox" style="display: none; color: rgb(250, 249, 249); margin-top: 10px;">
-                    <p id="message"></p>
-                </div>
-            </div>
-        </div>
-    </div></div>
+    <main class="container">
+        <form>
+            <h1>Entrar</h1>
 
+            <div class="input-box">
+                <i class="bi bi-person-fill icon"></i>
+                <input id="email" name="email" placeholder="Usuário" type="email" required>
+            </div>
+
+            <div class="input-box">
+                <i class="bi bi-lock-fill icon"></i>
+                <input id="password" name="password" placeholder="Senha" type="password" required>
+            </div>
+
+            <div class="remember-forgot">
+                <label>
+                    <input type="checkbox"> Lembrar minha senha
+                </label>
+                <a href="#">Esqueci minha senha</a>
+            </div>
+
+            <button type="submit" class="login">Entrar</button>
+
+            <div class="register-link">
+                <p>Não tem uma conta? <a href="SignUp.html">Cadastre-se</a></p>
+            </div>
+
+            <div class="social-login">
+                <p>Ou entre com:</p>
+                <button type="button" class="enterwith">
+                    <i class="bi bi-google me-2"></i> Google
+                </button>
+                <button type="button" class="enterwith" onclick="window.location.href='SignInWithSuperID.html'">
+                    <i class="bi bi-shield-lock me-2"></i> Super ID
+                </button>
+            </div>
+        </form>
+    </main>
+</body>
+
+</html>
     
