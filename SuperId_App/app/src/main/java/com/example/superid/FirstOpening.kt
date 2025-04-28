@@ -42,6 +42,8 @@ import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CheckboxColors
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -67,6 +69,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -283,7 +286,10 @@ fun Screen2(termsAccepted: Boolean, onTermsAcceptedChange: (Boolean) -> Unit) {
         ) {
             androidx.compose.material3.Checkbox(
                 checked = termsAccepted,
-                onCheckedChange = { onTermsAcceptedChange(it) }
+                onCheckedChange = { onTermsAcceptedChange(it) },
+                colors = CheckboxDefaults.colors(
+                    checkedColor = colorResource(R.color.field_text_background)
+                )
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(

@@ -89,14 +89,14 @@ fun SuperIdTitle(modifier: Modifier = Modifier){
     Text(
         buildAnnotatedString { //junta strings com estilos diferentes
             withStyle(
-                style = SpanStyle(fontFamily = title_font, fontSize = 40.sp, color = Color.Black,
+                style = SpanStyle(fontFamily = title_font, fontSize = 40.sp, color = Color.White,
                     shadow = Shadow(Color.DarkGray, offset = Offset(2f, 2f),blurRadius = 8f)
                 )
             ){
                 append("Super")
             }
             withStyle(
-                style = SpanStyle(fontFamily = title_font, fontSize = 40.sp, color = Color(0xFF152034),
+                style = SpanStyle(fontFamily = title_font, fontSize = 40.sp, color = Color(0xFF014E92),
                     shadow = Shadow(Color.DarkGray, offset = Offset(2f, 2f),blurRadius = 8f)
                 )
             ){
