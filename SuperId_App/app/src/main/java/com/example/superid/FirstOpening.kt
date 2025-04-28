@@ -112,8 +112,8 @@ fun SuperID() {
 @Composable //Essa função é responsável pelo design das páginas de íniciais
 fun InitialScreensDesign(
     imageResId: Int,
-    statusBarColor: Color = Color(0xFF152034),
-    navigationBarColor: Color = Color(0xFF152034),
+    statusBarColor: Color = Color.Transparent,
+    navigationBarColor: Color = Color.Transparent,
     content: @Composable () -> Unit,
     bottomContent: @Composable () -> Unit
 ) {
