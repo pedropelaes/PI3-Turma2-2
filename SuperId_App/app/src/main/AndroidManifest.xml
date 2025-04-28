@@ -13,9 +13,14 @@
         android:theme="@style/Theme.SuperId"
         tools:targetApi="31">
         <activity
+            android:name=".PasswordReset"
+            android:exported="false"
+            android:label="@string/title_activity_password_reset"
+            android:theme="@style/Theme.SuperId" />
+        <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:theme="@style/Theme.SuperId"/>
+            android:theme="@style/Theme.SuperId" />
         <activity
             android:name=".LogInActivity"
             android:exported="true"

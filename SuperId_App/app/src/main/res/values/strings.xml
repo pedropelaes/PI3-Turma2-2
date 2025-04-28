@@ -63,4 +63,5 @@
         \n\n
         <b>9. Contato</b>\n\n
         Em caso de dúvidas ou solicitações relacionadas a estes Termos e Condições de Uso, entre em contato conosco pelo e-mail: pi3superid@gmail.com </string>
+    <string name="title_activity_password_reset">PasswordReset</string>
 </resources>

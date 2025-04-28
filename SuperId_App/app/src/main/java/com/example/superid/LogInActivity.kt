@@ -152,7 +152,13 @@ fun LoginScreen(){
         Spacer(modifier = Modifier.height(2.dp))
 
         TextButton(
-            onClick = {}
+            onClick = {
+                val intent = Intent(context, PasswordReset::class.java)
+                context.startActivity(intent)
+            },
+            modifier = Modifier
+                .height(45.dp)
+                .width(160.dp)
         ) {
             Text("Esqueceu sua senha?", textDecoration = TextDecoration.Underline, color = Color.White)
         }
