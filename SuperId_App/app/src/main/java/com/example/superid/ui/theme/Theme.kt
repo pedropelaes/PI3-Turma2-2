@@ -13,18 +13,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Blue30,
-    secondary = Blue20,
-    tertiary = Color.Red,
-    background = D_Blue80,
-    onBackground = Color.White,
-    surface = D_Blue70,
+    primary = Blue30,   //usar em fundo de botões e caixas de texto focados
+    secondary = Blue20, //usar em fundo de botões e caixas de texto desfocados
+    tertiary = Color.Red, //avisos de erros e elementos com alto contraste
+    background = D_Blue80, //fundo
+    onBackground = Color.White, //usar em texto sobre o fundo
+    surface = D_Blue70,  //usar em bordas de botões e field texts
     onSurface = Color.White,
     surfaceVariant = D_Blue60,
     onSurfaceVariant = Color.Gray,
-    onPrimary = Color.Black,
-    onSecondary = Color.DarkGray,
-    onTertiary = Color.Black
+    onPrimary = Color.Black, //elementos sobre cor primaria
+    onSecondary = Color.DarkGray, //elementos sobre cor secundaria
+    onTertiary = Color.Black //elementos sobre cor terciaria
 )
 
 private val LightColorScheme = lightColorScheme(

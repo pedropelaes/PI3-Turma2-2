@@ -83,7 +83,7 @@ fun TextFieldDesignForLoginAndSignUp(value: String, onValueChange: (String) -> U
             errorIndicatorColor = Color.Transparent,
         ),
         modifier = Modifier.wrapContentSize()
-            .border(2.dp, colorResource(R.color.field_text_border), CircleShape)
+            .border(2.dp, MaterialTheme.colorScheme.surface, CircleShape)
             .padding(4.dp)
     )
 }

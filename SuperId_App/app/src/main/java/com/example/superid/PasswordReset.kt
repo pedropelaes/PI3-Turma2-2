@@ -21,6 +21,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.superid.ui.theme.SuperIdTheme
 import com.example.superid.ui.theme.ui.common.LoginAndSignUpDesign
 import com.example.superid.ui.theme.ui.common.SuperIdTitle
 import com.example.superid.ui.theme.ui.common.TextFieldDesignForLoginAndSignUp
@@ -33,8 +34,10 @@ class PasswordReset : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            LoginAndSignUpDesign(imageResId = R.drawable.lockers_background_dark) {
-                PasswordResetScreen()
+            SuperIdTheme {
+                LoginAndSignUpDesign(){
+                    PasswordResetScreen()
+                }
             }
         }
     }
