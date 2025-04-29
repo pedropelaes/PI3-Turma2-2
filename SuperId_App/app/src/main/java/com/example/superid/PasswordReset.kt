@@ -33,7 +33,7 @@ class PasswordReset : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            LoginAndSignUpDesign(imageResId = R.drawable.lockers_background) {
+            LoginAndSignUpDesign(imageResId = R.drawable.lockers_background_dark) {
                 PasswordResetScreen()
             }
         }

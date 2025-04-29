@@ -4,6 +4,7 @@ import android.content.Intent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,6 +20,7 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -51,7 +53,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.superid.R
 import com.example.superid.SignUpActivity
+import com.example.superid.SuperID
+import com.example.superid.ui.theme.SuperIdTheme
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+
 
 @Composable
 //necessário passar a função de atualização por conta do estado do campo de texto ser gerenciado pela activity
@@ -66,12 +71,12 @@ fun TextFieldDesignForLoginAndSignUp(value: String, onValueChange: (String) -> U
         shape = CircleShape,
         visualTransformation = if(isPassword) PasswordVisualTransformation() else VisualTransformation.None,
         colors = TextFieldDefaults.colors(
-            unfocusedTextColor = Color.White,
-            unfocusedLabelColor = Color.Gray,
-            unfocusedContainerColor = colorResource(R.color.field_text_background),
-            focusedContainerColor = colorResource(R.color.field_text_focused_background),
-            focusedTextColor = Color.White,
-            focusedLabelColor = Color.Black,
+            unfocusedTextColor = MaterialTheme.colorScheme.onSecondary,
+            unfocusedLabelColor = MaterialTheme.colorScheme.onSecondary,
+            unfocusedContainerColor = MaterialTheme.colorScheme.secondary,
+            focusedContainerColor = MaterialTheme.colorScheme.primary,
+            focusedTextColor = MaterialTheme.colorScheme.onPrimary,
+            focusedLabelColor = MaterialTheme.colorScheme.onPrimary,
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
             disabledIndicatorColor = Color.Transparent,
@@ -86,64 +91,76 @@ fun TextFieldDesignForLoginAndSignUp(value: String, onValueChange: (String) -> U
 @Composable
 fun SuperIdTitle(modifier: Modifier = Modifier){
     val title_font = FontFamily(Font(R.font.fonte_titulo))
-    Text(
-        buildAnnotatedString { //junta strings com estilos diferentes
-            withStyle(
-                style = SpanStyle(fontFamily = title_font, fontSize = 40.sp, color = Color.Black,
-                    shadow = Shadow(Color.DarkGray, offset = Offset(2f, 2f),blurRadius = 8f)
-                )
-            ){
-                append("Super")
-            }
-            withStyle(
-                style = SpanStyle(fontFamily = title_font, fontSize = 40.sp, color = Color(0xFF152034),
-                    shadow = Shadow(Color.DarkGray, offset = Offset(2f, 2f),blurRadius = 8f)
-                )
-            ){
-                append(" ID")
-            }
-        },
-        textAlign = TextAlign.Center,
-        modifier = Modifier
-            .wrapContentWidth()
-            .padding(16.dp)
-    )
+    SuperIdTheme {
+        Text(
+            buildAnnotatedString { //junta strings com estilos diferentes
+                withStyle(
+                    style = SpanStyle(fontFamily = title_font, fontSize = 40.sp, color = MaterialTheme.colorScheme.onBackground,
+                        shadow = Shadow(Color.DarkGray, offset = Offset(2f, 2f),blurRadius = 8f)
+                    )
+                ){
+                    append("Super")
+                }
+                withStyle(
+                    style = SpanStyle(fontFamily = title_font, fontSize = 40.sp, color = MaterialTheme.colorScheme.primary,
+                        shadow = Shadow(Color.DarkGray, offset = Offset(2f, 2f),blurRadius = 8f)
+                    )
+                ){
+                    append(" ID")
+                }
+            },
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .wrapContentWidth()
+                .padding(16.dp)
+        )
+    }
 }
 
 @Composable
 fun LoginAndSignUpDesign(
-    imageResId: Int,
+    imageResId: Int = themedBackgroundImage(),
     statusBarColor: Color = Color(0xFF152034),
     navigationBarColor: Color = Color(0xFF152034),
     content: @Composable () -> Unit,
 ) {
     val systemUiController = rememberSystemUiController()
-    SideEffect { //aplicando as cores da barra de status e navegação
-        systemUiController.setStatusBarColor(statusBarColor, darkIcons = false)
-        systemUiController.setNavigationBarColor(navigationBarColor, darkIcons = false)
-    }
+    SuperIdTheme {
+        SideEffect { //aplicando as cores da barra de status e navegação
+            systemUiController.setStatusBarColor(statusBarColor, darkIcons = false)
+            systemUiController.setNavigationBarColor(navigationBarColor, darkIcons = false)
+        }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-    ) {
-        Image(
-            painter = painterResource(id = imageResId),
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize()
-        )
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()),
-            verticalArrangement = Arrangement.SpaceBetween,
-            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
-                content()
+            Image(
+                painter = painterResource(id = imageResId),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
+            )
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()),
+                verticalArrangement = Arrangement.SpaceBetween,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                    content()
+                }
             }
         }
+    }
+}
+@Composable
+fun themedBackgroundImage(): Int {
+    return if (isSystemInDarkTheme()){
+        R.drawable.lockers_background_dark
+    } else{
+        R.drawable.lockers_backgroud_light
     }
 }
 

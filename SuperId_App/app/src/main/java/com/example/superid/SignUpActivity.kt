@@ -4,9 +4,9 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.TextButton
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -28,36 +29,34 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import com.example.superid.ui.theme.SuperIdTheme
 import com.example.superid.ui.theme.ui.common.LoginAndSignUpDesign
 import com.example.superid.ui.theme.ui.common.SuperIdTitle
 import com.example.superid.ui.theme.ui.common.TextFieldDesignForLoginAndSignUp
-import com.google.android.gms.tasks.Task
-import com.google.firebase.auth.AuthResult
-import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import kotlinx.coroutines.tasks.await
 
 
 class SignUpActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            SignUp()
+            SuperIdTheme(darkTheme = isSystemInDarkTheme()) {
+                SignUp()
+            }
         }
     }
 }
 @Preview
 @Composable
 fun SignUp(){
-    LoginAndSignUpDesign(R.drawable.lockers_background) {
+    LoginAndSignUpDesign() {
         SignUpScreen()
     }
 }
@@ -124,7 +123,7 @@ fun SignUpScreen() {
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        Text("Cadastro:",fontFamily = FontFamily.SansSerif ,fontSize = 30.sp, color = Color.White,
+        Text("Cadastro:",fontFamily = FontFamily.SansSerif ,fontSize = 30.sp, color = MaterialTheme.colorScheme.onBackground,
             fontWeight = FontWeight.Bold, modifier = Modifier.align(Alignment.CenterHorizontally)
         )
 
@@ -154,7 +153,7 @@ fun SignUpScreen() {
         Spacer(modifier = Modifier.height(8.dp))
 
         if(masterPassword != confirmPassword) {
-            Text(stringResource(R.string.passwords_must_match), color = Color.White)
+            Text(stringResource(R.string.passwords_must_match), color = MaterialTheme.colorScheme.onBackground, textAlign = TextAlign.Center)
         }
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -166,10 +165,10 @@ fun SignUpScreen() {
                 }
             },
             enabled = if(masterPassword == confirmPassword && name.isNotEmpty() && email.isNotEmpty() && masterPassword.isNotEmpty()) true else false,
-            border = BorderStroke(2.dp, Color.White),
+            border = BorderStroke(2.dp, MaterialTheme.colorScheme.secondary),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF152034).copy(alpha = 0.5f),
-                disabledContentColor = Color.DarkGray
+                containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
+                disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant
             ),
             modifier = Modifier
                 .height(45.dp)
@@ -180,11 +179,11 @@ fun SignUpScreen() {
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        Text(result, color = Color.Red, fontWeight = FontWeight.Bold)
+        Text(result, color = MaterialTheme.colorScheme.tertiary, fontWeight = FontWeight.Bold)
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        Text("Já possui conta?", color = Color.LightGray)
+        Text("Já possui conta?", color = MaterialTheme.colorScheme.onBackground)
         Spacer(modifier = Modifier.height(0.dp))
         TextButton(
             onClick = {
@@ -195,7 +194,7 @@ fun SignUpScreen() {
                 .height(45.dp)
                 .width(160.dp)
         ) {
-            Text("Login", textDecoration = TextDecoration.Underline, color = Color.White)
+            Text("Login", textDecoration = TextDecoration.Underline, color = MaterialTheme.colorScheme.onBackground)
         }
     }
 }

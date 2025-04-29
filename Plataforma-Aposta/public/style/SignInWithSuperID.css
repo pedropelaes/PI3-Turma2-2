@@ -1,0 +1,71 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: url('../assets/anders-jilden-AkUR27wtaxs-unsplash.jpg') no-repeat center center/cover;
+}
+
+.container {
+    width: 100%;
+    padding: 20px;
+}
+
+.card {
+    background-color: #ffffffcc;
+    border-radius: 15px;
+    border: none;
+    padding: 30px;
+    box-shadow: rgba(0, 0, 0, 0.25) 0px 30px 60px,
+                rgba(0, 0, 0, 0.12) 0px -10px 20px,
+                rgba(0, 0, 0, 0.12) 0px 4px 6px;
+}
+
+.card-title {
+    font-size: 28px;
+    font-weight: 600;
+    color: #000;
+}
+
+.card-text {
+    font-size: 16px;
+    color: #333;
+}
+
+#qrcodeCanvas {
+    width: 200px;
+    height: 200px;
+    margin: 0 auto;
+}
+
+#timer {
+    font-size: 16px;
+}
+
+#resetButton {
+    border-radius: 30px;
+    padding: 10px 25px;
+    font-weight: 500;
+    font-size: 16px;
+}
+
+@media (max-width: 480px) {
+    .card {
+        width: 100% !important;
+        padding: 20px;
+    }
+
+    #qrcodeCanvas {
+        width: 160px;
+        height: 160px;
+    }
+}

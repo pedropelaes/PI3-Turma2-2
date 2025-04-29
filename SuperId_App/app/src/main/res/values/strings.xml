@@ -8,7 +8,7 @@
     <string name="type_your_email">Digite seu email</string>
     <string name="type_your_password">Digite sua senha</string>
     <string name="confirm_your_password">Confirme a sua senha</string>
-    <string name="passwords_must_match">As senhas precisam ser iguais para criar sua conta.</string>
+    <string name="passwords_must_match">As senhas precisam ser iguais e ter mais que 6 caracteres para criar sua conta.</string>
     <string name="type_your_name">Digite o seu nome</string>
     <string name="login_error">Erro ao fazer login, confira seus dados.</string>
     <string name="terms">Termos e Condições de Uso do SuperID:\n
