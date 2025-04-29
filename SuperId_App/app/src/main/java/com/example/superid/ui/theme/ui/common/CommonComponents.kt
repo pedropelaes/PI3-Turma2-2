@@ -102,7 +102,7 @@ fun SuperIdTitle(modifier: Modifier = Modifier){
                     append("Super")
                 }
                 withStyle(
-                    style = SpanStyle(fontFamily = title_font, fontSize = 40.sp, color = MaterialTheme.colorScheme.primary,
+                    style = SpanStyle(fontFamily = title_font, fontSize = 40.sp, color = MaterialTheme.colorScheme.secondary,
                         shadow = Shadow(Color.DarkGray, offset = Offset(2f, 2f),blurRadius = 8f)
                     )
                 ){
