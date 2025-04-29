@@ -46,6 +46,7 @@ import androidx.compose.material3.CheckboxColors
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -87,6 +88,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import com.example.superid.ui.theme.SuperIdTheme
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -99,7 +101,9 @@ class FirstOpeningActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         setContent {
+            SuperIdTheme(darkTheme = true) {
                 SuperID()
+            }
         }
     }
 }
@@ -191,9 +195,9 @@ fun ViewPagerForInitialScreens() { //view pager das paginas iniciais
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                 contentDescription = "Voltar",
-                                tint = Color.White
+                                tint = MaterialTheme.colorScheme.onBackground
                             )
-                            Text("Voltar", fontSize = 15.sp, color = Color.White, textDecoration = TextDecoration.Underline)
+                            Text("Voltar", fontSize = 15.sp, color = MaterialTheme.colorScheme.onBackground, textDecoration = TextDecoration.Underline)
                         }
                         Spacer(modifier = Modifier.width(120.dp))
                     }
@@ -221,11 +225,11 @@ fun ViewPagerForInitialScreens() { //view pager das paginas iniciais
                         modifier = Modifier.wrapContentWidth()
                             .padding(8.dp)
                     ) {
-                        Text("Próximo", fontSize = 15.sp, color = Color.White, textDecoration = TextDecoration.Underline)
+                        Text("Próximo", fontSize = 15.sp, color = MaterialTheme.colorScheme.onBackground, textDecoration = TextDecoration.Underline)
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                             contentDescription = "Próximo",
-                            tint = Color.White
+                            tint = MaterialTheme.colorScheme.onBackground
                         )
                     }
                 }
@@ -238,13 +242,13 @@ fun ViewPagerForInitialScreens() { //view pager das paginas iniciais
 @Composable
 fun Screen1(){
     Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally){
-        Text("Bem-vindo ao",fontFamily = FontFamily.SansSerif ,fontSize = 50.sp, color = Color.White,
+        Text("Bem-vindo ao",fontFamily = FontFamily.SansSerif ,fontSize = 50.sp, color = MaterialTheme.colorScheme.onBackground,
             fontWeight = FontWeight.Bold, modifier = Modifier.align(Alignment.CenterHorizontally)
         )
         SuperIdTitle()
 
         Spacer(modifier = Modifier.height(16.dp))
-        Text(stringResource(R.string.app_description), color = Color.White ,fontSize = 20.sp,
+        Text(stringResource(R.string.app_description), color = MaterialTheme.colorScheme.onBackground ,fontSize = 20.sp,
             fontFamily = FontFamily.SansSerif,
             textAlign = TextAlign.Center,
             modifier = Modifier
@@ -265,7 +269,7 @@ fun Screen2(termsAccepted: Boolean, onTermsAcceptedChange: (Boolean) -> Unit) {
     ) {
         Text(
             "Termos e Condições:",
-            color = Color.White,
+            color = MaterialTheme.colorScheme.onBackground,
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold
         )
@@ -273,7 +277,7 @@ fun Screen2(termsAccepted: Boolean, onTermsAcceptedChange: (Boolean) -> Unit) {
 
         Text(
             "Para usar o SuperID, você precisa aceitar nossos termos e condições:",
-            color = Color.White,
+            color = MaterialTheme.colorScheme.onBackground,
             fontSize = 16.sp
         )
 
