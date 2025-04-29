@@ -6,18 +6,16 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -26,30 +24,22 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.ArrowForward
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonColors
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CheckboxColors
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
@@ -60,39 +50,26 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.focusModifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.BlurEffect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.graphics.Shadow
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.zIndex
 import com.example.superid.ui.theme.SuperIdTheme
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import com.example.superid.ui.theme.ui.common.SuperIdTitle
+import com.example.superid.ui.theme.ui.common.themedBackgroundImage
 
 
 class FirstOpeningActivity : ComponentActivity() {
@@ -101,7 +78,7 @@ class FirstOpeningActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         setContent {
-            SuperIdTheme(darkTheme = true) {
+            SuperIdTheme(darkTheme = isSystemInDarkTheme()) {
                 SuperID()
             }
         }
@@ -113,9 +90,11 @@ fun SuperID() {
     ViewPagerForInitialScreens()
 }
 
+
+
 @Composable //Essa função é responsável pelo design das páginas de íniciais
 fun InitialScreensDesign(
-    imageResId: Int,
+    imageResId: Int = themedBackgroundImage(),
     statusBarColor: Color = Color.Transparent,
     navigationBarColor: Color = Color.Transparent,
     content: @Composable () -> Unit,
@@ -165,7 +144,7 @@ fun ViewPagerForInitialScreens() { //view pager das paginas iniciais
             state = pagerState,
             modifier = Modifier.weight(1f)
         ) { page ->
-            InitialScreensDesign(R.drawable.lockers_background, content = {
+            InitialScreensDesign(content = {
                 when (page) {
                     0 -> Screen1()
                     1 -> Screen2(termsAccepted, onTermsAcceptedChange = { termsAccepted = it })
@@ -292,13 +271,14 @@ fun Screen2(termsAccepted: Boolean, onTermsAcceptedChange: (Boolean) -> Unit) {
                 checked = termsAccepted,
                 onCheckedChange = { onTermsAcceptedChange(it) },
                 colors = CheckboxDefaults.colors(
-                    checkedColor = colorResource(R.color.field_text_background)
+                    checkedColor = MaterialTheme.colorScheme.primary,
+                    checkmarkColor = MaterialTheme.colorScheme.onPrimary
                 )
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
                 "Li e aceito os Termos e Condições",
-                color = Color.White,
+                color = MaterialTheme.colorScheme.onBackground,
                 fontSize = 16.sp
             )
         }
@@ -311,8 +291,8 @@ fun HorizontalPagerIndicator(
     pageCount: Int,
     currentPage: Int,
     modifier: Modifier = Modifier,
-    activeColor: Color = Color.White,
-    inactiveColor: Color = Color.DarkGray,
+    activeColor: Color = MaterialTheme.colorScheme.primary,
+    inactiveColor: Color = MaterialTheme.colorScheme.secondary,
     indicatorSize: Dp = 16.dp,
     spacing: Dp = 4.dp
 ) {
@@ -354,7 +334,7 @@ fun ScrollableTextWithScrollbar() {
         Box {
             Text(
                 text = stringResource(R.string.terms),
-                color = Color.White,
+                color = MaterialTheme.colorScheme.onBackground,
                 textAlign = TextAlign.Justify,
                 fontSize = 16.sp,
                 modifier = Modifier

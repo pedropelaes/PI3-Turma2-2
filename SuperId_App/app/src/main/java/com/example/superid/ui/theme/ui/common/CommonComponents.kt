@@ -4,6 +4,7 @@ import android.content.Intent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -70,12 +71,12 @@ fun TextFieldDesignForLoginAndSignUp(value: String, onValueChange: (String) -> U
         shape = CircleShape,
         visualTransformation = if(isPassword) PasswordVisualTransformation() else VisualTransformation.None,
         colors = TextFieldDefaults.colors(
-            unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
-            unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
-            unfocusedContainerColor = MaterialTheme.colorScheme.primary,
-            focusedContainerColor = MaterialTheme.colorScheme.secondary,
-            focusedTextColor = MaterialTheme.colorScheme.onSurface,
-            focusedLabelColor = MaterialTheme.colorScheme.onSecondary,
+            unfocusedTextColor = MaterialTheme.colorScheme.onSecondary,
+            unfocusedLabelColor = MaterialTheme.colorScheme.onSecondary,
+            unfocusedContainerColor = MaterialTheme.colorScheme.secondary,
+            focusedContainerColor = MaterialTheme.colorScheme.primary,
+            focusedTextColor = MaterialTheme.colorScheme.onPrimary,
+            focusedLabelColor = MaterialTheme.colorScheme.onPrimary,
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
             disabledIndicatorColor = Color.Transparent,
@@ -94,14 +95,14 @@ fun SuperIdTitle(modifier: Modifier = Modifier){
         Text(
             buildAnnotatedString { //junta strings com estilos diferentes
                 withStyle(
-                    style = SpanStyle(fontFamily = title_font, fontSize = 40.sp, color = Color.White,
+                    style = SpanStyle(fontFamily = title_font, fontSize = 40.sp, color = MaterialTheme.colorScheme.onBackground,
                         shadow = Shadow(Color.DarkGray, offset = Offset(2f, 2f),blurRadius = 8f)
                     )
                 ){
                     append("Super")
                 }
                 withStyle(
-                    style = SpanStyle(fontFamily = title_font, fontSize = 40.sp, color = Color(0xFF014E92), //todo: cor primaria
+                    style = SpanStyle(fontFamily = title_font, fontSize = 40.sp, color = MaterialTheme.colorScheme.primary,
                         shadow = Shadow(Color.DarkGray, offset = Offset(2f, 2f),blurRadius = 8f)
                     )
                 ){
@@ -118,7 +119,7 @@ fun SuperIdTitle(modifier: Modifier = Modifier){
 
 @Composable
 fun LoginAndSignUpDesign(
-    imageResId: Int,
+    imageResId: Int = themedBackgroundImage(),
     statusBarColor: Color = Color(0xFF152034),
     navigationBarColor: Color = Color(0xFF152034),
     content: @Composable () -> Unit,
@@ -152,6 +153,14 @@ fun LoginAndSignUpDesign(
                 }
             }
         }
+    }
+}
+@Composable
+fun themedBackgroundImage(): Int {
+    return if (isSystemInDarkTheme()){
+        R.drawable.lockers_background_dark
+    } else{
+        R.drawable.lockers_backgroud_light
     }
 }
 
