@@ -8,12 +8,15 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.TextButton
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
@@ -33,6 +36,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.superid.ui.theme.SuperIdTheme
 import com.example.superid.ui.theme.ui.common.LoginAndSignUpDesign
 import com.example.superid.ui.theme.ui.common.SuperIdTitle
 import com.example.superid.ui.theme.ui.common.TextFieldDesignForLoginAndSignUp
@@ -44,7 +48,9 @@ class LogInActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent{
-            Login()
+            SuperIdTheme(darkTheme = isSystemInDarkTheme()) {
+                Login()
+            }
         }
     }
 }
@@ -72,7 +78,7 @@ fun PerformLogin(email: String, password: String, context: Context, onResult: (B
 @Preview
 @Composable
 fun Login(){
-    LoginAndSignUpDesign(imageResId = R.drawable.lockers_background_dark, content = {
+    LoginAndSignUpDesign(content = {
         LoginScreen()
     })
 }
@@ -88,7 +94,7 @@ fun LoginScreen(){
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        Text("Login:",fontFamily = FontFamily.SansSerif ,fontSize = 30.sp, color = Color.White,
+        Text("Login:",fontFamily = FontFamily.SansSerif ,fontSize = 30.sp, color = MaterialTheme.colorScheme.onBackground,
             fontWeight = FontWeight.Bold, modifier = Modifier.align(Alignment.CenterHorizontally)
         )
 
@@ -113,10 +119,10 @@ fun LoginScreen(){
                 }
             },
             enabled = if(email.isNotEmpty() && password.isNotEmpty()) true else false,
-            border = BorderStroke(2.dp, Color.White),
+            border = BorderStroke(2.dp, MaterialTheme.colorScheme.secondary),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF152034).copy(alpha = 0.5f),
-                disabledContentColor = Color.DarkGray
+                containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
+                disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant
             ),
             modifier = Modifier.height(45.dp).width(160.dp)
         ){
@@ -132,18 +138,19 @@ fun LoginScreen(){
             modifier = Modifier
                 .height(45.dp)
                 .width(160.dp)
+                .wrapContentSize()
         ) {
-            Text("Esqueceu sua senha?", textDecoration = TextDecoration.Underline, color = Color.White)
+            Text("Esqueceu sua senha?", textDecoration = TextDecoration.Underline, color = MaterialTheme.colorScheme.onBackground)
         }
 
         Spacer(modifier = Modifier.height(8.dp))
 
         if(!success){
-            Text(stringResource(R.string.login_error), color = Color.Red, fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.login_error), color = MaterialTheme.colorScheme.tertiary, fontWeight = FontWeight.Bold)
         }
         Spacer(modifier = Modifier.height(24.dp))
 
-        Text("Ainda não possui conta?", color = Color.LightGray)
+        Text("Ainda não possui conta?", color = MaterialTheme.colorScheme.onBackground)
         TextButton(
             onClick = {
                 val intent = Intent(context, SignUpActivity::class.java)
@@ -153,7 +160,7 @@ fun LoginScreen(){
                 .height(45.dp)
                 .width(160.dp)
         ) {
-            Text("Fazer Cadastro", textDecoration = TextDecoration.Underline, color = Color.White)
+            Text("Fazer Cadastro", textDecoration = TextDecoration.Underline, color = MaterialTheme.colorScheme.onBackground)
         }
     }
 }

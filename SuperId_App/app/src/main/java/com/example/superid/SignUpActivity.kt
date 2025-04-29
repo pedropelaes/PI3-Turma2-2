@@ -123,7 +123,7 @@ fun SignUpScreen() {
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        Text("Cadastro:",fontFamily = FontFamily.SansSerif ,fontSize = 30.sp, color = MaterialTheme.colorScheme.primary,
+        Text("Cadastro:",fontFamily = FontFamily.SansSerif ,fontSize = 30.sp, color = MaterialTheme.colorScheme.onBackground,
             fontWeight = FontWeight.Bold, modifier = Modifier.align(Alignment.CenterHorizontally)
         )
 
@@ -183,7 +183,7 @@ fun SignUpScreen() {
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        Text("Já possui conta?", color = MaterialTheme.colorScheme.primary)
+        Text("Já possui conta?", color = MaterialTheme.colorScheme.onBackground)
         Spacer(modifier = Modifier.height(0.dp))
         TextButton(
             onClick = {
