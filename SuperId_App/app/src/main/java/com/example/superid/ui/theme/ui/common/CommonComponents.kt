@@ -98,12 +98,12 @@ fun TextFieldDesignForMainScreen(value: String, onValueChange: (String) -> Unit,
         shape = CircleShape,
         visualTransformation = if(isPassword) PasswordVisualTransformation() else VisualTransformation.None,
         colors = TextFieldDefaults.colors(
-            unfocusedTextColor = Color.DarkGray,
-            unfocusedLabelColor = Color.DarkGray,
+            unfocusedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
             unfocusedContainerColor = MaterialTheme.colorScheme.onSecondaryContainer,
             focusedContainerColor = MaterialTheme.colorScheme.onPrimaryContainer,
-            focusedTextColor = Color.Black,
-            focusedLabelColor = Color.Black,
+            focusedTextColor = MaterialTheme.colorScheme.onSurface,
+            focusedLabelColor = MaterialTheme.colorScheme.onSurface,
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
             disabledIndicatorColor = Color.Transparent,
@@ -119,30 +119,29 @@ fun TextFieldDesignForMainScreen(value: String, onValueChange: (String) -> Unit,
 @Composable
 fun SuperIdTitle(modifier: Modifier = Modifier){
     val title_font = FontFamily(Font(R.font.fonte_titulo))
-    SuperIdTheme {
-        Text(
-            buildAnnotatedString { //junta strings com estilos diferentes
-                withStyle(
-                    style = SpanStyle(fontFamily = title_font, fontSize = 40.sp, color = MaterialTheme.colorScheme.onBackground,
-                        shadow = Shadow(Color.DarkGray, offset = Offset(2f, 2f),blurRadius = 8f)
-                    )
-                ){
-                    append("Super")
-                }
-                withStyle(
-                    style = SpanStyle(fontFamily = title_font, fontSize = 40.sp, color = MaterialTheme.colorScheme.secondary,
-                        shadow = Shadow(Color.DarkGray, offset = Offset(2f, 2f),blurRadius = 8f)
-                    )
-                ){
-                    append(" ID")
-                }
-            },
-            textAlign = TextAlign.Center,
-            modifier = Modifier
-                .wrapContentWidth()
-                .padding(16.dp)
-        )
-    }
+    Text(
+        buildAnnotatedString { //junta strings com estilos diferentes
+            withStyle(
+                style = SpanStyle(fontFamily = title_font, fontSize = 40.sp, color = MaterialTheme.colorScheme.onBackground,
+                    shadow = Shadow(Color.DarkGray, offset = Offset(2f, 2f),blurRadius = 8f)
+                )
+            ){
+                append("Super")
+            }
+            withStyle(
+                style = SpanStyle(fontFamily = title_font, fontSize = 40.sp, color = MaterialTheme.colorScheme.secondary,
+                    shadow = Shadow(Color.DarkGray, offset = Offset(2f, 2f),blurRadius = 8f)
+                )
+            ){
+                append(" ID")
+            }
+        },
+        textAlign = TextAlign.Center,
+        modifier = Modifier
+            .wrapContentWidth()
+            .padding(16.dp)
+    )
+
 }
 
 @Composable

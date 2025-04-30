@@ -189,9 +189,9 @@ fun DialogCriarCategoria(
                 Text("Cancelar", color = MaterialTheme.colorScheme.onPrimaryContainer)
             }
         },
-        containerColor = MaterialTheme.colorScheme.primaryContainer, // Cor de fundo do dialog
-        titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer, // Cor do título
-        textContentColor = MaterialTheme.colorScheme.onPrimaryContainer, // Cor do texto
+        containerColor = MaterialTheme.colorScheme.primary, // Cor de fundo do dialog
+        titleContentColor = MaterialTheme.colorScheme.onPrimary, // Cor do título
+        textContentColor = MaterialTheme.colorScheme.onPrimary, // Cor do texto
     )
 }
 
