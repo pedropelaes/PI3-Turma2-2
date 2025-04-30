@@ -87,6 +87,34 @@ fun TextFieldDesignForLoginAndSignUp(value: String, onValueChange: (String) -> U
             .padding(4.dp)
     )
 }
+
+@Composable
+fun TextFieldDesignForMainScreen(value: String, onValueChange: (String) -> Unit, label: String, isPassword: Boolean = false){
+    TextField(
+        value = value,
+        onValueChange = onValueChange,
+        label = { Text(label) },
+        singleLine = true,
+        shape = CircleShape,
+        visualTransformation = if(isPassword) PasswordVisualTransformation() else VisualTransformation.None,
+        colors = TextFieldDefaults.colors(
+            unfocusedTextColor = Color.DarkGray,
+            unfocusedLabelColor = Color.DarkGray,
+            unfocusedContainerColor = MaterialTheme.colorScheme.onSecondaryContainer,
+            focusedContainerColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            focusedTextColor = Color.Black,
+            focusedLabelColor = Color.Black,
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent,
+            disabledIndicatorColor = Color.Transparent,
+            errorIndicatorColor = Color.Transparent,
+        ),
+        modifier = Modifier.wrapContentSize()
+            .border(2.dp, colorResource(R.color.field_text_border), CircleShape)
+            .padding(4.dp)
+    )
+}
+
 @Preview
 @Composable
 fun SuperIdTitle(modifier: Modifier = Modifier){

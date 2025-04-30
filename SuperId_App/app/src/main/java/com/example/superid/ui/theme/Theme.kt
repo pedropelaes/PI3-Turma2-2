@@ -36,10 +36,14 @@ private val LightColorScheme = lightColorScheme(
     surface = Color.LightGray,
     onSurface = Color.Black,
     surfaceVariant = Blue30,
-    onSurfaceVariant = Color.DarkGray,
+    onSurfaceVariant = Color.White,
     onPrimary = Color.White,
     onSecondary = Color.LightGray,
     onTertiary = Color.White,
+    primaryContainer = D_Blue60,
+    onPrimaryContainer = Color.White,
+    secondaryContainer = D_Blue40,
+    onSecondaryContainer = Color.LightGray
 )
 
 @Composable
