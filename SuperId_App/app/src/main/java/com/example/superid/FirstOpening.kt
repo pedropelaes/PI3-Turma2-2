@@ -1,5 +1,6 @@
 package com.example.superid
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
@@ -48,6 +49,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -96,14 +98,20 @@ class FirstOpeningActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         setContent {
-                SuperID()
+            FirstOpeningScreen(
+                navToLogIn = {
+                    val intent = Intent(this, LogInActivity::class.java)
+                    startActivity(intent)
+                    finish() // Finaliza para não voltar
+                }
+            )
         }
     }
 }
 @Preview(showBackground = true)
 @Composable
 fun SuperID() {
-    ViewPagerForInitialScreens()
+    ViewPagerForInitialScreens(onFinish = {})
 }
 
 @Composable //Essa função é responsável pelo design das páginas de íniciais
@@ -148,7 +156,7 @@ fun InitialScreensDesign(
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun ViewPagerForInitialScreens() { //view pager das paginas iniciais
+fun ViewPagerForInitialScreens(onFinish: () -> Unit) {
     val pagerState = rememberPagerState(pageCount = { 2 })
     val coroutineScope = rememberCoroutineScope()
     var termsAccepted by remember { mutableStateOf(false) }
@@ -202,23 +210,32 @@ fun ViewPagerForInitialScreens() { //view pager das paginas iniciais
                     TextButton(
                         onClick = {
                             coroutineScope.launch {
-                                // Impede de ir para a próxima tela se não aceitou os termos.
-                                if (pagerState.currentPage == 1 && !termsAccepted) {
-                                    Toast.makeText(context, "É necessário aceitar os termos antes de prosseguir.", Toast.LENGTH_SHORT).show()
-                                    return@launch
-                                }else if(pagerState.currentPage == 1 && termsAccepted) {
-                                    val intent = Intent(context, SignUpActivity::class.java)
-                                    context.startActivity(intent)
-                                }
                                 if (pagerState.currentPage < pagerState.pageCount - 1) {
                                     pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                                } else {
+                                    if (!termsAccepted) {
+                                        Toast.makeText(
+                                            context,
+                                            "É necessário aceitar os termos antes de prosseguir.",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    } else {
+                                        // Agora chamamos o onFinish()
+                                        onFinish()
+                                    }
                                 }
                             }
                         },
-                        modifier = Modifier.wrapContentWidth()
+                        modifier = Modifier
+                            .wrapContentWidth()
                             .padding(8.dp)
                     ) {
-                        Text("Próximo", fontSize = 15.sp, color = Color.White, textDecoration = TextDecoration.Underline)
+                        Text(
+                            if (pagerState.currentPage == pagerState.pageCount - 1) "Começar" else "Próximo",
+                            fontSize = 15.sp,
+                            color = Color.White,
+                            textDecoration = TextDecoration.Underline
+                        )
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                             contentDescription = "Próximo",
@@ -367,8 +384,56 @@ fun ScrollableTextWithScrollbar() {
                     .background(Color.White.copy(alpha = 0.5f), shape = RoundedCornerShape(2.dp))
             )
         }
+        class FirstOpeningActivity : ComponentActivity() {
+            override fun onCreate(savedInstanceState: Bundle?) {
+                super.onCreate(savedInstanceState)
+                enableEdgeToEdge()
+
+                setContent {
+                    FirstOpeningScreen(
+                        navToLogIn = {
+                            // Quando terminar, manda para a SignUpActivity
+                            val intent = Intent(this, LogInActivity::class.java)
+                            startActivity(intent)
+                            finish() // fecha essa activity para que não volte para o onboarding
+                        }
+                    )
+                }
+            }
+        }
+    }
+
+}
+@Composable
+fun FirstOpeningScreen(navToLogIn: () -> Unit) {
+    val context = LocalContext.current
+    var shouldShowOnboarding by remember { mutableStateOf(true) }
+
+    LaunchedEffect(Unit) {
+        val prefs = context.getSharedPreferences("onboarding_prefs", Context.MODE_PRIVATE)
+        val alreadySeen = prefs.getBoolean("has_seen_onboarding", false)
+        if (alreadySeen) {
+            navToLogIn()
+            shouldShowOnboarding = false
+        }
+    }
+
+    if (shouldShowOnboarding) {
+        ViewPagerForInitialScreens(
+            onFinish = {
+                // Salva nas prefs
+                val prefs = context.getSharedPreferences("onboarding_prefs", Context.MODE_PRIVATE)
+                prefs.edit().putBoolean("has_seen_onboarding", true).apply()
+
+                // Faz a navegação como você queria antes
+                val intent = Intent(context, LogInActivity::class.java)
+                context.startActivity(intent)
+
+            }
+        )
     }
 }
+
 
 
 /*
