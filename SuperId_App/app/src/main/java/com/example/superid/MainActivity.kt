@@ -6,11 +6,14 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -22,7 +25,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.materialIcon
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -50,6 +57,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ModifierLocalBeyondBoundsLayout
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -58,6 +66,7 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.superid.ui.theme.SuperIdTheme
+import com.example.superid.ui.theme.ui.common.CategoryRow
 import com.example.superid.ui.theme.ui.common.SuperIdTitle
 import com.example.superid.ui.theme.ui.common.TextFieldDesignForLoginAndSignUp
 import com.example.superid.ui.theme.ui.common.TextFieldDesignForMainScreen
@@ -195,14 +204,51 @@ fun DialogCriarCategoria(
     )
 }
 
-
-
 @Preview
 @Composable
 fun MainScreen(){
-    MainScreenDesign {
-        Column(){
+    var categoriasCriadas by remember { mutableStateOf(emptyList<Int>()) }
+    SuperIdTheme(darkTheme = false) {
+        MainScreenDesign {
+            Column(
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxHeight()
+            ){
+                CategoryRow(
+                    painter = R.drawable.smartphone,
+                    contentDescripiton = "Categoria Aplicativos",
+                    text = "Aplicativos",
+                )
+                CategoryRow(
+                    painter = R.drawable.email,
+                    contentDescripiton = "Categoria Emails",
+                    text = "Emails",
+                )
+                CategoryRow(
+                    painter = R.drawable.world_wide_web,
+                    contentDescripiton = "Categoria Sites",
+                    text = "Sites",
+                )
+                CategoryRow(
+                    painter = R.drawable.keyboard,
+                    contentDescripiton = "Categoria Teclados de acesso físicos",
+                    text = "Teclados de acesso físicos",
+                )
 
+                if(categoriasCriadas.isNotEmpty()) {
+                    categoriasCriadas.forEach { index ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 4.dp)
+                                .background(color = MaterialTheme.colorScheme.onBackground),
+                        ) {
+                            Text(text = "Item ${index + 1}")
+                        }
+                    }
+                }
+            }
         }
     }
 }

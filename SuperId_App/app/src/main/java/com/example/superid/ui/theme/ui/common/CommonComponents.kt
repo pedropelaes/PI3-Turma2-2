@@ -3,23 +3,31 @@ package com.example.superid.ui.theme.ui.common
 import android.content.Intent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -188,6 +196,46 @@ fun themedBackgroundImage(): Int {
         R.drawable.lockers_background_dark
     } else{
         R.drawable.lockers_backgroud_light
+    }
+}
+
+@Composable
+fun CategoryRow(painter: Int = R.mipmap.ic_launcher, contentDescripiton: String, text: String){
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .size(80.dp)
+            .padding(vertical = 2.dp)
+            .background(color = MaterialTheme.colorScheme.secondary)
+    ){
+        Icon(
+            painter = painterResource(painter),
+            tint = MaterialTheme.colorScheme.inverseOnSurface,
+            contentDescription = contentDescripiton,
+            modifier = Modifier.size(48.dp)
+                .align(Alignment.CenterVertically)
+                .padding(start = 8.dp)
+        )
+
+        Spacer(modifier = Modifier.size(8.dp))
+
+        Text(
+            text = text,
+            color = MaterialTheme.colorScheme.inverseOnSurface,
+            textAlign = TextAlign.Center,
+            fontSize = 24.sp,
+            modifier = Modifier.align(Alignment.CenterVertically)
+        )
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        Icon(
+            imageVector = Icons.Default.KeyboardArrowRight,
+            contentDescription = "Abrir categoria",
+            tint = MaterialTheme.colorScheme.inverseOnSurface,
+            modifier = Modifier.align(Alignment.CenterVertically)
+
+        )
     }
 }
 
