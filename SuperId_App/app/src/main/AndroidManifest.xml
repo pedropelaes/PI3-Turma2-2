@@ -18,7 +18,7 @@
             android:label="@string/title_activity_password_reset"
             android:theme="@style/Theme.SuperId" />
         <activity
-            android:name=".MainActivity"
+            android:name=".FirstOpeningActivity"
             android:exported="true"
             android:theme="@style/Theme.SuperId" />
         <activity
@@ -30,7 +30,7 @@
             android:exported="true"
             android:theme="@style/Theme.SuperId" />
         <activity
-            android:name=".FirstOpeningActivity"
+            android:name=".MainActivity"
             android:exported="true"
             android:theme="@style/Theme.SuperId">
             <intent-filter>
