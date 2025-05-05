@@ -50,8 +50,9 @@ class PasswordsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContent{
             val categoria = intent.getStringExtra("categoria")
+            val icone = intent.getIntExtra("icone", R.drawable.logo_without_text)
             SuperIdTheme(darkTheme = isSystemInDarkTheme()) {
-                PasswordsScreen(categoria)
+                PasswordsScreen(categoria, icone)
             }
         }
     }
@@ -64,7 +65,7 @@ fun PasswordsScreenDesign(
     statusBarColor: Color = Color.Transparent,
     navigationBarColor: Color = Color.Transparent,
     categoria: String?,
-    iconPainter: Int = R.drawable.logo_without_text,
+    iconPainter: Int,
     content: @Composable () -> Unit
 ){
     val context = LocalContext.current
@@ -157,8 +158,8 @@ fun PasswordsScreenDesign(
 }
 
 @Composable
-fun PasswordsScreen(categoria: String?){
-    PasswordsScreenDesign(categoria = categoria) {
+fun PasswordsScreen(categoria: String?, icone: Int){
+    PasswordsScreenDesign(categoria = categoria, iconPainter = icone) {
         if (categoria != null) {
             Text(categoria)
         }
@@ -168,5 +169,8 @@ fun PasswordsScreen(categoria: String?){
 @Preview(showBackground = true)
 @Composable
 fun PasswordsScreenPreview(){
-    PasswordsScreen(categoria = "mock_categoria")
+    PasswordsScreen(
+        categoria = "mock_categoria",
+        icone = R.drawable.logo_without_text
+    )
 }
