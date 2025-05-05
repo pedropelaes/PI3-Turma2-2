@@ -1,6 +1,7 @@
 package com.example.superid
 
 import android.app.Dialog
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.setContent
@@ -210,9 +211,17 @@ fun DialogCriarCategoria(
     )
 }
 
+fun OpenPasswordsActivity(categoria: String, context: Context) {
+    val intent = Intent(context, PasswordsActivity::class.java).apply {
+        putExtra("categoria", categoria)
+    }
+    context.startActivity(intent)
+}
+
 @Preview
 @Composable
 fun MainScreen(){
+    val context = LocalContext.current
     var categoriasCriadas by remember { mutableStateOf(emptyList<Int>()) }
     MainScreenDesign {
         Column(
@@ -224,21 +233,25 @@ fun MainScreen(){
                 painter = R.drawable.smartphone,
                 contentDescripiton = "Categoria Aplicativos",
                 text = "Aplicativos",
+                onClick = { OpenPasswordsActivity("aplicativos", context) },
             )
             CategoryRow(
                 painter = R.drawable.email,
                 contentDescripiton = "Categoria Emails",
                 text = "Emails",
+                onClick = { OpenPasswordsActivity("emails", context) },
             )
             CategoryRow(
                 painter = R.drawable.world_wide_web,
                 contentDescripiton = "Categoria Sites",
                 text = "Sites",
+                onClick = { OpenPasswordsActivity("sites", context) },
             )
             CategoryRow(
                 painter = R.drawable.keyboard,
                 contentDescripiton = "Categoria Teclados de acesso físicos",
                 text = "Teclados de acesso físicos",
+                onClick = { OpenPasswordsActivity("teclados", context) },
             )
 
             if(categoriasCriadas.isNotEmpty()) {

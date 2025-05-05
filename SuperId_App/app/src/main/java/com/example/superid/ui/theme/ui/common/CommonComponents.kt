@@ -1,10 +1,12 @@
 package com.example.superid.ui.theme.ui.common
 
+import android.content.Context
 import android.content.Intent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -45,6 +47,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -59,6 +62,8 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.superid.PasswordsActivity
+import com.example.superid.QrCodeAuthActivity
 import com.example.superid.R
 import com.example.superid.SignUpActivity
 import com.example.superid.SuperID
@@ -79,12 +84,12 @@ fun TextFieldDesignForLoginAndSignUp(value: String, onValueChange: (String) -> U
         shape = CircleShape,
         visualTransformation = if(isPassword) PasswordVisualTransformation() else VisualTransformation.None,
         colors = TextFieldDefaults.colors(
-            unfocusedTextColor = MaterialTheme.colorScheme.onSecondary,
-            unfocusedLabelColor = MaterialTheme.colorScheme.onSecondary,
-            unfocusedContainerColor = MaterialTheme.colorScheme.secondary,
-            focusedContainerColor = MaterialTheme.colorScheme.primary,
-            focusedTextColor = MaterialTheme.colorScheme.onPrimary,
-            focusedLabelColor = MaterialTheme.colorScheme.onPrimary,
+            unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+            unfocusedLabelColor = MaterialTheme.colorScheme.onBackground,
+            unfocusedContainerColor = MaterialTheme.colorScheme.background,
+            focusedContainerColor = MaterialTheme.colorScheme.surface,
+            focusedTextColor = MaterialTheme.colorScheme.onBackground,
+            focusedLabelColor = MaterialTheme.colorScheme.onBackground,
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
             disabledIndicatorColor = Color.Transparent,
@@ -220,13 +225,14 @@ fun themedBackgroundImage(): Int {
 }
 
 @Composable
-fun CategoryRow(painter: Int = R.mipmap.ic_launcher, contentDescripiton: String, text: String){
+fun CategoryRow(painter: Int = R.mipmap.ic_launcher, contentDescripiton: String, text: String, onClick: () -> Unit){
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .size(80.dp)
             .padding(vertical = 2.dp)
             .background(color = MaterialTheme.colorScheme.secondary)
+            .clickable { onClick() }
     ){
         Icon(
             painter = painterResource(painter),

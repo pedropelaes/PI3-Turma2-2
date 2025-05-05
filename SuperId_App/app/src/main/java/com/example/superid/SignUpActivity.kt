@@ -188,7 +188,8 @@ fun SignUpScreen() {
             enabled = if(masterPassword == confirmPassword && name.isNotEmpty() && email.isNotEmpty() && masterPassword.isNotEmpty()) true else false,
             border = BorderStroke(2.dp, MaterialTheme.colorScheme.secondary),
             colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
+                disabledContainerColor = MaterialTheme.colorScheme.primary.copy(0.5f),
+                containerColor = MaterialTheme.colorScheme.primary,
                 disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant
             ),
             modifier = Modifier
