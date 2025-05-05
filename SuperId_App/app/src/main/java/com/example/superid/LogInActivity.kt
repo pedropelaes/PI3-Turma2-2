@@ -96,7 +96,7 @@ fun LoginScreen(){
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        Text("Login:",fontFamily = FontFamily.SansSerif ,fontSize = 30.sp, color = MaterialTheme.colorScheme.onBackground,
+        Text("Entrar:",fontFamily = FontFamily.SansSerif ,fontSize = 30.sp, color = MaterialTheme.colorScheme.onBackground,
             fontWeight = FontWeight.Bold, modifier = Modifier.align(Alignment.CenterHorizontally)
         )
 

@@ -144,7 +144,7 @@ fun SignUpScreen() {
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        Text("Cadastro:",fontFamily = FontFamily.SansSerif ,fontSize = 30.sp, color = MaterialTheme.colorScheme.onBackground,
+        Text("Crie sua conta:",fontFamily = FontFamily.SansSerif ,fontSize = 30.sp, color = MaterialTheme.colorScheme.onBackground,
             fontWeight = FontWeight.Bold, modifier = Modifier.align(Alignment.CenterHorizontally)
         )
 
