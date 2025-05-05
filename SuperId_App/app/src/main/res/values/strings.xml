@@ -5,11 +5,11 @@
         além de contar com um sistema de autenticação rápido e prático para acessar sites parceiros.
         Basta deslizar para o lado e começar a usar nosso app com facilidade!
     </string>
-    <string name="type_your_email">Digite seu email</string>
-    <string name="type_your_password">Digite sua senha</string>
-    <string name="confirm_your_password">Confirme a sua senha</string>
-    <string name="passwords_must_match">As senhas precisam ser iguais para criar sua conta.</string>
-    <string name="type_your_name">Digite o seu nome</string>
+    <string name="type_your_email">Email</string>
+    <string name="type_your_password">Senha</string>
+    <string name="confirm_your_password">Confirmar senha</string>
+    <string name="passwords_must_match">As senhas precisam ser iguais e ter mais que 6 caracteres para criar sua conta.</string>
+    <string name="type_your_name">Nome completo</string>
     <string name="login_error">Erro ao fazer login, confira seus dados.</string>
     <string name="terms">Termos e Condições de Uso do SuperID:\n
         Última atualização: 22/04/2025
