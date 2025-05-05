@@ -1,6 +1,7 @@
 package com.example.superid
 
 import android.app.Dialog
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -55,6 +56,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ModifierLocalBeyondBoundsLayout
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -91,6 +93,7 @@ fun MainScreenDesign(
     content: @Composable () -> Unit
 ){
     var showDialog by remember { mutableStateOf(false) }
+    val context = LocalContext.current
     Scaffold(
         topBar = {
             TopAppBar(
@@ -137,7 +140,10 @@ fun MainScreenDesign(
                 }
 
                 FloatingActionButton(
-                    onClick = {},
+                    onClick = {
+                        val intent = Intent(context, QrCodeAuthActivity::class.java)
+                        context.startActivity(intent)
+                    },
                     containerColor = MaterialTheme.colorScheme.primary,
                     shape = CircleShape,
                     modifier = Modifier.size(48.dp)
