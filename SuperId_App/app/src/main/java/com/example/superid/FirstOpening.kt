@@ -345,36 +345,40 @@ fun ScrollableTextWithScrollbar() {
             .height(boxHeight)
             .background(Color.LightGray.copy(0.15f))
             .border(2.dp, shape = RectangleShape, color = Color.White)
-            .padding(8.dp)
+            .padding(end = 12.dp) // Adiciona espaço pra scrollbar
     ) {
-        Box {
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(scrollState)
+                .padding(end = 8.dp) // padding interno para o texto não colar na scrollbar
+        ) {
             Text(
                 text = stringResource(R.string.terms),
                 color = Color.White,
                 textAlign = TextAlign.Justify,
-                fontSize = 16.sp,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .verticalScroll(scrollState)
-            )
-
-            // Cálculo do offset com o LocalDensity
-            val scrollProgress = scrollState.value.toFloat() / scrollState.maxValue.toFloat().coerceAtLeast(1f)
-            val offsetY = with(LocalDensity.current) {
-                ((boxHeight - scrollbarHeight) * scrollProgress).toPx()
-            }
-
-            Box(
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .offset(y = Dp(offsetY / LocalDensity.current.density))
-                    .width(4.dp)
-                    .height(scrollbarHeight)
-                    .background(Color.White.copy(alpha = 0.5f), shape = RoundedCornerShape(2.dp))
+                fontSize = 16.sp
             )
         }
+
+
+        val scrollProgress = scrollState.value.toFloat() / scrollState.maxValue.toFloat().coerceAtLeast(1f)
+        val offsetY = with(LocalDensity.current) {
+            ((boxHeight - scrollbarHeight) * scrollProgress).toPx()
+        }
+
+        Box(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .offset(y = Dp(offsetY / LocalDensity.current.density))
+                .width(4.dp)
+                .height(scrollbarHeight)
+                .background(Color.White.copy(alpha = 0.5f), shape = RoundedCornerShape(2.dp))
+        )
     }
 }
+
 
 
 /*
