@@ -155,15 +155,15 @@ fun SuperIdTitle(modifier: Modifier = Modifier){
     Text(
         buildAnnotatedString { //junta strings com estilos diferentes
             withStyle(
-                style = SpanStyle(fontFamily = title_font, fontSize = 40.sp, color = MaterialTheme.colorScheme.onPrimary,
-                    shadow = Shadow(Color.DarkGray, offset = Offset(2f, 2f),blurRadius = 8f)
+                style = SpanStyle(fontFamily = title_font, fontSize = 28.sp, color = MaterialTheme.colorScheme.onPrimary,
+                    shadow = Shadow(Color.DarkGray, offset = Offset(1f, 1f),blurRadius = 4f)
                 )
             ){
                 append("Super")
             }
             withStyle(
-                style = SpanStyle(fontFamily = title_font, fontSize = 40.sp, color = MaterialTheme.colorScheme.surfaceVariant,
-                    shadow = Shadow(Color.DarkGray, offset = Offset(2f, 2f),blurRadius = 8f)
+                style = SpanStyle(fontFamily = title_font, fontSize = 28.sp, color = MaterialTheme.colorScheme.surfaceVariant,
+                    shadow = Shadow(Color.DarkGray, offset = Offset(1f, 1f),blurRadius = 4f)
                 )
             ){
                 append(" ID")
@@ -172,7 +172,7 @@ fun SuperIdTitle(modifier: Modifier = Modifier){
         textAlign = TextAlign.Center,
         modifier = Modifier
             .wrapContentWidth()
-            .padding(16.dp)
+            .padding(horizontal = 16.dp)
     )
 
 }
@@ -225,7 +225,7 @@ fun themedBackgroundImage(): Int {
 }
 
 @Composable
-fun CategoryRow(painter: Int = R.mipmap.ic_launcher, contentDescripiton: String, text: String, onClick: () -> Unit){
+fun CategoryRow(painter: Int = R.drawable.logo_without_text, contentDescripiton: String, text: String, onClick: () -> Unit){
     Row(
         modifier = Modifier
             .fillMaxWidth()

@@ -99,7 +99,17 @@ fun MainScreenDesign(
         topBar = {
             TopAppBar(
                 title = {
-                    SuperIdTitle(modifier = Modifier.size(10.dp))
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 16.dp, end = 16.dp), // Match typical top bar padding
+                        contentAlignment = Alignment.CenterStart
+                    ) {
+                        SuperIdTitle(
+                            modifier = Modifier
+                                .wrapContentSize() // Let the text take its natural size
+                        )
+                    }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary
@@ -236,7 +246,7 @@ fun MainScreen(){
                 onClick = { OpenPasswordsActivity("aplicativos", context) },
             )
             CategoryRow(
-                painter = R.drawable.email,
+                //painter = R.drawable.email,
                 contentDescripiton = "Categoria Emails",
                 text = "Emails",
                 onClick = { OpenPasswordsActivity("emails", context) },
