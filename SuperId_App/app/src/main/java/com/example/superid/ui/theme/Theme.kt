@@ -20,11 +20,17 @@ private val DarkColorScheme = darkColorScheme(
     onBackground = Color.White, //usar em texto sobre o fundo
     surface = D_Blue70,  //usar em bordas de botões e field texts
     onSurface = Color.White,
+    inverseOnSurface = Color.Black,
     surfaceVariant = D_Blue60,
     onSurfaceVariant = Color.Gray,
     onPrimary = Color.Black, //elementos sobre cor primaria
     onSecondary = Color.DarkGray, //elementos sobre cor secundaria
-    onTertiary = Color.Black //elementos sobre cor terciaria
+    onTertiary = Color.Black, //elementos sobre cor terciaria
+    primaryContainer = Blue30,
+    secondaryContainer = Blue20,
+    onPrimaryContainer = D_Blue70,
+    onSecondaryContainer = D_Blue60,
+
 )
 
 private val LightColorScheme = lightColorScheme(
@@ -35,11 +41,16 @@ private val LightColorScheme = lightColorScheme(
     onBackground = Color.Black,
     surface = Color.LightGray,
     onSurface = Color.Black,
+    inverseOnSurface = Color.White,
     surfaceVariant = Blue30,
-    onSurfaceVariant = Color.DarkGray,
+    onSurfaceVariant = Color.White,
     onPrimary = Color.White,
     onSecondary = Color.LightGray,
     onTertiary = Color.White,
+    primaryContainer = D_Blue60,
+    onPrimaryContainer = Color.White,
+    secondaryContainer = D_Blue40,
+    onSecondaryContainer = Color.LightGray
 )
 
 @Composable
