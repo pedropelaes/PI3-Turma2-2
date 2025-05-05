@@ -214,44 +214,42 @@ fun DialogCriarCategoria(
 @Composable
 fun MainScreen(){
     var categoriasCriadas by remember { mutableStateOf(emptyList<Int>()) }
-    SuperIdTheme(darkTheme = false) {
-        MainScreenDesign {
-            Column(
-                verticalArrangement = Arrangement.Top,
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.fillMaxHeight()
-            ){
-                CategoryRow(
-                    painter = R.drawable.smartphone,
-                    contentDescripiton = "Categoria Aplicativos",
-                    text = "Aplicativos",
-                )
-                CategoryRow(
-                    painter = R.drawable.email,
-                    contentDescripiton = "Categoria Emails",
-                    text = "Emails",
-                )
-                CategoryRow(
-                    painter = R.drawable.world_wide_web,
-                    contentDescripiton = "Categoria Sites",
-                    text = "Sites",
-                )
-                CategoryRow(
-                    painter = R.drawable.keyboard,
-                    contentDescripiton = "Categoria Teclados de acesso físicos",
-                    text = "Teclados de acesso físicos",
-                )
+    MainScreenDesign {
+        Column(
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.fillMaxHeight()
+        ){
+            CategoryRow(
+                painter = R.drawable.smartphone,
+                contentDescripiton = "Categoria Aplicativos",
+                text = "Aplicativos",
+            )
+            CategoryRow(
+                painter = R.drawable.email,
+                contentDescripiton = "Categoria Emails",
+                text = "Emails",
+            )
+            CategoryRow(
+                painter = R.drawable.world_wide_web,
+                contentDescripiton = "Categoria Sites",
+                text = "Sites",
+            )
+            CategoryRow(
+                painter = R.drawable.keyboard,
+                contentDescripiton = "Categoria Teclados de acesso físicos",
+                text = "Teclados de acesso físicos",
+            )
 
-                if(categoriasCriadas.isNotEmpty()) {
-                    categoriasCriadas.forEach { index ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 4.dp)
-                                .background(color = MaterialTheme.colorScheme.onBackground),
-                        ) {
-                            Text(text = "Item ${index + 1}")
-                        }
+            if(categoriasCriadas.isNotEmpty()) {
+                categoriasCriadas.forEach { index ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp)
+                            .background(color = MaterialTheme.colorScheme.onBackground),
+                    ) {
+                        Text(text = "Item ${index + 1}")
                     }
                 }
             }

@@ -123,6 +123,26 @@ fun TextFieldDesignForMainScreen(value: String, onValueChange: (String) -> Unit,
     )
 }
 
+@Composable
+fun SuperIdTitlePainter(painter: Int = R.drawable.super_id_title_light ){
+    Image(
+        painter = painterResource(painter),
+        contentDescription = "SuperIdTitle",
+        contentScale = ContentScale.Fit,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(48.dp)
+    )
+}
+@Composable
+fun SuperIdTitlePainterVerified(){
+    if(isSystemInDarkTheme()){
+        SuperIdTitlePainter()
+    }else{
+        SuperIdTitlePainter(R.drawable.super_id_title_dark)
+    }
+}
+
 @Preview
 @Composable
 fun SuperIdTitle(modifier: Modifier = Modifier){
@@ -130,14 +150,14 @@ fun SuperIdTitle(modifier: Modifier = Modifier){
     Text(
         buildAnnotatedString { //junta strings com estilos diferentes
             withStyle(
-                style = SpanStyle(fontFamily = title_font, fontSize = 40.sp, color = MaterialTheme.colorScheme.onBackground,
+                style = SpanStyle(fontFamily = title_font, fontSize = 40.sp, color = MaterialTheme.colorScheme.onPrimary,
                     shadow = Shadow(Color.DarkGray, offset = Offset(2f, 2f),blurRadius = 8f)
                 )
             ){
                 append("Super")
             }
             withStyle(
-                style = SpanStyle(fontFamily = title_font, fontSize = 40.sp, color = MaterialTheme.colorScheme.secondary,
+                style = SpanStyle(fontFamily = title_font, fontSize = 40.sp, color = MaterialTheme.colorScheme.surfaceVariant,
                     shadow = Shadow(Color.DarkGray, offset = Offset(2f, 2f),blurRadius = 8f)
                 )
             ){

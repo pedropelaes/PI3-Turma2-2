@@ -37,6 +37,8 @@ import androidx.compose.ui.unit.sp
 import com.example.superid.ui.theme.SuperIdTheme
 import com.example.superid.ui.theme.ui.common.LoginAndSignUpDesign
 import com.example.superid.ui.theme.ui.common.SuperIdTitle
+import com.example.superid.ui.theme.ui.common.SuperIdTitlePainter
+import com.example.superid.ui.theme.ui.common.SuperIdTitlePainterVerified
 import com.example.superid.ui.theme.ui.common.TextFieldDesignForLoginAndSignUp
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
@@ -70,6 +72,7 @@ fun PerformSignUp(name: String,email: String, password: String, onResult: (Strin
                 val user = auth.currentUser
                 user?.let {
                     SaveNewAccount(name, email, it.uid)
+                    SaveUserDefaultCategories(it.uid)
                 }
                 user?.sendEmailVerification()
                     ?.addOnCompleteListener{ verification ->
@@ -77,12 +80,12 @@ fun PerformSignUp(name: String,email: String, password: String, onResult: (Strin
                             Log.d("SIGNUP", "Email de verificação enviado.")
                             onResult("Um email de verificação foi enviado para confirmar sua conta.")
                         }else{
-                            Log.d("SIGNUP", "Erro ao mandar email de veriricação.")
+                            Log.e("SIGNUP", "Erro ao mandar email de veriricação.")
                             onResult("Erro ao enviar email de verificação, verifique o seu email.")
                         }
                     }
             }else{
-                Log.d("SIGNUP", "Erro ao criar usuário ${task.exception?.message}.")
+                Log.e("SIGNUP", "Erro ao criar usuário ${task.exception?.message}.")
                 onResult("Erro ao criar sua conta, verifique seus dados.")
             }
         }
@@ -98,16 +101,34 @@ fun SaveNewAccount(name: String, email: String, uid: String, tries: Int = 0){
     db.collection("users").document(uid).set(taskDoc)
         .addOnCompleteListener{task->
             if(task.isSuccessful){
-                Log.d("SIGNUP", "Documento do usuário salvo no banco de dados.")
+                Log.d("SIGNUP", "Documento do usuário salvo no banco de dados. ${task.result}")
             }
         }
         .addOnFailureListener{retry->
             if (tries < 5){
                 SaveNewAccount(name, email, uid, tries + 1)
             }else{
-                Log.d("SIGNUP", "Falha ao salvar usuário no banco de dados.")
+                Log.e("SIGNUP", "Falha ao salvar usuário no banco de dados.")
             }
         }
+}
+
+fun SaveUserDefaultCategories(uid: String){
+    val db = Firebase.firestore
+    val batch = db.batch()
+    val categorias = listOf("aplicativos", "emails", "sites", "teclados")
+    val categoriasRef = db.collection("users").document(uid).collection("categorias")
+
+    for(categoria in categorias){
+        val docRef = categoriasRef.document(categoria)
+        val passwordPlaceHolder = docRef.collection("senhas").document("placeholder")
+        val placeholder = mapOf("placeholder" to true)
+        batch.set(passwordPlaceHolder, placeholder)
+    }
+
+    batch.commit()
+        .addOnSuccessListener { Log.d("SIGNUP", "Estrutura das categorias criada.") }
+        .addOnFailureListener { Log.e("SIGNUP", "Erro", it) }
 }
 
 @Composable
@@ -119,7 +140,7 @@ fun SignUpScreen() {
     var result by remember { mutableStateOf("") }
     val context = LocalContext.current
     Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally){
-        SuperIdTitle()
+        SuperIdTitlePainterVerified()
 
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -179,7 +200,7 @@ fun SignUpScreen() {
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        Text(result, color = MaterialTheme.colorScheme.tertiary, fontWeight = FontWeight.Bold)
+        Text(result, color = MaterialTheme.colorScheme.tertiary, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
 
         Spacer(modifier = Modifier.height(12.dp))
 

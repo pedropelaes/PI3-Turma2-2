@@ -39,6 +39,8 @@ import androidx.compose.ui.unit.sp
 import com.example.superid.ui.theme.SuperIdTheme
 import com.example.superid.ui.theme.ui.common.LoginAndSignUpDesign
 import com.example.superid.ui.theme.ui.common.SuperIdTitle
+import com.example.superid.ui.theme.ui.common.SuperIdTitlePainter
+import com.example.superid.ui.theme.ui.common.SuperIdTitlePainterVerified
 import com.example.superid.ui.theme.ui.common.TextFieldDesignForLoginAndSignUp
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
@@ -90,7 +92,7 @@ fun LoginScreen(){
     var success by remember { mutableStateOf(true) }
     val context = LocalContext.current
     Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally){
-        SuperIdTitle()
+        SuperIdTitlePainterVerified()
 
         Spacer(modifier = Modifier.height(24.dp))
 

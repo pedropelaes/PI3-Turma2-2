@@ -69,6 +69,8 @@ import com.example.superid.ui.theme.SuperIdTheme
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlinx.coroutines.launch
 import com.example.superid.ui.theme.ui.common.SuperIdTitle
+import com.example.superid.ui.theme.ui.common.SuperIdTitlePainter
+import com.example.superid.ui.theme.ui.common.SuperIdTitlePainterVerified
 import com.example.superid.ui.theme.ui.common.themedBackgroundImage
 
 
@@ -220,11 +222,14 @@ fun ViewPagerForInitialScreens() { //view pager das paginas iniciais
 
 @Composable
 fun Screen1(){
+    var superIdTitle = remember { mutableStateOf(R.drawable.super_id_title_light) }
     Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally){
         Text("Bem-vindo ao",fontFamily = FontFamily.SansSerif ,fontSize = 50.sp, color = MaterialTheme.colorScheme.onBackground,
             fontWeight = FontWeight.Bold, modifier = Modifier.align(Alignment.CenterHorizontally)
         )
-        SuperIdTitle()
+
+        SuperIdTitlePainterVerified()
+
 
         Spacer(modifier = Modifier.height(16.dp))
         Text(stringResource(R.string.app_description), color = MaterialTheme.colorScheme.onBackground ,fontSize = 20.sp,
