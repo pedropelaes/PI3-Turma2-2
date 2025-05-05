@@ -103,9 +103,10 @@ fun InitialScreensDesign(
     bottomContent: @Composable () -> Unit
 ) {
     val systemUiController = rememberSystemUiController()
+    val darkIcons = !isSystemInDarkTheme()
     SideEffect { //aplicando as cores da barra de status e navegação
-        systemUiController.setStatusBarColor(statusBarColor, darkIcons = false)
-        systemUiController.setNavigationBarColor(navigationBarColor, darkIcons = false)
+        systemUiController.setStatusBarColor(statusBarColor, darkIcons = darkIcons)
+        systemUiController.setNavigationBarColor(navigationBarColor, darkIcons = darkIcons)
     }
 
     Box(

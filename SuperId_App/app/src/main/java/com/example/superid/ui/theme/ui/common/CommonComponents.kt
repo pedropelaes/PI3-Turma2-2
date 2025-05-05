@@ -185,35 +185,35 @@ fun LoginAndSignUpDesign(
     content: @Composable () -> Unit,
 ) {
     val systemUiController = rememberSystemUiController()
-    SuperIdTheme {
-        SideEffect { //aplicando as cores da barra de status e navegação
-            systemUiController.setStatusBarColor(statusBarColor, darkIcons = false)
-            systemUiController.setNavigationBarColor(navigationBarColor, darkIcons = false)
-        }
+    val darkIcons = !isSystemInDarkTheme()
+    SideEffect { //aplicando as cores da barra de status e navegação
+        systemUiController.setStatusBarColor(statusBarColor, darkIcons = darkIcons)
+        systemUiController.setNavigationBarColor(navigationBarColor, darkIcons = darkIcons)
+    }
 
-        Box(
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
+        Image(
+            painter = painterResource(id = imageResId),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize()
+        )
+        Column(
             modifier = Modifier
                 .fillMaxSize()
+                .padding(bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()),
+            verticalArrangement = Arrangement.SpaceBetween,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Image(
-                painter = painterResource(id = imageResId),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize()
-            )
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()),
-                verticalArrangement = Arrangement.SpaceBetween,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
-                    content()
-                }
+            Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                content()
             }
         }
     }
+
 }
 @Composable
 fun themedBackgroundImage(): Int {

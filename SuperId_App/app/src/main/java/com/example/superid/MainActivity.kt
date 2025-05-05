@@ -48,6 +48,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -73,6 +74,7 @@ import com.example.superid.ui.theme.ui.common.CategoryRow
 import com.example.superid.ui.theme.ui.common.SuperIdTitle
 import com.example.superid.ui.theme.ui.common.TextFieldDesignForLoginAndSignUp
 import com.example.superid.ui.theme.ui.common.TextFieldDesignForMainScreen
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -93,23 +95,20 @@ fun MainScreenDesign(
     navigationBarColor: Color = Color.Transparent,
     content: @Composable () -> Unit
 ){
+    val systemUiController = rememberSystemUiController()
+    val darkIcons = isSystemInDarkTheme()
+    SideEffect { //aplicando as cores da barra de status e navegação
+        systemUiController.setStatusBarColor(statusBarColor, darkIcons = darkIcons)
+        systemUiController.setNavigationBarColor(navigationBarColor, darkIcons = darkIcons)
+    }
+
     var showDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(start = 16.dp, end = 16.dp), // Match typical top bar padding
-                        contentAlignment = Alignment.CenterStart
-                    ) {
-                        SuperIdTitle(
-                            modifier = Modifier
-                                .wrapContentSize() // Let the text take its natural size
-                        )
-                    }
+                    SuperIdTitle(Modifier.fillMaxSize())
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary
@@ -135,21 +134,6 @@ fun MainScreenDesign(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ){
-                ExtendedFloatingActionButton(
-                    onClick = {
-                        showDialog = true
-                    },
-                    containerColor = MaterialTheme.colorScheme.primary,
-                ){
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "Criar Categoria",
-                        tint = MaterialTheme.colorScheme.onPrimary,
-                        modifier = Modifier.size(28.dp)
-                    )
-                    Text("Criar Categoria")
-                }
-
                 FloatingActionButton(
                     onClick = {
                         val intent = Intent(context, QrCodeAuthActivity::class.java)
@@ -165,6 +149,21 @@ fun MainScreenDesign(
                         tint = MaterialTheme.colorScheme.onPrimary,
                         modifier = Modifier.size(28.dp)
                     )
+                }
+
+                ExtendedFloatingActionButton(
+                    onClick = {
+                        showDialog = true
+                    },
+                    containerColor = MaterialTheme.colorScheme.primary,
+                ){
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Criar Categoria",
+                        tint = MaterialTheme.colorScheme.onPrimary,
+                        modifier = Modifier.size(28.dp)
+                    )
+                    Text("Criar Categoria")
                 }
             }
         },
