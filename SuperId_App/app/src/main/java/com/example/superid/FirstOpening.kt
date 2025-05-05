@@ -342,7 +342,7 @@ fun ScrollableTextWithScrollbar() {
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(scrollState)
-                .padding(end = 8.dp) // padding interno para o texto não colar na scrollbar
+                .padding(end = 8.dp, start = 8.dp) // padding interno para o texto não colar na scrollbar
         ) {
             Text(
                 text = stringResource(R.string.terms),
