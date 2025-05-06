@@ -4,81 +4,38 @@ import android.app.Dialog
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.materialIcon
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.FabPosition
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.FloatingActionButtonDefaults
-import androidx.compose.material3.FloatingActionButtonElevation
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.layout.ModifierLocalBeyondBoundsLayout
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import com.example.superid.ui.theme.SuperIdTheme
 import com.example.superid.ui.theme.ui.common.CategoryRow
 import com.example.superid.ui.theme.ui.common.SuperIdTitle
-import com.example.superid.ui.theme.ui.common.TextFieldDesignForLoginAndSignUp
 import com.example.superid.ui.theme.ui.common.TextFieldDesignForMainScreen
+import com.google.firebase.FirebaseApp
+import com.google.firebase.firestore.FirebaseFirestore
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        FirebaseApp.initializeApp(this)
         enableEdgeToEdge()
-        setContent{
+        setContent {
             SuperIdTheme(darkTheme = isSystemInDarkTheme()) {
                 MainScreen()
             }
@@ -86,15 +43,50 @@ class MainActivity : AppCompatActivity() {
     }
 }
 
+@Composable
+fun MainScreen() {
+    val context = LocalContext.current
+    val db = FirebaseFirestore.getInstance()
+    var categoriasCriadas by remember { mutableStateOf(listOf<String>()) }
+
+    // Carregar uma vez categorias já salvas no banco
+    LaunchedEffect(Unit) {
+        db.collection("categoriasPersonalizadas")
+            .get()
+            .addOnSuccessListener { snapshot ->
+                categoriasCriadas = snapshot.documents.mapNotNull { doc ->
+                    doc.getString("nome")
+                }
+            }
+    }
+
+    MainScreenDesign(
+        categoriasCriadas = categoriasCriadas,
+        onAdicionarCategoria = { novaCategoria ->
+            // Adiciona na UI
+            categoriasCriadas = categoriasCriadas + novaCategoria
+            // Salva no Firestore
+            db.collection("categoriasPersonalizadas")
+                .add(mapOf("nome" to novaCategoria))
+                .addOnSuccessListener {
+                    Toast.makeText(context, "Categoria criada!", Toast.LENGTH_SHORT).show()
+                }
+        }
+    )
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreenDesign(
     statusBarColor: Color = Color.Transparent,
     navigationBarColor: Color = Color.Transparent,
-    content: @Composable () -> Unit
-){
+    categoriasCriadas: List<String>,
+    onAdicionarCategoria: (String) -> Unit,
+    content: @Composable () -> Unit = {}
+) {
     var showDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -105,9 +97,7 @@ fun MainScreenDesign(
                     containerColor = MaterialTheme.colorScheme.primary
                 ),
                 actions = {
-                    IconButton(
-                        onClick = {}
-                    ) {
+                    IconButton(onClick = {}) {
                         Icon(
                             imageVector = Icons.Default.Search,
                             contentDescription = "Buscar",
@@ -124,13 +114,13 @@ fun MainScreenDesign(
                     .padding(start = 32.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
-            ){
+            ) {
                 ExtendedFloatingActionButton(
                     onClick = {
                         showDialog = true
                     },
                     containerColor = MaterialTheme.colorScheme.primary,
-                ){
+                ) {
                     Icon(
                         imageVector = Icons.Default.Add,
                         contentDescription = "Criar Categoria",
@@ -165,23 +155,69 @@ fun MainScreenDesign(
                 .padding(innerPadding),
             contentAlignment = Alignment.Center
         ) {
-            content()
+            Column(
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxHeight()
+            ) {
+                // Categorias pré-definidas
+                CategoryRow(
+                    painter = R.drawable.smartphone,
+                    contentDescripiton = "Categoria Aplicativos",
+                    text = "Aplicativos",
+                    onClick = { OpenPasswordsActivity("aplicativos", context) },
+                )
+                CategoryRow(
+                    painter = R.drawable.email,
+                    contentDescripiton = "Categoria Emails",
+                    text = "Emails",
+                    onClick = { OpenPasswordsActivity("emails", context) },
+                )
+                CategoryRow(
+                    painter = R.drawable.world_wide_web,
+                    contentDescripiton = "Categoria Sites",
+                    text = "Sites",
+                    onClick = { OpenPasswordsActivity("sites", context) },
+                )
+                CategoryRow(
+                    painter = R.drawable.keyboard,
+                    contentDescripiton = "Categoria Teclados de acesso físicos",
+                    text = "Teclados de acesso físicos",
+                    onClick = { OpenPasswordsActivity("teclados", context) },
+                )
+
+                // Categorias criadas pelo usuário
+                categoriasCriadas.forEach { nome ->
+                    CategoryRow(
+                        painter = R.drawable.smartphone, // Ícone padrão para categorias criadas
+                        contentDescripiton = "Categoria $nome",
+                        text = nome,
+                        onClick = { OpenPasswordsActivity(nome, context) }
+                    )
+                }
+            }
         }
 
-        if (showDialog){
+        // Dialog para criar nova categoria
+        if (showDialog) {
             DialogCriarCategoria(
-                onDismiss = {showDialog = false},
-                onConfirm = {showDialog = false}
+                onDismiss = { showDialog = false },
+                onConfirm = { nome ->
+                    if (nome.isNotBlank()) {
+                        onAdicionarCategoria(nome)
+                    }
+                    showDialog = false
+                }
             )
         }
     }
-
 }
+
 @Composable
 fun DialogCriarCategoria(
     onDismiss: () -> Unit,
-    onConfirm: () -> Unit
-){
+    onConfirm: (String) -> Unit
+) {
     var nomeDaCategoria by remember { mutableStateOf("") }
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -189,25 +225,25 @@ fun DialogCriarCategoria(
             Text(text = "Criando categoria:")
         },
         text = {
-            TextFieldDesignForMainScreen(value = nomeDaCategoria, onValueChange = {nomeDaCategoria = it}, label = "Nome da categoria")
+            TextFieldDesignForMainScreen(
+                value = nomeDaCategoria,
+                onValueChange = { nomeDaCategoria = it },
+                label = "Nome da categoria"
+            )
         },
         confirmButton = {
-            TextButton(
-                onClick = onConfirm
-            ) {
+            TextButton(onClick = { onConfirm(nomeDaCategoria) }) {
                 Text("Confirmar", color = MaterialTheme.colorScheme.onPrimaryContainer)
             }
         },
         dismissButton = {
-            TextButton(
-                onClick = onDismiss
-            ) {
+            TextButton(onClick = onDismiss) {
                 Text("Cancelar", color = MaterialTheme.colorScheme.onPrimaryContainer)
             }
         },
-        containerColor = MaterialTheme.colorScheme.primary, // Cor de fundo do dialog
-        titleContentColor = MaterialTheme.colorScheme.onPrimary, // Cor do título
-        textContentColor = MaterialTheme.colorScheme.onPrimary, // Cor do texto
+        containerColor = MaterialTheme.colorScheme.primary,
+        titleContentColor = MaterialTheme.colorScheme.onPrimary,
+        textContentColor = MaterialTheme.colorScheme.onPrimary,
     )
 }
 
@@ -216,56 +252,4 @@ fun OpenPasswordsActivity(categoria: String, context: Context) {
         putExtra("categoria", categoria)
     }
     context.startActivity(intent)
-}
-
-@Preview
-@Composable
-fun MainScreen(){
-    val context = LocalContext.current
-    var categoriasCriadas by remember { mutableStateOf(emptyList<Int>()) }
-    MainScreenDesign {
-        Column(
-            verticalArrangement = Arrangement.Top,
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.fillMaxHeight()
-        ){
-            CategoryRow(
-                painter = R.drawable.smartphone,
-                contentDescripiton = "Categoria Aplicativos",
-                text = "Aplicativos",
-                onClick = { OpenPasswordsActivity("aplicativos", context) },
-            )
-            CategoryRow(
-                painter = R.drawable.email,
-                contentDescripiton = "Categoria Emails",
-                text = "Emails",
-                onClick = { OpenPasswordsActivity("emails", context) },
-            )
-            CategoryRow(
-                painter = R.drawable.world_wide_web,
-                contentDescripiton = "Categoria Sites",
-                text = "Sites",
-                onClick = { OpenPasswordsActivity("sites", context) },
-            )
-            CategoryRow(
-                painter = R.drawable.keyboard,
-                contentDescripiton = "Categoria Teclados de acesso físicos",
-                text = "Teclados de acesso físicos",
-                onClick = { OpenPasswordsActivity("teclados", context) },
-            )
-
-            if(categoriasCriadas.isNotEmpty()) {
-                categoriasCriadas.forEach { index ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 4.dp)
-                            .background(color = MaterialTheme.colorScheme.onBackground),
-                    ) {
-                        Text(text = "Item ${index + 1}")
-                    }
-                }
-            }
-        }
-    }
 }
