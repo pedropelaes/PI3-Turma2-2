@@ -2,6 +2,8 @@ package com.example.superid
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -40,6 +42,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -55,11 +58,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.ViewModel
 import com.example.superid.ui.theme.SuperIdTheme
 import com.example.superid.ui.theme.ui.common.PasswordRow
 import com.example.superid.ui.theme.ui.common.SuperIdTitle
 import com.example.superid.ui.theme.ui.common.TextFieldDesignForMainScreen
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.FieldPath
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 
 class PasswordsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -68,9 +76,97 @@ class PasswordsActivity : AppCompatActivity() {
             val categoria = intent.getStringExtra("categoria")
             val icone = intent.getIntExtra("icone", R.drawable.logo_without_text)
             SuperIdTheme(darkTheme = isSystemInDarkTheme()) {
-                PasswordsScreen(categoria, icone)
+                PasswordsScreen(categoria, icone, SenhasViewModel())
             }
         }
+    }
+}
+data class Senha(
+    val login: String = "",
+    val senha: String = "",
+    val descricao: String = ""
+)
+
+class SenhasViewModel : ViewModel() {
+    private val db = Firebase.firestore
+    private val auth = Firebase.auth
+
+    var listaSenhas by mutableStateOf<List<Senha>>(emptyList())
+        private set
+
+    fun buscarSenhas(categoria: String?) {
+        val uid = auth.currentUser?.uid
+        if (uid != null && categoria != null) {
+            db.collection("users")
+                .document(uid)
+                .collection("categorias")
+                .document(categoria)
+                .collection("senhas")
+                .whereNotEqualTo(FieldPath.documentId(), "placeholder")
+                .get()
+                .addOnSuccessListener { result ->
+                    listaSenhas = result.toObjects(Senha::class.java)
+                    Log.d("GETPASSWORDS", "Senhas buscadas no banco")
+                }
+                .addOnFailureListener { exception ->
+                    Log.w("GETPASSWORDS", "Erro ao buscar senhas no banco", exception)
+                }
+        } else {
+            Log.e("GETPASSWORDS", "UID ou categoria nulo")
+        }
+    }
+}
+
+@Composable
+fun PasswordsScreen(categoria: String?, icone: Int, viewModel: SenhasViewModel){
+    var senhasCriadas by remember { mutableStateOf(listOf<Senha>()) }
+    var context = LocalContext.current
+    val db = Firebase.firestore
+    val auth = Firebase.auth
+    PasswordsScreenDesign(
+        categoria = categoria,
+        iconPainter = icone,
+        onAddPassword = { novaSenha ->
+            senhasCriadas = senhasCriadas + novaSenha
+
+
+            val UID = auth.currentUser?.uid
+            if (UID != null) {
+                if (categoria != null) {
+                    val senhasRef = db.collection("users")
+                        .document(UID)
+                        .collection("categorias")
+                        .document(categoria)
+                        .collection("senhas")
+
+                        senhasRef.document("placeholder")
+                            .delete()
+                            .addOnSuccessListener {
+                                Log.d("ADDPASSWORD", "Placeholder deletado")
+                            }
+                            .addOnFailureListener{
+                                Log.w("ADDPASSOWRD", "Erro ao deletar placeholder", it)
+                            }
+
+                        senhasRef.add(novaSenha) //objeto senha adicionado diretamente como documento
+                            .addOnSuccessListener {
+                                viewModel.buscarSenhas(categoria) //após uma nova senha ser adicionada, ele atualiza a lista, buscando de novo no banco
+                            }
+                }else{
+                    Log.e("ADDPASSWORD", "Erro ao adicionar senha, variavel de categoria vazia")
+                }
+            }else{
+                Toast.makeText(context, "É nescessário ter feito login para adicionar uma senha", Toast.LENGTH_SHORT).show()
+                val intent = Intent(context, LogInActivity::class.java)
+                context.startActivity(intent)
+            }
+        }
+    ) {
+        LaunchedEffect(categoria) {
+            viewModel.buscarSenhas(categoria)
+        }
+        val senhas = viewModel.listaSenhas
+        ColumnSenhas(senhasCriadas = senhas)
     }
 }
 
@@ -81,6 +177,7 @@ fun PasswordsScreenDesign(
     statusBarColor: Color = Color.Transparent,
     navigationBarColor: Color = Color.Transparent,
     categoria: String?,
+    onAddPassword: (Senha) -> Unit,
     iconPainter: Int,
     content: @Composable () -> Unit
 ){
@@ -105,7 +202,8 @@ fun PasswordsScreenDesign(
                             painter = painterResource(iconPainter),
                             tint = MaterialTheme.colorScheme.onPrimary,
                             contentDescription = "Icone da categoria",
-                            modifier = Modifier.wrapContentHeight()
+                            modifier = Modifier
+                                .wrapContentHeight()
                                 .padding(6.dp)
                         )
                         Spacer(Modifier.width(8.dp))
@@ -209,7 +307,10 @@ fun PasswordsScreenDesign(
         if (showDialog){
             AddPasswordDialog(
                 onDismiss = {showDialog = false},
-                onConfirm = {showDialog = false}
+                onConfirm = { senhaCriada->
+                    onAddPassword(senhaCriada)
+                    showDialog = false
+                }
             )
         }
     }
@@ -218,11 +319,9 @@ fun PasswordsScreenDesign(
 @Composable
 fun AddPasswordDialog(
     onDismiss: () -> Unit,
-    onConfirm: () -> Unit
+    onConfirm: (Senha) -> Unit
 ){
-    var login by remember { mutableStateOf("") }
-    var senha by remember { mutableStateOf("") }
-    var descricao by remember { mutableStateOf("") }
+    var senha by remember { mutableStateOf(Senha()) }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
@@ -234,16 +333,17 @@ fun AddPasswordDialog(
                 verticalArrangement = Arrangement.SpaceBetween,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                TextFieldDesignForMainScreen(value = login, onValueChange = {login = it}, label = "Login(opcional)")
+                TextFieldDesignForMainScreen(value = senha.login, onValueChange = {senha = senha.copy(login = it)}, label = "Login(opcional)")
                 Spacer(modifier = Modifier.size(4.dp))
-                TextFieldDesignForMainScreen(value = login, onValueChange = {login = it}, label = "Senha", isPassword = true)
+                TextFieldDesignForMainScreen(value = senha.senha, onValueChange = {senha = senha.copy(senha = it)}, label = "Senha(*obrigatório)", isPassword = true)
                 Spacer(modifier = Modifier.size(4.dp))
-                TextFieldDesignForMainScreen(value = login, onValueChange = {login = it}, label = "Descrição(opcional)")
+                TextFieldDesignForMainScreen(value = senha.descricao, onValueChange = {senha = senha.copy(descricao = it)}, label = "Descrição(opcional)")
             }
         },
         confirmButton = {
             TextButton(
-                onClick = onConfirm
+                onClick = { onConfirm(senha) },
+                enabled = if((senha.senha).isNotEmpty()) true else false
             ) {
                 Text("Confirmar", color = MaterialTheme.colorScheme.onPrimaryContainer)
             }
@@ -261,19 +361,26 @@ fun AddPasswordDialog(
     )
 }
 
+
 @Composable
-fun PasswordsScreen(categoria: String?, icone: Int){
-    PasswordsScreenDesign(categoria = categoria, iconPainter = icone) {
-        if (categoria != null) {
-            Text(categoria)
-        }
-        Column(
-            verticalArrangement = Arrangement.Top,
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.fillMaxSize()
-        ) {
-            
+fun ColumnSenhas(
+    senhasCriadas: List<Senha>,
+){
+    var context = LocalContext.current
+    Column(
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.fillMaxSize()
+    ) {
+        senhasCriadas.forEach{senha ->
+            PasswordRow(
+                contentDescripiton = "Senha: ${senha.descricao}",
+                text = "Senha: ${senha.descricao}",
+                onClick = {
+                    Toast.makeText(context, senha.senha, Toast.LENGTH_SHORT).show()
+                }
+            )
+
         }
     }
 }
-
