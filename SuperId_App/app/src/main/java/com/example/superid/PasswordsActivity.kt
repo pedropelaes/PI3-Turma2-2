@@ -48,8 +48,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -361,12 +363,56 @@ fun AddPasswordDialog(
     )
 }
 
+@Composable
+fun ViewPasswordInfoDialog(
+    senha: Senha,
+    onDismiss: () -> Unit,
+    onConfirm: (Senha) -> Unit
+){
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(text = "Informação da senha:")
+        },
+        modifier = Modifier.wrapContentSize(),
+        text = {
+            Column(
+                verticalArrangement = Arrangement.SpaceBetween,
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Text("Login:\n${senha.login}")
+                Text("Senha:\n${senha.senha}")
+                Text("Descrição:\n${senha.descricao}")
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {}
+            ) {
+                Text("Editar", color = MaterialTheme.colorScheme.onPrimaryContainer)
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = onDismiss
+            ) {
+                Text("Voltar", color = MaterialTheme.colorScheme.onPrimaryContainer)
+            }
+        },
+        containerColor = MaterialTheme.colorScheme.primary, // Cor de fundo do dialog
+        titleContentColor = MaterialTheme.colorScheme.onPrimary, // Cor do título
+        textContentColor = MaterialTheme.colorScheme.onPrimary, // Cor do texto
+    )
+}
+
 
 @Composable
 fun ColumnSenhas(
     senhasCriadas: List<Senha>,
 ){
     var context = LocalContext.current
+    var showInfoDialog by remember { mutableStateOf(false) }
+    var senhaClicada by remember { mutableStateOf(Senha())}
     Column(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -377,10 +423,17 @@ fun ColumnSenhas(
                 contentDescripiton = "Senha: ${senha.descricao}",
                 text = "Senha: ${senha.descricao}",
                 onClick = {
-                    Toast.makeText(context, senha.senha, Toast.LENGTH_SHORT).show()
+                    senhaClicada = senha
+                    showInfoDialog = true
                 }
             )
-
         }
+    }
+    if(showInfoDialog){
+        ViewPasswordInfoDialog(
+            senha = senhaClicada,
+            onDismiss = { showInfoDialog = false },
+            onConfirm = {}
+        ) 
     }
 }

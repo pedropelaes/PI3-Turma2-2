@@ -293,6 +293,8 @@ fun PasswordRow(contentDescripiton: String, text: String, onClick: () -> Unit){
             textAlign = TextAlign.Center,
             fontSize = 24.sp,
             modifier = Modifier.align(Alignment.CenterVertically)
+                .wrapContentSize()
+                .padding(6.dp)
         )
 
         Spacer(modifier = Modifier.weight(1f))
