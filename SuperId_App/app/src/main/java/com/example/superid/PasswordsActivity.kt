@@ -90,22 +90,22 @@ data class Senha(
     val id: String = ""
 )
 
-class SenhasViewModel : ViewModel() {
+class SenhasViewModel : ViewModel() {  //view model para buscar as senhas que estão no banco de dados
     private val db = Firebase.firestore
     private val auth = Firebase.auth
 
-    var listaSenhas by mutableStateOf<List<Senha>>(emptyList())
+    var listaSenhas by mutableStateOf<List<Senha>>(emptyList()) //lista que guarda as senhas vindas do banco
         private set
 
     fun buscarSenhas(categoria: String?) {
         val uid = auth.currentUser?.uid
-        if (uid != null && categoria != null) {
+        if (uid != null && categoria != null) { //verifica se há um usuario logado e se a categoria existe
             db.collection("users")
                 .document(uid)
                 .collection("categorias")
                 .document(categoria)
                 .collection("senhas")
-                .whereNotEqualTo(FieldPath.documentId(), "placeholder")
+                .whereNotEqualTo(FieldPath.documentId(), "placeholder") //não exibe o placeholder caso ele ainda esteja no banco
                 .get()
                 .addOnSuccessListener { result ->
                     listaSenhas = result.toObjects(Senha::class.java)
@@ -122,14 +122,14 @@ class SenhasViewModel : ViewModel() {
 
 @Composable
 fun PasswordsScreen(categoria: String?, icone: Int, viewModel: SenhasViewModel){
-    var senhasCriadas by remember { mutableStateOf(listOf<Senha>()) }
+    var senhasCriadas by remember { mutableStateOf(listOf<Senha>()) } //variavel das senhas iniciada com o estado do view model
     var context = LocalContext.current
     val db = Firebase.firestore
     val auth = Firebase.auth
     PasswordsScreenDesign(
-        categoria = categoria,
-        iconPainter = icone,
-        onAddPassword = { novaSenha ->
+        categoria = categoria, //nome da categoria
+        iconPainter = icone, //icone da categoria
+        onAddPassword = { novaSenha ->   //adicionando nova senha
             val UID = auth.currentUser?.uid
             if (UID != null) {
                 if (categoria != null) {
@@ -139,7 +139,7 @@ fun PasswordsScreen(categoria: String?, icone: Int, viewModel: SenhasViewModel){
                         .document(categoria)
                         .collection("senhas")
 
-                        senhasRef.document("placeholder")
+                        senhasRef.document("placeholder") //deleta o placeholder caso ainda exista
                             .delete()
                             .addOnSuccessListener {
                                 Log.d("ADDPASSWORD", "Placeholder deletado")
@@ -149,12 +149,12 @@ fun PasswordsScreen(categoria: String?, icone: Int, viewModel: SenhasViewModel){
                             }
 
                         val novoId = senhasRef.document().id
-                        val senhaComId = novaSenha.copy(id = novoId)
+                        val senhaComId = novaSenha.copy(id = novoId)  //salva o id do documento dentro de um campo do mesmo
 
                         senhasRef.document(novoId)
                             .set(senhaComId)
                             .addOnSuccessListener {
-                                viewModel.buscarSenhas(categoria)
+                                viewModel.buscarSenhas(categoria) //busca de novo as senhas após uma nova ser adicionada
                             }
 
                 }else{
@@ -166,10 +166,9 @@ fun PasswordsScreen(categoria: String?, icone: Int, viewModel: SenhasViewModel){
                 context.startActivity(intent)
             }
 
-            senhasCriadas = senhasCriadas + novaSenha
         }
     ) {
-        LaunchedEffect(categoria) {
+        LaunchedEffect(categoria) { //inicia o view model e busca as senhas
             viewModel.buscarSenhas(categoria)
         }
         val senhas = viewModel.listaSenhas
@@ -460,7 +459,7 @@ fun EditPasswordOnFirestore(categoria: String?, senha: Senha, novaSenha: Senha){
     val db = Firebase.firestore
     val auth = Firebase.auth
 
-    val senhaEditada = mapOf(
+    val senhaEditada = mapOf(  //junta os novos valores da senha
         "login" to novaSenha.login,
         "senha" to novaSenha.senha,
         "descricao" to novaSenha.descricao
@@ -491,19 +490,18 @@ fun EditPasswordOnFirestore(categoria: String?, senha: Senha, novaSenha: Senha){
 @Composable
 fun ColumnSenhas(
     senhasCriadas: List<Senha>,
-    categoria: String?,
+    categoria: String?, //nome da categoria
     viewModel: SenhasViewModel
 ){
-    var context = LocalContext.current
-    var showInfoDialog by remember { mutableStateOf(false) }
-    var showEditDialog by remember { mutableStateOf(false) }
-    var senhaClicada by remember { mutableStateOf(Senha())}
+    var showInfoDialog by remember { mutableStateOf(false) } //variavel do estado de exibição do dialog de informação
+    var showEditDialog by remember { mutableStateOf(false) } //variavel do estado de exibição do dialog de editar
+    var senhaClicada by remember { mutableStateOf(Senha())} //variavel para guardar a senha da row que foi clicada
     Column(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxSize()
     ) {
-        senhasCriadas.forEach{senha ->
+        senhasCriadas.forEach{senha ->  //para cada senha da lista é criada uma row
             PasswordRow(
                 contentDescripiton = "Senha: ${senha.descricao}",
                 text = "Senha: ${senha.descricao}",
@@ -514,7 +512,7 @@ fun ColumnSenhas(
             )
         }
     }
-    if(showInfoDialog){
+    if(showInfoDialog){  //exibe o dialog de informações da senha
         ViewPasswordInfoDialog(
             senha = senhaClicada,
             onDismiss = { showInfoDialog = false },
@@ -524,7 +522,7 @@ fun ColumnSenhas(
             }
         ) 
     }
-    if(showEditDialog){
+    if(showEditDialog){ //exibe o dialog de editar senha
         EditPasswordDialog(
             senha = senhaClicada,
             onDismiss = { showEditDialog = false },
