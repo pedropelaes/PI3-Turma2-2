@@ -1,6 +1,5 @@
 package com.example.superid
 
-import android.app.Dialog
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -28,6 +27,7 @@ import com.example.superid.ui.theme.ui.common.CategoryRow
 import com.example.superid.ui.theme.ui.common.SuperIdTitle
 import com.example.superid.ui.theme.ui.common.TextFieldDesignForMainScreen
 import com.google.firebase.FirebaseApp
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
 class MainActivity : AppCompatActivity() {
@@ -47,30 +47,36 @@ class MainActivity : AppCompatActivity() {
 fun MainScreen() {
     val context = LocalContext.current
     val db = FirebaseFirestore.getInstance()
+    val userId = FirebaseAuth.getInstance().currentUser?.uid
     var categoriasCriadas by remember { mutableStateOf(listOf<String>()) }
 
-    // Carregar uma vez categorias já salvas no banco
-    LaunchedEffect(Unit) {
-        db.collection("categoriasPersonalizadas")
-            .get()
-            .addOnSuccessListener { snapshot ->
-                categoriasCriadas = snapshot.documents.mapNotNull { doc ->
-                    doc.getString("nome")
+    LaunchedEffect(userId) {
+        userId?.let { uid ->
+            db.collection("users")
+                .document(uid)
+                .collection("categorias")
+                .get()
+                .addOnSuccessListener { snapshot ->
+                    categoriasCriadas = snapshot.documents.mapNotNull { doc ->
+                        doc.getString("nome")
+                    }
                 }
-            }
+        }
     }
 
     MainScreenDesign(
         categoriasCriadas = categoriasCriadas,
         onAdicionarCategoria = { novaCategoria ->
-            // Adiciona na UI
             categoriasCriadas = categoriasCriadas + novaCategoria
-            // Salva no Firestore
-            db.collection("categoriasPersonalizadas")
-                .add(mapOf("nome" to novaCategoria))
-                .addOnSuccessListener {
-                    Toast.makeText(context, "Categoria criada!", Toast.LENGTH_SHORT).show()
-                }
+            userId?.let { uid ->
+                db.collection("users")
+                    .document(uid)
+                    .collection("categorias")
+                    .add(mapOf("nome" to novaCategoria))
+                    .addOnSuccessListener {
+                        Toast.makeText(context, "Categoria criada!", Toast.LENGTH_SHORT).show()
+                    }
+            }
         }
     )
 }
@@ -116,9 +122,7 @@ fun MainScreenDesign(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 ExtendedFloatingActionButton(
-                    onClick = {
-                        showDialog = true
-                    },
+                    onClick = { showDialog = true },
                     containerColor = MaterialTheme.colorScheme.primary,
                 ) {
                     Icon(
@@ -186,10 +190,10 @@ fun MainScreenDesign(
                     onClick = { OpenPasswordsActivity("teclados", context) },
                 )
 
-                // Categorias criadas pelo usuário
+                // Categorias personalizadas
                 categoriasCriadas.forEach { nome ->
                     CategoryRow(
-                        painter = R.drawable.smartphone, // Ícone padrão para categorias criadas
+                        painter = R.drawable.smartphone,
                         contentDescripiton = "Categoria $nome",
                         text = nome,
                         onClick = { OpenPasswordsActivity(nome, context) }
@@ -198,7 +202,6 @@ fun MainScreenDesign(
             }
         }
 
-        // Dialog para criar nova categoria
         if (showDialog) {
             DialogCriarCategoria(
                 onDismiss = { showDialog = false },
@@ -221,9 +224,7 @@ fun DialogCriarCategoria(
     var nomeDaCategoria by remember { mutableStateOf("") }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = {
-            Text(text = "Criando categoria:")
-        },
+        title = { Text("Criando categoria:") },
         text = {
             TextFieldDesignForMainScreen(
                 value = nomeDaCategoria,
