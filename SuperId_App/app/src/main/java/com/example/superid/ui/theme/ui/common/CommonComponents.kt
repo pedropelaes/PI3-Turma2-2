@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -265,3 +266,42 @@ fun CategoryRow(painter: Int = R.drawable.logo_without_text, contentDescripiton:
     }
 }
 
+@Composable
+fun PasswordRow(contentDescripiton: String, text: String, onClick: () -> Unit){
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .size(80.dp)
+            .padding(vertical = 2.dp)
+            .background(color = MaterialTheme.colorScheme.secondary)
+            .clickable { onClick() }
+    ){
+        Icon(
+            painter = painterResource(R.drawable.logo_without_text,),
+            tint = MaterialTheme.colorScheme.inverseOnSurface,
+            contentDescription = contentDescripiton,
+            modifier = Modifier.size(48.dp)
+                .align(Alignment.CenterVertically)
+                .padding(start = 8.dp)
+        )
+
+        Spacer(modifier = Modifier.size(8.dp))
+
+        Text(
+            text = text,
+            color = MaterialTheme.colorScheme.inverseOnSurface,
+            textAlign = TextAlign.Center,
+            fontSize = 24.sp,
+            modifier = Modifier.align(Alignment.CenterVertically)
+        )
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        Icon(
+            imageVector = Icons.Default.KeyboardArrowRight,
+            contentDescription = "Abrir senha",
+            tint = MaterialTheme.colorScheme.inverseOnSurface,
+            modifier = Modifier.align(Alignment.CenterVertically)
+        )
+    }
+}

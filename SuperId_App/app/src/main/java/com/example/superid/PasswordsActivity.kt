@@ -5,9 +5,12 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,6 +19,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
@@ -52,6 +56,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.superid.ui.theme.SuperIdTheme
+import com.example.superid.ui.theme.ui.common.PasswordRow
 import com.example.superid.ui.theme.ui.common.SuperIdTitle
 import com.example.superid.ui.theme.ui.common.TextFieldDesignForMainScreen
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
@@ -100,14 +105,14 @@ fun PasswordsScreenDesign(
                             painter = painterResource(iconPainter),
                             tint = MaterialTheme.colorScheme.onPrimary,
                             contentDescription = "Icone da categoria",
-                            modifier = Modifier.wrapContentSize()
+                            modifier = Modifier.wrapContentHeight()
                                 .padding(6.dp)
                         )
                         Spacer(Modifier.width(8.dp))
                         if (categoria != null) {
                             Text("${categoria.capitalize()}:", color = MaterialTheme.colorScheme.onPrimary)
                         }else{
-                            Text("Senhas:")
+                            Text("Senhas:", color = MaterialTheme.colorScheme.onPrimary)
                         }
                     }
                 },
@@ -202,7 +207,7 @@ fun PasswordsScreenDesign(
         }
 
         if (showDialog){
-            DialogCriarCategoria(
+            AddPasswordDialog(
                 onDismiss = {showDialog = false},
                 onConfirm = {showDialog = false}
             )
@@ -221,13 +226,20 @@ fun AddPasswordDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            Text(text = "Criando categoria:")
+            Text(text = "Adicionar senha:")
         },
+        modifier = Modifier.wrapContentSize(),
         text = {
-            TextFieldDesignForMainScreen(value = login, onValueChange = {login = it}, label = "Login(opcional)")
-            TextFieldDesignForMainScreen(value = login, onValueChange = {login = it}, label = "Senha", isPassword = true)
-            TextFieldDesignForMainScreen(value = login, onValueChange = {login = it}, label = "Descrição(opcional)")
-
+            Column(
+                verticalArrangement = Arrangement.SpaceBetween,
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                TextFieldDesignForMainScreen(value = login, onValueChange = {login = it}, label = "Login(opcional)")
+                Spacer(modifier = Modifier.size(4.dp))
+                TextFieldDesignForMainScreen(value = login, onValueChange = {login = it}, label = "Senha", isPassword = true)
+                Spacer(modifier = Modifier.size(4.dp))
+                TextFieldDesignForMainScreen(value = login, onValueChange = {login = it}, label = "Descrição(opcional)")
+            }
         },
         confirmButton = {
             TextButton(
@@ -255,14 +267,13 @@ fun PasswordsScreen(categoria: String?, icone: Int){
         if (categoria != null) {
             Text(categoria)
         }
+        Column(
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            
+        }
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun PasswordsScreenPreview(){
-    PasswordsScreen(
-        categoria = "mock_categoria",
-        icone = R.drawable.logo_without_text
-    )
-}
