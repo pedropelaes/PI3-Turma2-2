@@ -413,6 +413,7 @@ fun ViewPasswordInfoDialog(
 fun EditPasswordDialog(
     senha: Senha,
     onDismiss: () -> Unit,
+    onDelete: () -> Unit,
     onConfirm: (Senha) -> Unit
 ){
     var senhaState by remember { mutableStateOf(senha) }
@@ -435,11 +436,21 @@ fun EditPasswordDialog(
             }
         },
         confirmButton = {
-            TextButton(
-                onClick = { onConfirm(senhaState) }
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween
+            ){
+                TextButton(
+                    onClick = onDelete
+                ) {
+                    Text("Apagar senha", color = MaterialTheme.colorScheme.tertiary)
+                }
 
-            ) {
-                Text("Confirmar", color = MaterialTheme.colorScheme.onPrimaryContainer)
+                TextButton(
+                    onClick = { onConfirm(senhaState) }
+
+                ) {
+                    Text("Confirmar", color = MaterialTheme.colorScheme.onPrimaryContainer)
+                }
             }
         },
         dismissButton = {
@@ -485,6 +496,29 @@ fun EditPasswordOnFirestore(categoria: String?, senha: Senha, novaSenha: Senha){
     }
 }
 
+fun DeletePasswordOnFirestore(categoria: String?, senha: Senha){
+    val db = Firebase.firestore
+    val auth = Firebase.auth
+    val uid = auth.currentUser?.uid
+
+    if (uid != null && categoria != null) {
+        db.collection("users")
+            .document(uid)
+            .collection("categorias")
+            .document(categoria)
+            .collection("senhas")
+            .document(senha.id)
+            .delete()
+            .addOnSuccessListener {
+                Log.d("DELETEPASSWORD", "Senha deletada")
+            }
+            .addOnFailureListener { e->
+                Log.e("DELETEPASSWORD", "Erro ao apagar senha", e)
+            }
+    } else {
+        Log.e("GETPASSWORDS", "UID ou categoria nulo")
+    }
+}
 
 
 @Composable
@@ -526,6 +560,12 @@ fun ColumnSenhas(
         EditPasswordDialog(
             senha = senhaClicada,
             onDismiss = { showEditDialog = false },
+            onDelete = {
+                DeletePasswordOnFirestore(categoria, senhaClicada)
+                showEditDialog = false
+
+                viewModel.buscarSenhas(categoria)
+            },
             onConfirm = { senhaAtualizada ->
                 EditPasswordOnFirestore(
                     categoria = categoria,
