@@ -84,9 +84,10 @@ class PasswordsActivity : AppCompatActivity() {
     }
 }
 data class Senha(
-    val login: String = "",
-    val senha: String = "",
-    val descricao: String = ""
+    var login: String = "",
+    var senha: String = "",
+    var descricao: String = "",
+    val id: String = ""
 )
 
 class SenhasViewModel : ViewModel() {
@@ -129,9 +130,6 @@ fun PasswordsScreen(categoria: String?, icone: Int, viewModel: SenhasViewModel){
         categoria = categoria,
         iconPainter = icone,
         onAddPassword = { novaSenha ->
-            senhasCriadas = senhasCriadas + novaSenha
-
-
             val UID = auth.currentUser?.uid
             if (UID != null) {
                 if (categoria != null) {
@@ -150,10 +148,15 @@ fun PasswordsScreen(categoria: String?, icone: Int, viewModel: SenhasViewModel){
                                 Log.w("ADDPASSOWRD", "Erro ao deletar placeholder", it)
                             }
 
-                        senhasRef.add(novaSenha) //objeto senha adicionado diretamente como documento
+                        val novoId = senhasRef.document().id
+                        val senhaComId = novaSenha.copy(id = novoId)
+
+                        senhasRef.document(novoId)
+                            .set(senhaComId)
                             .addOnSuccessListener {
-                                viewModel.buscarSenhas(categoria) //após uma nova senha ser adicionada, ele atualiza a lista, buscando de novo no banco
+                                viewModel.buscarSenhas(categoria)
                             }
+
                 }else{
                     Log.e("ADDPASSWORD", "Erro ao adicionar senha, variavel de categoria vazia")
                 }
@@ -162,13 +165,15 @@ fun PasswordsScreen(categoria: String?, icone: Int, viewModel: SenhasViewModel){
                 val intent = Intent(context, LogInActivity::class.java)
                 context.startActivity(intent)
             }
+
+            senhasCriadas = senhasCriadas + novaSenha
         }
     ) {
         LaunchedEffect(categoria) {
             viewModel.buscarSenhas(categoria)
         }
         val senhas = viewModel.listaSenhas
-        ColumnSenhas(senhasCriadas = senhas)
+        ColumnSenhas(senhasCriadas = senhas, categoria, viewModel)
     }
 }
 
@@ -367,7 +372,7 @@ fun AddPasswordDialog(
 fun ViewPasswordInfoDialog(
     senha: Senha,
     onDismiss: () -> Unit,
-    onConfirm: (Senha) -> Unit
+    onConfirm: () -> Unit
 ){
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -387,7 +392,7 @@ fun ViewPasswordInfoDialog(
         },
         confirmButton = {
             TextButton(
-                onClick = {}
+                onClick = onConfirm
             ) {
                 Text("Editar", color = MaterialTheme.colorScheme.onPrimaryContainer)
             }
@@ -405,13 +410,93 @@ fun ViewPasswordInfoDialog(
     )
 }
 
+@Composable
+fun EditPasswordDialog(
+    senha: Senha,
+    onDismiss: () -> Unit,
+    onConfirm: (Senha) -> Unit
+){
+    var senhaState by remember { mutableStateOf(senha) }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(text = "Editar senha:")
+        },
+        modifier = Modifier.wrapContentSize(),
+        text = {
+            Column(
+                verticalArrangement = Arrangement.SpaceBetween,
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                TextFieldDesignForMainScreen(value = senhaState.login, onValueChange = {senhaState = senhaState.copy(login = it)}, label = "Login(opcional)")
+                Spacer(modifier = Modifier.size(4.dp))
+                TextFieldDesignForMainScreen(value = senhaState.senha, onValueChange = {senhaState = senhaState.copy(senha = it)}, label = "Senha(*obrigatório)", isPassword = true)
+                Spacer(modifier = Modifier.size(4.dp))
+                TextFieldDesignForMainScreen(value = senhaState.descricao, onValueChange = {senhaState = senhaState.copy(descricao = it)}, label = "Descrição(opcional)")
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = { onConfirm(senhaState) }
+
+            ) {
+                Text("Confirmar", color = MaterialTheme.colorScheme.onPrimaryContainer)
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = onDismiss
+            ) {
+                Text("Voltar", color = MaterialTheme.colorScheme.onPrimaryContainer)
+            }
+        },
+        containerColor = MaterialTheme.colorScheme.primary, // Cor de fundo do dialog
+        titleContentColor = MaterialTheme.colorScheme.onPrimary, // Cor do título
+        textContentColor = MaterialTheme.colorScheme.onPrimary, // Cor do texto
+    )
+}
+
+fun EditPasswordOnFirestore(categoria: String?, senha: Senha, novaSenha: Senha){
+    val db = Firebase.firestore
+    val auth = Firebase.auth
+
+    val senhaEditada = mapOf(
+        "login" to novaSenha.login,
+        "senha" to novaSenha.senha,
+        "descricao" to novaSenha.descricao
+    )
+
+    val uid = auth.currentUser?.uid
+    if (uid != null && categoria != null) {
+        db.collection("users")
+            .document(uid)
+            .collection("categorias")
+            .document(categoria)
+            .collection("senhas")
+            .document(senha.id)
+            .update(senhaEditada)
+            .addOnSuccessListener {
+                Log.d("UPDATEPASSWORD", "Senha atualizada")
+            }
+            .addOnFailureListener { e->
+                Log.e("UPDATEPASSWORD", "Erro ao atualizar senha", e)
+            }
+    } else {
+        Log.e("GETPASSWORDS", "UID ou categoria nulo")
+    }
+}
+
+
 
 @Composable
 fun ColumnSenhas(
     senhasCriadas: List<Senha>,
+    categoria: String?,
+    viewModel: SenhasViewModel
 ){
     var context = LocalContext.current
     var showInfoDialog by remember { mutableStateOf(false) }
+    var showEditDialog by remember { mutableStateOf(false) }
     var senhaClicada by remember { mutableStateOf(Senha())}
     Column(
         verticalArrangement = Arrangement.Top,
@@ -433,7 +518,26 @@ fun ColumnSenhas(
         ViewPasswordInfoDialog(
             senha = senhaClicada,
             onDismiss = { showInfoDialog = false },
-            onConfirm = {}
+            onConfirm = {
+                showInfoDialog = false
+                showEditDialog = true
+            }
         ) 
+    }
+    if(showEditDialog){
+        EditPasswordDialog(
+            senha = senhaClicada,
+            onDismiss = { showEditDialog = false },
+            onConfirm = { senhaAtualizada ->
+                EditPasswordOnFirestore(
+                    categoria = categoria,
+                    senha = senhaClicada,
+                    novaSenha = senhaAtualizada
+                )
+                showEditDialog = false
+
+                viewModel.buscarSenhas(categoria)
+            }
+        )
     }
 }
