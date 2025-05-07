@@ -79,7 +79,8 @@ fun MainScreen() {
                 db.collection("users")
                     .document(uid)
                     .collection("categorias")
-                    .add(mapOf("nome" to novaCategoria))
+                    .document(novaCategoria)
+                    .set(hashMapOf("nome" to novaCategoria))
                     .addOnSuccessListener {
                         Toast.makeText(context, "Categoria criada!", Toast.LENGTH_SHORT).show()
                     }
