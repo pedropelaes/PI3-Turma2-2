@@ -10,6 +10,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -166,38 +168,40 @@ fun MainScreenDesign(
                 .padding(innerPadding),
             contentAlignment = Alignment.Center
         ) {
-            Column(
+            LazyColumn(
                 verticalArrangement = Arrangement.Top,
                 horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.fillMaxHeight()
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 8.dp)
             ) {
-                // Categorias pré-definidas
-                CategoryRow(
-                    painter = R.drawable.smartphone,
-                    contentDescripiton = "Categoria Aplicativos",
-                    text = "Aplicativos",
-                    onClick = { OpenPasswordsActivity("aplicativos", context) },
-                )
-                CategoryRow(
-                    painter = R.drawable.email,
-                    contentDescripiton = "Categoria Emails",
-                    text = "Emails",
-                    onClick = { OpenPasswordsActivity("emails", context) },
-                )
-                CategoryRow(
-                    painter = R.drawable.world_wide_web,
-                    contentDescripiton = "Categoria Sites",
-                    text = "Sites",
-                    onClick = { OpenPasswordsActivity("sites", context) },
-                )
-                CategoryRow(
-                    painter = R.drawable.keyboard,
-                    contentDescripiton = "Categoria Teclados de acesso físicos",
-                    text = "Teclados de acesso físicos",
-                    onClick = { OpenPasswordsActivity("teclados", context) },
-                )
-
-                categoriasCriadas.forEach { nome ->
+                item {
+                    CategoryRow(
+                        painter = R.drawable.smartphone,
+                        contentDescripiton = "Categoria Aplicativos",
+                        text = "Aplicativos",
+                        onClick = { OpenPasswordsActivity("aplicativos", context) },
+                    )
+                    CategoryRow(
+                        painter = R.drawable.email,
+                        contentDescripiton = "Categoria Emails",
+                        text = "Emails",
+                        onClick = { OpenPasswordsActivity("emails", context) },
+                    )
+                    CategoryRow(
+                        painter = R.drawable.world_wide_web,
+                        contentDescripiton = "Categoria Sites",
+                        text = "Sites",
+                        onClick = { OpenPasswordsActivity("sites", context) },
+                    )
+                    CategoryRow(
+                        painter = R.drawable.keyboard,
+                        contentDescripiton = "Categoria Teclados de acesso físicos",
+                        text = "Teclados de acesso físicos",
+                        onClick = { OpenPasswordsActivity("teclados", context) },
+                    )
+                }
+                items(categoriasCriadas) { nome ->
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -253,6 +257,7 @@ fun MainScreenDesign(
                             )
                         }
                     }
+
                 }
             }
         }
