@@ -383,24 +383,7 @@ fun ScrollableTextWithScrollbar() {
                     .background(Color.White.copy(alpha = 0.5f), shape = RoundedCornerShape(2.dp))
             )
         }
-        class FirstOpeningActivity : ComponentActivity() {
-            override fun onCreate(savedInstanceState: Bundle?) {
-                super.onCreate(savedInstanceState)
-                enableEdgeToEdge()
-
-                setContent {
-                    FirstOpeningScreen(
-                        navToLogIn = {
-                            val intent = Intent(this, LogInActivity::class.java)
-                            startActivity(intent)
-                            finish()
-                        }
-                    )
-                }
-            }
-        }
     }
-
 }
 @Composable
 fun FirstOpeningScreen(navToLogIn: () -> Unit) {
@@ -422,7 +405,7 @@ fun FirstOpeningScreen(navToLogIn: () -> Unit) {
                 val prefs = context.getSharedPreferences("onboarding_prefs", Context.MODE_PRIVATE)
                 prefs.edit().putBoolean("has_seen_onboarding", true).apply()
 
-                val intent = Intent(context, LogInActivity::class.java)
+                val intent = Intent(context, SignUpActivity::class.java)
                 context.startActivity(intent)
 
             }
