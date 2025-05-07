@@ -1,5 +1,6 @@
 package com.example.superid
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -41,6 +43,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -81,7 +84,13 @@ class FirstOpeningActivity : ComponentActivity() {
 
         setContent {
             SuperIdTheme(darkTheme = isSystemInDarkTheme()) {
-                SuperID()
+                FirstOpeningScreen(
+                    navToLogIn = {
+                        val intent = Intent(this, LogInActivity::class.java)
+                        startActivity(intent)
+                        finish()
+                    }
+                )
             }
         }
     }
@@ -89,10 +98,8 @@ class FirstOpeningActivity : ComponentActivity() {
 @Preview(showBackground = true)
 @Composable
 fun SuperID() {
-    ViewPagerForInitialScreens()
+    ViewPagerForInitialScreens(onFinish = {})
 }
-
-
 
 @Composable //Essa função é responsável pelo design das páginas de íniciais
 fun InitialScreensDesign(
@@ -136,7 +143,7 @@ fun InitialScreensDesign(
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun ViewPagerForInitialScreens() { //view pager das paginas iniciais
+fun ViewPagerForInitialScreens(onFinish: () -> Unit) {
     val pagerState = rememberPagerState(pageCount = { 2 })
     val coroutineScope = rememberCoroutineScope()
     var termsAccepted by remember { mutableStateOf(false) }
@@ -190,23 +197,31 @@ fun ViewPagerForInitialScreens() { //view pager das paginas iniciais
                     TextButton(
                         onClick = {
                             coroutineScope.launch {
-                                // Impede de ir para a próxima tela se não aceitou os termos.
-                                if (pagerState.currentPage == 1 && !termsAccepted) {
-                                    Toast.makeText(context, "É necessário aceitar os termos antes de prosseguir.", Toast.LENGTH_SHORT).show()
-                                    return@launch
-                                }else if(pagerState.currentPage == 1 && termsAccepted) {
-                                    val intent = Intent(context, SignUpActivity::class.java)
-                                    context.startActivity(intent)
-                                }
                                 if (pagerState.currentPage < pagerState.pageCount - 1) {
                                     pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                                } else {
+                                    if (!termsAccepted) {
+                                        Toast.makeText(
+                                            context,
+                                            "É necessário aceitar os termos antes de prosseguir.",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    } else {
+                                        onFinish()
+                                    }
                                 }
                             }
                         },
-                        modifier = Modifier.wrapContentWidth()
+                        modifier = Modifier
+                            .wrapContentWidth()
                             .padding(8.dp)
                     ) {
-                        Text("Próximo", fontSize = 15.sp, color = MaterialTheme.colorScheme.onBackground, textDecoration = TextDecoration.Underline)
+                        Text(
+                            if (pagerState.currentPage == pagerState.pageCount - 1) "Começar" else "Próximo",
+                            fontSize = 15.sp,
+                            color = Color.White,
+                            textDecoration = TextDecoration.Underline
+                        )
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                             contentDescription = "Próximo",
@@ -365,49 +380,30 @@ fun ScrollableTextWithScrollbar() {
         }
     }
 }
+@Composable
+fun FirstOpeningScreen(navToLogIn: () -> Unit) {
+    val context = LocalContext.current
+    var shouldShowOnboarding by remember { mutableStateOf(true) }
 
+    LaunchedEffect(Unit) {
+        val prefs = context.getSharedPreferences("onboarding_prefs", Context.MODE_PRIVATE)
+        val alreadySeen = prefs.getBoolean("has_seen_onboarding", false)
+        if (alreadySeen) {
+            navToLogIn()
+            shouldShowOnboarding = false
+        }
+    }
 
-/*
-//ideia de codigo para usuario aceitar termos de uso
-override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
-    setContentView(R.layout.activity_id)
+    if (shouldShowOnboarding) {
+        ViewPagerForInitialScreens(
+            onFinish = {
+                val prefs = context.getSharedPreferences("onboarding_prefs", Context.MODE_PRIVATE)
+                prefs.edit().putBoolean("has_seen_onboarding", true).apply()
 
-    //verifica se ja aceitou alguma vez
-    val sharedPreferences = getSharedPreferences("AppPrefs", MODE_PRIVATE)
-    val aceitouTermos = sharedPreferences.getBoolean("aceitou_termos", false)
+                val intent = Intent(context, SignUpActivity::class.java)
+                context.startActivity(intent)
 
-    if (!aceitouTermos) {
-        mostrarTermosDeUso(sharedPreferences)
+            }
+        )
     }
 }
-
-//exibir os termos
-private fun mostrarTermosDeUso(sharedPreferences: SharedPreferences) {
-    val builder = AlertDialog.Builder(this)
-    builder.setTitle("Termos de Uso")
-    // escrever os termos aqui
-    // builder.setMessage("exemplo")
-
-    builder.setPositiveButton("Aceitar") { dialog, _ ->
-
-        val editor = sharedPreferences.edit()
-        //salva se aceitou
-        editor.putBoolean("aceitou_termos", true)
-        editor.apply()
-        dialog.dismiss()
-    }
-
-    builder.setNegativeButton("Sair") { dialog, _ ->
-        dialog.dismiss()
-        finish()
-        //se o usuario nao aceitar os termos fecha o app
-    }
-
-    builder.setCancelable(false)
-    builder.show()
-    //nao deixa o usuario fechar o termo sem aceitar
-}
- */
-
-
