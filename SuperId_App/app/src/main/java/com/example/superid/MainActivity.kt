@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
@@ -220,6 +221,35 @@ fun MainScreenDesign(
                                 imageVector = Icons.Default.Edit,
                                 contentDescription = "Editar categoria",
                                 tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                        IconButton(
+                            onClick = {
+                                userId?.let { uid ->
+                                    db.collection("users")
+                                        .document(uid)
+                                        .collection("categorias")
+                                        .whereEqualTo("nome", nome)
+                                        .get()
+                                        .addOnSuccessListener { documents ->
+                                            for (document in documents) {
+                                                db.collection("users")
+                                                    .document(uid)
+                                                    .collection("categorias")
+                                                    .document(document.id)
+                                                    .delete()
+                                                    .addOnSuccessListener {
+                                                        Toast.makeText(context, "Categoria deletada!", Toast.LENGTH_SHORT).show()
+                                                    }
+                                            }
+                                        }
+                                }
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = "Deletar categoria",
+                                tint = Color.Red
                             )
                         }
                     }
