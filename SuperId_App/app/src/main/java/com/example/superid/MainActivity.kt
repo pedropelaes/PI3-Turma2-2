@@ -8,10 +8,12 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -23,7 +25,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.example.superid.ui.theme.SuperIdTheme
-import com.example.superid.ui.theme.ui.common.CategoryRow
 import com.example.superid.ui.theme.ui.common.SuperIdTitle
 import com.example.superid.ui.theme.ui.common.TextFieldDesignForMainScreen
 import com.google.firebase.FirebaseApp
@@ -55,10 +56,11 @@ fun MainScreen() {
             db.collection("users")
                 .document(uid)
                 .collection("categorias")
-                .get()
-                .addOnSuccessListener { snapshot ->
-                    categoriasCriadas = snapshot.documents.mapNotNull { doc ->
-                        doc.getString("nome")
+                .addSnapshotListener { snapshot, _ ->
+                    snapshot?.let {
+                        categoriasCriadas = it.documents.mapNotNull { doc ->
+                            doc.getString("nome")
+                        }
                     }
                 }
         }
@@ -91,7 +93,11 @@ fun MainScreenDesign(
     content: @Composable () -> Unit = {}
 ) {
     var showDialog by remember { mutableStateOf(false) }
+    var showEditDialog by remember { mutableStateOf(false) }
+    var categoriaParaEditar by remember { mutableStateOf("") }
     val context = LocalContext.current
+    val db = FirebaseFirestore.getInstance()
+    val userId = FirebaseAuth.getInstance().currentUser?.uid
 
     Scaffold(
         topBar = {
@@ -190,14 +196,33 @@ fun MainScreenDesign(
                     onClick = { OpenPasswordsActivity("teclados", context) },
                 )
 
-                // Categorias personalizadas
                 categoriasCriadas.forEach { nome ->
-                    CategoryRow(
-                        painter = R.drawable.smartphone,
-                        contentDescripiton = "Categoria $nome",
-                        text = nome,
-                        onClick = { OpenPasswordsActivity(nome, context) }
-                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        CategoryRow(
+                            painter = R.drawable.smartphone,
+                            contentDescripiton = "Categoria $nome",
+                            text = nome,
+                            onClick = { OpenPasswordsActivity(nome, context) },
+                            modifier = Modifier.weight(1f)
+                        )
+                        IconButton(
+                            onClick = {
+                                showEditDialog = true
+                                categoriaParaEditar = nome
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Edit,
+                                contentDescription = "Editar categoria",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -210,6 +235,35 @@ fun MainScreenDesign(
                         onAdicionarCategoria(nome)
                     }
                     showDialog = false
+                }
+            )
+        }
+
+        if (showEditDialog) {
+            DialogEditarCategoria(
+                nomeAtual = categoriaParaEditar,
+                onDismiss = { showEditDialog = false },
+                onConfirm = { novoNome ->
+                    if (novoNome.isNotBlank() && userId != null) {
+                        db.collection("users")
+                            .document(userId)
+                            .collection("categorias")
+                            .whereEqualTo("nome", categoriaParaEditar)
+                            .get()
+                            .addOnSuccessListener { documents ->
+                                for (document in documents) {
+                                    db.collection("users")
+                                        .document(userId)
+                                        .collection("categorias")
+                                        .document(document.id)
+                                        .update("nome", novoNome)
+                                        .addOnSuccessListener {
+                                            Toast.makeText(context, "Categoria renomeada!", Toast.LENGTH_SHORT).show()
+                                        }
+                                }
+                            }
+                    }
+                    showEditDialog = false
                 }
             )
         }
@@ -246,6 +300,68 @@ fun DialogCriarCategoria(
         titleContentColor = MaterialTheme.colorScheme.onPrimary,
         textContentColor = MaterialTheme.colorScheme.onPrimary,
     )
+}
+
+@Composable
+fun DialogEditarCategoria(
+    nomeAtual: String,
+    onDismiss: () -> Unit,
+    onConfirm: (String) -> Unit
+) {
+    var novoNome by remember { mutableStateOf(nomeAtual) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Editar categoria") },
+        text = {
+            TextFieldDesignForMainScreen(
+                value = novoNome,
+                onValueChange = { novoNome = it },
+                label = "Novo nome"
+            )
+        },
+        confirmButton = {
+            TextButton(onClick = { onConfirm(novoNome) }) {
+                Text("Confirmar", color = MaterialTheme.colorScheme.onPrimaryContainer)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancelar", color = MaterialTheme.colorScheme.onPrimaryContainer)
+            }
+        },
+        containerColor = MaterialTheme.colorScheme.primary,
+        titleContentColor = MaterialTheme.colorScheme.onPrimary,
+        textContentColor = MaterialTheme.colorScheme.onPrimary,
+    )
+}
+
+@Composable
+fun CategoryRow(
+    painter: Int,
+    contentDescripiton: String,
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .padding(8.dp)
+            .fillMaxWidth()
+            .clickable { onClick() },
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            painter = painterResource(id = painter),
+            contentDescription = contentDescripiton,
+            modifier = Modifier.size(40.dp)
+        )
+        Spacer(modifier = Modifier.width(16.dp))
+        Text(
+            text,
+            style = MaterialTheme.typography.bodyLarge
+        )
+    }
 }
 
 fun OpenPasswordsActivity(categoria: String, context: Context) {
