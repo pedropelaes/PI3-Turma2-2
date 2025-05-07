@@ -53,6 +53,8 @@ fun MainScreen() {
     val db = FirebaseFirestore.getInstance()
     val userId = FirebaseAuth.getInstance().currentUser?.uid
     var categoriasCriadas by remember { mutableStateOf(listOf<String>()) }
+    var categoriaParaExcluir by remember { mutableStateOf<String?>(null) }
+    var showDialogExcluir by remember { mutableStateOf(false) }
 
     LaunchedEffect(userId) {
         userId?.let { uid ->
@@ -82,6 +84,45 @@ fun MainScreen() {
                         Toast.makeText(context, "Categoria criada!", Toast.LENGTH_SHORT).show()
                     }
             }
+        },
+        categoriaParaExcluir = categoriaParaExcluir,
+        onExcluirCategoria = { nome ->
+            categoriaParaExcluir = nome
+            showDialogExcluir = true
+        },
+        showDialogExcluir = showDialogExcluir,
+        onConfirmarExclusao = {
+            val nomeExcluir = categoriaParaExcluir
+            if (nomeExcluir != null && userId != null) {
+                db.collection("users")
+                    .document(userId)
+                    .collection("categorias")
+                    .whereEqualTo("nome", nomeExcluir)
+                    .get()
+                    .addOnSuccessListener { documents ->
+                        for (document in documents) {
+                            db.collection("users")
+                                .document(userId)
+                                .collection("categorias")
+                                .document(document.id)
+                                .delete()
+                                .addOnSuccessListener {
+                                    Toast.makeText(context, "Categoria deletada!", Toast.LENGTH_SHORT).show()
+                                }
+                        }
+                        showDialogExcluir = false
+                        categoriaParaExcluir = null
+                    }
+                    .addOnFailureListener {
+                        Toast.makeText(context, "Erro ao deletar", Toast.LENGTH_SHORT).show()
+                        showDialogExcluir = false
+                        categoriaParaExcluir = null
+                    }
+            }
+        },
+        onCancelarExclusao = {
+            showDialogExcluir = false
+            categoriaParaExcluir = null
         }
     )
 }
@@ -93,6 +134,11 @@ fun MainScreenDesign(
     navigationBarColor: Color = Color.Transparent,
     categoriasCriadas: List<String>,
     onAdicionarCategoria: (String) -> Unit,
+    categoriaParaExcluir: String?,
+    onExcluirCategoria: (String) -> Unit,
+    showDialogExcluir: Boolean,
+    onConfirmarExclusao: () -> Unit,
+    onCancelarExclusao: () -> Unit,
     content: @Composable () -> Unit = {}
 ) {
     var showDialog by remember { mutableStateOf(false) }
@@ -229,25 +275,7 @@ fun MainScreenDesign(
                         }
                         IconButton(
                             onClick = {
-                                userId?.let { uid ->
-                                    db.collection("users")
-                                        .document(uid)
-                                        .collection("categorias")
-                                        .whereEqualTo("nome", nome)
-                                        .get()
-                                        .addOnSuccessListener { documents ->
-                                            for (document in documents) {
-                                                db.collection("users")
-                                                    .document(uid)
-                                                    .collection("categorias")
-                                                    .document(document.id)
-                                                    .delete()
-                                                    .addOnSuccessListener {
-                                                        Toast.makeText(context, "Categoria deletada!", Toast.LENGTH_SHORT).show()
-                                                    }
-                                            }
-                                        }
-                                }
+                                onExcluirCategoria(nome)
                             }
                         ) {
                             Icon(
@@ -257,7 +285,6 @@ fun MainScreenDesign(
                             )
                         }
                     }
-
                 }
             }
         }
@@ -300,6 +327,27 @@ fun MainScreenDesign(
                     }
                     showEditDialog = false
                 }
+            )
+        }
+
+        if (showDialogExcluir && categoriaParaExcluir != null) {
+            AlertDialog(
+                onDismissRequest = onCancelarExclusao,
+                title = { Text("Confirmar exclusão") },
+                text = { Text("Tem certeza que deseja excluir a categoria \"${categoriaParaExcluir}\"?") },
+                confirmButton = {
+                    TextButton(onClick = onConfirmarExclusao) {
+                        Text("Confirmar", color = MaterialTheme.colorScheme.onPrimaryContainer)
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = onCancelarExclusao) {
+                        Text("Cancelar", color = MaterialTheme.colorScheme.onPrimaryContainer)
+                    }
+                },
+                containerColor = MaterialTheme.colorScheme.primary,
+                titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                textContentColor = MaterialTheme.colorScheme.onPrimary,
             )
         }
     }
