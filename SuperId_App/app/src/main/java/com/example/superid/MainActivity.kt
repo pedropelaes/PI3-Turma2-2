@@ -28,6 +28,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.example.superid.ui.theme.SuperIdTheme
+import com.example.superid.ui.theme.ui.common.StatusAndNavigationBarColors
 import com.example.superid.ui.theme.ui.common.SuperIdTitle
 import com.example.superid.ui.theme.ui.common.TextFieldDesignForMainScreen
 import com.google.firebase.FirebaseApp
@@ -134,8 +135,6 @@ fun MainScreen() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreenDesign(
-    statusBarColor: Color = Color.Transparent,
-    navigationBarColor: Color = Color.Transparent,
     categoriasCriadas: List<String>,
     onAdicionarCategoria: (String) -> Unit,
     categoriaParaExcluir: String?,
@@ -145,12 +144,7 @@ fun MainScreenDesign(
     onCancelarExclusao: () -> Unit,
     content: @Composable () -> Unit = {}
 ) {
-    val systemUiController = rememberSystemUiController()
-    val darkIcons = isSystemInDarkTheme()
-    SideEffect { //aplicando as cores da barra de status e navegação
-        systemUiController.setStatusBarColor(statusBarColor, darkIcons = darkIcons)
-        systemUiController.setNavigationBarColor(navigationBarColor, darkIcons = darkIcons)
-    }
+    StatusAndNavigationBarColors()
 
     var showDialog by remember { mutableStateOf(false) }
     var showEditDialog by remember { mutableStateOf(false) }

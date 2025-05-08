@@ -5,10 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,13 +14,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -43,37 +38,40 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.focusModifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.capitalize
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.ViewModel
 import com.example.superid.ui.theme.SuperIdTheme
 import com.example.superid.ui.theme.ui.common.PasswordRow
-import com.example.superid.ui.theme.ui.common.SuperIdTitle
+import com.example.superid.ui.theme.ui.common.StatusAndNavigationBarColors
 import com.example.superid.ui.theme.ui.common.TextFieldDesignForMainScreen
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FieldPath
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import utils.ChaveAesUtils
 import utils.CriptoUtils
+import utils.getSenhasRef
+import utils.getSenhasRefDireto
 
+data class Senha(
+    var login: String = "",
+    var senha: String = "",
+    var descricao: String = "",
+    val id: String = "",
+    var iv:  String = ""
+)
 
 class PasswordsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -87,13 +85,6 @@ class PasswordsActivity : AppCompatActivity() {
         }
     }
 }
-data class Senha(
-    var login: String = "",
-    var senha: String = "",
-    var descricao: String = "",
-    val id: String = "",
-    var iv:  String = ""
-)
 
 class SenhasViewModel : ViewModel() {  //view model para buscar as senhas que estão no banco de dados
     private val db = Firebase.firestore
@@ -101,6 +92,7 @@ class SenhasViewModel : ViewModel() {  //view model para buscar as senhas que es
 
     var listaSenhas by mutableStateOf<List<Senha>>(emptyList()) //lista que guarda as senhas vindas do banco
         private set
+
 
     fun buscarSenhas(categoria: String?) {
         val uid = auth.currentUser?.uid
@@ -116,7 +108,7 @@ class SenhasViewModel : ViewModel() {  //view model para buscar as senhas que es
                     if(!querySnapshot.isEmpty){
                         val docCategoria = querySnapshot.documents.first()
                         val categoriaId = docCategoria.id
-                        val senhasRef = categoriasRef.document(categoriaId).collection("senhas")
+                        val senhasRef = getSenhasRefDireto(db, uid, categoriaId)
 
                         senhasRef
                             .whereNotEqualTo(
@@ -152,109 +144,147 @@ fun PasswordsScreen(categoria: String?, icone: Int, viewModel: SenhasViewModel){
     PasswordsScreenDesign(
         categoria = categoria, //nome da categoria
         iconPainter = icone, //icone da categoria
-        onAddPassword = { novaSenha ->   //adicionando nova senha
-            val UID = auth.currentUser?.uid
-            if (UID != null) {
-                if (categoria != null) {
-                    val categoriasRef = db.collection("users")
-                        .document(UID)
-                        .collection("categorias")
-
-                    categoriasRef
-                        .whereEqualTo("nome", categoria)
-                        .get()
-                        .addOnSuccessListener { querySnapshot->
-                            if(!querySnapshot.isEmpty()) {
-                                val docCategoria = querySnapshot.documents.first()
-                                val categoriaId = docCategoria.id
-                                val senhasRef = categoriasRef.document(categoriaId).collection("senhas")
-
-                                // Recupera a chave AES do Firestore
-                                ChaveAesUtils.recuperarChaveDoUsuario(
-                                    UID,
-                                    db,
-                                    onSuccess = { chaveBase64 ->
-                                        val secretKey = CriptoUtils.base64ToSecretKey(chaveBase64)
-
-                                        // Criptografa a senha que o usuário digitou
-                                        val (senhaCripto, iv, accessToken) = CriptoUtils.encrypt(
-                                            novaSenha.senha,
-                                            secretKey
-                                        )
-                                        val novoId = senhasRef.document().id
-
-                                        // Agora salva isso no Firestore
-                                        val doc = mapOf(
-                                            "senha" to senhaCripto,
-                                            "iv" to iv,
-                                            "accessToken" to accessToken,
-                                            "login" to novaSenha.login,
-                                            "descricao" to novaSenha.descricao,
-                                            "id" to novoId,
-                                        )
-                                        novaSenha.iv = iv
-                                        novaSenha.senha = senhaCripto
-                                        senhasRef.document(novoId)
-                                            .set(doc)
-                                            .addOnSuccessListener {
-                                                viewModel.buscarSenhas(categoria) //busca de novo as senhas após uma nova ser adicionada
-                                            }
-                                        senhasRef.document("placeholder") //deleta o placeholder caso ainda exista
-                                            .delete()
-                                            .addOnSuccessListener {
-                                                Log.d("ADDPASSWORD", "Placeholder deletado")
-                                            }
-                                            .addOnFailureListener {
-                                                Log.w("ADDPASSOWRD", "Erro ao deletar placeholder", it)
-                                            }
-                                    },
-                                    onFailure = { e ->
-                                        Log.e("CRYPTO", "Erro ao buscar chave AES", e)
-                                    }
-                                )
-                            }else{
-                                Log.e("ADDPASSWORD", "Categoria: '$categoria' não encontrada no banco")
-                            }
-                        }.addOnFailureListener {
-                            Log.e("ADDPASSWORD", "Erro ao buscar categoria no banco", it)
-                        }
-                }else{
-                    Log.e("ADDPASSWORD", "Erro ao adicionar senha, variavel de categoria vazia")
-                }
-            }else{
-                Toast.makeText(context, "É nescessário ter feito login para adicionar uma senha", Toast.LENGTH_SHORT).show()
-                val intent = Intent(context, LogInActivity::class.java)
-                context.startActivity(intent)
+        onAddPassword = { novaSenha ->
+            val uid = auth.currentUser?.uid
+            if (uid == null || categoria == null) {
+                Toast.makeText(context, "É necessário estar logado para adicionar uma senha", Toast.LENGTH_SHORT).show()
+                context.startActivity(Intent(context, LogInActivity::class.java))
+                return@PasswordsScreenDesign
             }
+            getSenhasRef(
+                db = db,
+                uid = uid,
+                categoria = categoria,
+                onSuccess = { senhasRef ->
+                    ChaveAesUtils.recuperarChaveDoUsuario(
+                        uid,
+                        db,
+                        onSuccess = { chaveBase64 ->
+                            val secretKey = CriptoUtils.base64ToSecretKey(chaveBase64)
+                            val (senhaCripto, iv, accessToken) = CriptoUtils.encrypt(novaSenha.senha, secretKey)
+                            val novoId = senhasRef.document().id
+
+                            // Preenche os campos criptografados na instância
+                            novaSenha.senha = senhaCripto
+                            novaSenha.iv = iv
+
+                            val doc = mapOf(
+                                "senha" to senhaCripto,
+                                "iv" to iv,
+                                "accessToken" to accessToken,
+                                "login" to novaSenha.login,
+                                "descricao" to novaSenha.descricao,
+                                "id" to novoId,
+                            )
+
+                            // Salva no Firestore
+                            senhasRef.document(novoId).set(doc)
+                                .addOnSuccessListener {
+                                    viewModel.buscarSenhas(categoria)
+                                }
+
+                            // Remove placeholder, se ainda existir
+                            senhasRef.document("placeholder").delete()
+                                .addOnSuccessListener {
+                                    Log.d("ADDPASSWORD", "Placeholder deletado")
+                                }
+                                .addOnFailureListener {
+                                    Log.w("ADDPASSWORD", "Erro ao deletar placeholder", it)
+                                }
+                        },
+                        onFailure = { e ->
+                            Log.e("CRYPTO", "Erro ao buscar chave AES", e)
+                        }
+                    )
+                },
+                onFailure = { e ->
+                    Log.e("ADDPASSWORD", e.message ?: "Erro desconhecido")
+                }
+            )
         }
     ) {
         LaunchedEffect(categoria) { //inicia o view model e busca as senhas
             viewModel.buscarSenhas(categoria)
         }
         val senhas by remember { derivedStateOf { viewModel.listaSenhas } }
-        ColumnSenhas(senhasCriadas = senhas, categoria, viewModel)
+        ColumnSenhas(senhasCriadas = senhas, categoria, viewModel, auth, db)
     }
 }
 
+fun EditPasswordOnFirestore(categoria: String?, senha: Senha, novaSenha: Senha, viewModel: SenhasViewModel, db:FirebaseFirestore, auth: FirebaseAuth){
+    val uid = auth.currentUser?.uid
+    if (uid != null && categoria != null) {
+        ChaveAesUtils.recuperarChaveDoUsuario(
+            uid,
+            db,
+            onSuccess = { chaveBase64 ->
+                val secretKey = CriptoUtils.base64ToSecretKey(chaveBase64)
+
+                // Criptografa a senha que o usuário digitou
+                val (senhaCripto, iv, accessToken) = CriptoUtils.encrypt(novaSenha.senha, secretKey)
+
+                val doc = mapOf(
+                    "senha" to senhaCripto,
+                    "login" to novaSenha.login,
+                    "iv" to iv,
+                    "accessToken" to accessToken,
+                    "descricao" to novaSenha.descricao,
+                )
+
+                getSenhasRef(db, uid, categoria,
+                    onSuccess = { senhasRef ->
+                        senhasRef.document(senha.id)
+                            .update(doc)
+                            .addOnSuccessListener {
+                                Log.d("UPDATEPASSWORD", "Senha atualizada")
+                                viewModel.buscarSenhas(categoria)
+                            }
+                            .addOnFailureListener { e ->
+                                Log.e("UPDATEPASSWORD", "Erro ao atualizar senha", e)
+                            }
+                    },
+                    onFailure = { e -> Log.e("UPDATEPASSWORD", e.message ?: "Erro desconhecido") }
+                )
+            },
+            onFailure = { e -> Log.e("CRYPTO", "Erro ao buscar chave AES", e) }
+        )
+    } else {
+        Log.e("UPDATEPASSWORD", "UID ou categoria nulo")
+    }
+}
+
+fun DeletePasswordOnFirestore(categoria: String?, senha: Senha, db:FirebaseFirestore, auth: FirebaseAuth){
+    val uid = auth.currentUser?.uid
+
+    if (uid != null && categoria != null) {
+        getSenhasRef(db, uid, categoria,
+            onSuccess = { senhasRef ->
+                senhasRef.document(senha.id)
+                    .delete()
+                    .addOnSuccessListener {
+                        Log.d("DELETEPASSWORD", "Senha deletada")
+                    }
+                    .addOnFailureListener { e ->
+                        Log.e("DELETEPASSWORD", "Erro ao apagar senha", e)
+                    }
+            },
+            onFailure = { e -> Log.e("DELETEPASSWORD", e.message ?: "Erro desconhecido") }
+        )
+    } else {
+        Log.e("DELETEPASSWORD", "UID ou categoria nulo")
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PasswordsScreenDesign(
-    statusBarColor: Color = Color.Transparent,
-    navigationBarColor: Color = Color.Transparent,
     categoria: String?,
     onAddPassword: (Senha) -> Unit,
     iconPainter: Int,
     content: @Composable () -> Unit
 ){
-    val systemUiController = rememberSystemUiController()
-    val darkIcons = isSystemInDarkTheme()
-    SideEffect { //aplicando as cores da barra de status e navegação
-        systemUiController.setStatusBarColor(statusBarColor, darkIcons = darkIcons)
-        systemUiController.setNavigationBarColor(navigationBarColor, darkIcons = darkIcons)
-    }
-
-    var showDialog by remember { mutableStateOf(false) }
+    StatusAndNavigationBarColors()
+    var showAddPasswordDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current
     Scaffold(
         topBar = {
@@ -274,7 +304,7 @@ fun PasswordsScreenDesign(
                         )
                         Spacer(Modifier.width(8.dp))
                         if (categoria != null) {
-                            Text("${categoria.capitalize()}:", color = MaterialTheme.colorScheme.onPrimary)
+                            Text("${categoria.replaceFirstChar { it.uppercase() }}:", color = MaterialTheme.colorScheme.onPrimary)
                         }else{
                             Text("Senhas:", color = MaterialTheme.colorScheme.onPrimary)
                         }
@@ -344,7 +374,7 @@ fun PasswordsScreenDesign(
 
                 ExtendedFloatingActionButton(
                     onClick = {
-                        showDialog = true
+                        showAddPasswordDialog = true
                     },
                     containerColor = MaterialTheme.colorScheme.primary,
                 ){
@@ -370,12 +400,12 @@ fun PasswordsScreenDesign(
             content()
         }
 
-        if (showDialog){
+        if (showAddPasswordDialog){
             AddPasswordDialog(
-                onDismiss = {showDialog = false},
+                onDismiss = {showAddPasswordDialog = false},
                 onConfirm = { senhaCriada->
                     onAddPassword(senhaCriada)
-                    showDialog = false
+                    showAddPasswordDialog = false
                 }
             )
         }
@@ -409,7 +439,7 @@ fun AddPasswordDialog(
         confirmButton = {
             TextButton(
                 onClick = { onConfirm(senha) },
-                enabled = if((senha.senha).isNotEmpty()) true else false
+                enabled = senha.senha.isNotEmpty()
             ) {
                 Text("Confirmar", color = MaterialTheme.colorScheme.onPrimaryContainer)
             }
@@ -526,114 +556,15 @@ fun EditPasswordDialog(
     )
 }
 
-fun EditPasswordOnFirestore(categoria: String?, senha: Senha, novaSenha: Senha, viewModel: SenhasViewModel){
-    val db = Firebase.firestore
-    val auth = Firebase.auth
-
-    val uid = auth.currentUser?.uid
-    if (uid != null && categoria != null) {
-        ChaveAesUtils.recuperarChaveDoUsuario(
-            uid,
-            db,
-            onSuccess = { chaveBase64 ->
-                val secretKey = CriptoUtils.base64ToSecretKey(chaveBase64)
-
-                // Criptografa a senha que o usuário digitou
-                val (senhaCripto, iv, accessToken) = CriptoUtils.encrypt(novaSenha.senha, secretKey)
-
-                val doc = mapOf(
-                    "senha" to senhaCripto,
-                    "login" to novaSenha.login,
-                    "iv" to iv,
-                    "accessToken" to accessToken,
-                    "descricao" to novaSenha.descricao,
-                )
-
-                val categoriasRef = db.collection("users")
-                    .document(uid)
-                    .collection("categorias")
-
-
-                categoriasRef
-                    .whereEqualTo("nome", categoria)
-                    .get()
-                    .addOnSuccessListener { querySnapshot->
-                        if(!querySnapshot.isEmpty){
-                            val docCategoria = querySnapshot.documents.first()
-                            val categoriaId = docCategoria.id
-                            val senhasRef = categoriasRef.document(categoriaId).collection("senhas")
-
-                            senhasRef
-                                .document(senha.id)
-                                .update(doc)
-                                .addOnSuccessListener {
-                                    Log.d("UPDATEPASSWORD", "Senha atualizada")
-                                    viewModel.buscarSenhas(categoria)
-                                }
-                                .addOnFailureListener { e->
-                                    Log.e("UPDATEPASSWORD", "Erro ao atualizar senha", e)
-                                }
-                        }else{
-                            Log.e("UPDATEPASSWORD", "Catehoria: '$categoria' não encontrada no banco")
-                        }
-                    }
-
-
-            },
-            onFailure = { e -> Log.e("CRYPTO", "Erro ao buscar chave AES", e) }
-        )
-    } else {
-        Log.e("GETPASSWORDS", "UID ou categoria nulo")
-    }
-}
-
-fun DeletePasswordOnFirestore(categoria: String?, senha: Senha){
-    val db = Firebase.firestore
-    val auth = Firebase.auth
-    val uid = auth.currentUser?.uid
-
-    if (uid != null && categoria != null) {
-        val categoriasRef = db.collection("users")
-            .document(uid)
-            .collection("categorias")
-
-        categoriasRef
-            .whereEqualTo("nome", categoria)
-            .get()
-            .addOnSuccessListener { querySnapshot->
-                if(!querySnapshot.isEmpty){
-                    val docCategoria = querySnapshot.documents.first()
-                    val categoriaId = docCategoria.id
-                    val senhasRef = categoriasRef.document(categoriaId).collection("senhas")
-
-                    senhasRef
-                        .document(senha.id)
-                        .delete()
-                        .addOnSuccessListener {
-                            Log.d("DELETEPASSWORD", "Senha deletada")
-                        }
-                        .addOnFailureListener { e->
-                            Log.e("DELETEPASSWORD", "Erro ao apagar senha", e)
-                        }
-                }else{
-                    Log.e("DELETEPASSWORD", "Catehoria: '$categoria' não encontrada no banco")
-                }
-            }
-
-    } else {
-        Log.e("GETPASSWORDS", "UID ou categoria nulo")
-    }
-}
-
-
 @Composable
 fun ColumnSenhas(
     senhasCriadas: List<Senha>,
     categoria: String?, //nome da categoria
-    viewModel: SenhasViewModel
+    viewModel: SenhasViewModel,
+    auth: FirebaseAuth,
+    db: FirebaseFirestore
 ){
     var senhaDescriptografada by remember { mutableStateOf("") }
-    val auth=Firebase.auth
     val uid=auth.currentUser?.uid
     var showInfoDialog by remember { mutableStateOf(false) } //variavel do estado de exibição do dialog de informação
     var showEditDialog by remember { mutableStateOf(false) } //variavel do estado de exibição do dialog de editar
@@ -691,7 +622,7 @@ fun ColumnSenhas(
             senha = senhaClicada.copy(senha = senhaDescriptografada),
             onDismiss = { showEditDialog = false },
             onDelete = {
-                DeletePasswordOnFirestore(categoria, senhaClicada)
+                DeletePasswordOnFirestore(categoria, senhaClicada, db, auth)
                 showEditDialog = false
 
                 viewModel.buscarSenhas(categoria)
@@ -701,7 +632,9 @@ fun ColumnSenhas(
                     categoria = categoria,
                     senha = senhaClicada.copy(senha = senhaDescriptografada),
                     novaSenha = senhaAtualizada,
-                    viewModel = SenhasViewModel()
+                    viewModel = viewModel,
+                    db = db,
+                    auth = auth,
                 )
                 showEditDialog = false
 

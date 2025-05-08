@@ -181,16 +181,9 @@ fun SuperIdTitle(modifier: Modifier = Modifier){
 @Composable
 fun LoginAndSignUpDesign(
     imageResId: Int = themedBackgroundImage(),
-    statusBarColor: Color = Color(0xFF152034),
-    navigationBarColor: Color = Color(0xFF152034),
     content: @Composable () -> Unit,
 ) {
-    val systemUiController = rememberSystemUiController()
-    val darkIcons = !isSystemInDarkTheme()
-    SideEffect { //aplicando as cores da barra de status e navegação
-        systemUiController.setStatusBarColor(statusBarColor, darkIcons = darkIcons)
-        systemUiController.setNavigationBarColor(navigationBarColor, darkIcons = darkIcons)
-    }
+    StatusAndNavigationBarColors(MaterialTheme.colorScheme.background, MaterialTheme.colorScheme.background)
 
     Box(
         modifier = Modifier
@@ -305,5 +298,18 @@ fun PasswordRow(contentDescripiton: String, text: String, onClick: () -> Unit){
             tint = MaterialTheme.colorScheme.inverseOnSurface,
             modifier = Modifier.align(Alignment.CenterVertically)
         )
+    }
+}
+
+@Composable
+fun StatusAndNavigationBarColors(
+    statusBarColor: Color = Color.Transparent,
+    navigationBarColor: Color = Color.Transparent,
+){
+    val systemUiController = rememberSystemUiController()
+    val darkIcons = isSystemInDarkTheme()
+    SideEffect { //aplicando as cores da barra de status e navegação
+        systemUiController.setStatusBarColor(statusBarColor, darkIcons = darkIcons)
+        systemUiController.setNavigationBarColor(navigationBarColor, darkIcons = darkIcons)
     }
 }

@@ -69,6 +69,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.superid.ui.theme.SuperIdTheme
+import com.example.superid.ui.theme.ui.common.StatusAndNavigationBarColors
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlinx.coroutines.launch
 import com.example.superid.ui.theme.ui.common.SuperIdTitle
@@ -104,17 +105,10 @@ fun SuperID() {
 @Composable //Essa função é responsável pelo design das páginas de íniciais
 fun InitialScreensDesign(
     imageResId: Int = themedBackgroundImage(),
-    statusBarColor: Color = Color.Transparent,
-    navigationBarColor: Color = Color.Transparent,
     content: @Composable () -> Unit,
     bottomContent: @Composable () -> Unit
 ) {
-    val systemUiController = rememberSystemUiController()
-    val darkIcons = !isSystemInDarkTheme()
-    SideEffect { //aplicando as cores da barra de status e navegação
-        systemUiController.setStatusBarColor(statusBarColor, darkIcons = darkIcons)
-        systemUiController.setNavigationBarColor(navigationBarColor, darkIcons = darkIcons)
-    }
+    StatusAndNavigationBarColors()
 
     Box(
         modifier = Modifier
