@@ -64,7 +64,7 @@ fun PasswordResetScreen() {
             "Recuperar Senha",
             fontFamily = FontFamily.SansSerif,
             fontSize = 30.sp,
-            color = Color.White,
+            color = MaterialTheme.colorScheme.onBackground,
             fontWeight = FontWeight.Bold
         )
 
@@ -75,7 +75,7 @@ fun PasswordResetScreen() {
 
             fontFamily = FontFamily.SansSerif,
             fontSize = 15.sp,
-            color = Color.White,
+            color = MaterialTheme.colorScheme.onBackground,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Justify,
             modifier = Modifier
@@ -151,9 +151,9 @@ fun PasswordResetScreen() {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                 contentDescription = "Voltar",
-                tint = Color.White
+                tint = MaterialTheme.colorScheme.onBackground
             )
-            Text("Voltar", fontSize = 15.sp, color = Color.White, textDecoration = TextDecoration.Underline)
+            Text("Voltar", fontSize = 15.sp, color = MaterialTheme.colorScheme.onBackground, textDecoration = TextDecoration.Underline)
         }
     }
 
