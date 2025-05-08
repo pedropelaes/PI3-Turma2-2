@@ -33,6 +33,7 @@ import com.example.superid.ui.theme.ui.common.TextFieldDesignForMainScreen
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -55,6 +56,7 @@ fun MainScreen() {
     var categoriasCriadas by remember { mutableStateOf(listOf<String>()) }
     var categoriaParaExcluir by remember { mutableStateOf<String?>(null) }
     var showDialogExcluir by remember { mutableStateOf(false) }
+    val categoriasFixas = listOf("aplicativos", "emails", "sites", "teclados")
 
     LaunchedEffect(userId) {
         userId?.let { uid ->
@@ -65,6 +67,8 @@ fun MainScreen() {
                     snapshot?.let {
                         categoriasCriadas = it.documents.mapNotNull { doc ->
                             doc.getString("nome")
+                        }.filterNot { nome-> //filtra as categorias pré criadas para evitar repetição
+                            nome in categoriasFixas
                         }
                     }
                 }
@@ -141,6 +145,13 @@ fun MainScreenDesign(
     onCancelarExclusao: () -> Unit,
     content: @Composable () -> Unit = {}
 ) {
+    val systemUiController = rememberSystemUiController()
+    val darkIcons = isSystemInDarkTheme()
+    SideEffect { //aplicando as cores da barra de status e navegação
+        systemUiController.setStatusBarColor(statusBarColor, darkIcons = darkIcons)
+        systemUiController.setNavigationBarColor(navigationBarColor, darkIcons = darkIcons)
+    }
+
     var showDialog by remember { mutableStateOf(false) }
     var showEditDialog by remember { mutableStateOf(false) }
     var categoriaParaEditar by remember { mutableStateOf("") }

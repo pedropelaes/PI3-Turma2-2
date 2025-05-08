@@ -43,6 +43,7 @@ import com.example.superid.ui.theme.ui.common.TextFieldDesignForLoginAndSignUp
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import utils.ChaveAesUtils
 
 
 class SignUpActivity : AppCompatActivity() {
@@ -93,10 +94,11 @@ fun PerformSignUp(name: String,email: String, password: String, onResult: (Strin
 
 fun SaveNewAccount(name: String, email: String, uid: String, tries: Int = 0){
     val db = Firebase.firestore
-
+    val chave = ChaveAesUtils.gerarChaveAesBase64()
     val taskDoc = hashMapOf(
         "name" to name,
         "email" to email,
+        "AESkey" to chave,
     )
     db.collection("users").document(uid).set(taskDoc)
         .addOnCompleteListener{task->
@@ -121,6 +123,10 @@ fun SaveUserDefaultCategories(uid: String){
 
     for(categoria in categorias){
         val docRef = categoriasRef.document(categoria)
+
+        val nameCategoria = mapOf("nome" to categoria)
+        batch.set(docRef, nameCategoria)
+
         val passwordPlaceHolder = docRef.collection("senhas").document("placeholder")
         val placeholder = mapOf("placeholder" to true)
         batch.set(passwordPlaceHolder, placeholder)

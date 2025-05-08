@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -155,15 +156,15 @@ fun SuperIdTitle(modifier: Modifier = Modifier){
     Text(
         buildAnnotatedString { //junta strings com estilos diferentes
             withStyle(
-                style = SpanStyle(fontFamily = title_font, fontSize = 40.sp, color = MaterialTheme.colorScheme.onPrimary,
-                    shadow = Shadow(Color.DarkGray, offset = Offset(2f, 2f),blurRadius = 8f)
+                style = SpanStyle(fontFamily = title_font, fontSize = 28.sp, color = MaterialTheme.colorScheme.onPrimary,
+                    shadow = Shadow(Color.DarkGray, offset = Offset(1f, 1f),blurRadius = 4f)
                 )
             ){
                 append("Super")
             }
             withStyle(
-                style = SpanStyle(fontFamily = title_font, fontSize = 40.sp, color = MaterialTheme.colorScheme.surfaceVariant,
-                    shadow = Shadow(Color.DarkGray, offset = Offset(2f, 2f),blurRadius = 8f)
+                style = SpanStyle(fontFamily = title_font, fontSize = 28.sp, color = MaterialTheme.colorScheme.surfaceVariant,
+                    shadow = Shadow(Color.DarkGray, offset = Offset(1f, 1f),blurRadius = 4f)
                 )
             ){
                 append(" ID")
@@ -172,7 +173,7 @@ fun SuperIdTitle(modifier: Modifier = Modifier){
         textAlign = TextAlign.Center,
         modifier = Modifier
             .wrapContentWidth()
-            .padding(16.dp)
+            .padding(horizontal = 16.dp)
     )
 
 }
@@ -185,35 +186,35 @@ fun LoginAndSignUpDesign(
     content: @Composable () -> Unit,
 ) {
     val systemUiController = rememberSystemUiController()
-    SuperIdTheme {
-        SideEffect { //aplicando as cores da barra de status e navegação
-            systemUiController.setStatusBarColor(statusBarColor, darkIcons = false)
-            systemUiController.setNavigationBarColor(navigationBarColor, darkIcons = false)
-        }
+    val darkIcons = !isSystemInDarkTheme()
+    SideEffect { //aplicando as cores da barra de status e navegação
+        systemUiController.setStatusBarColor(statusBarColor, darkIcons = darkIcons)
+        systemUiController.setNavigationBarColor(navigationBarColor, darkIcons = darkIcons)
+    }
 
-        Box(
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
+        Image(
+            painter = painterResource(id = imageResId),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize()
+        )
+        Column(
             modifier = Modifier
                 .fillMaxSize()
+                .padding(bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()),
+            verticalArrangement = Arrangement.SpaceBetween,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Image(
-                painter = painterResource(id = imageResId),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize()
-            )
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()),
-                verticalArrangement = Arrangement.SpaceBetween,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
-                    content()
-                }
+            Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                content()
             }
         }
     }
+
 }
 @Composable
 fun themedBackgroundImage(): Int {
@@ -225,7 +226,7 @@ fun themedBackgroundImage(): Int {
 }
 
 @Composable
-fun CategoryRow(painter: Int = R.mipmap.ic_launcher, contentDescripiton: String, text: String, onClick: () -> Unit){
+fun CategoryRow(painter: Int = R.drawable.logo_without_text, contentDescripiton: String, text: String, onClick: () -> Unit){
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -265,3 +266,44 @@ fun CategoryRow(painter: Int = R.mipmap.ic_launcher, contentDescripiton: String,
     }
 }
 
+@Composable
+fun PasswordRow(contentDescripiton: String, text: String, onClick: () -> Unit){
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .size(80.dp)
+            .padding(vertical = 2.dp)
+            .background(color = MaterialTheme.colorScheme.secondary)
+            .clickable { onClick() }
+    ){
+        Icon(
+            painter = painterResource(R.drawable.logo_without_text,),
+            tint = MaterialTheme.colorScheme.inverseOnSurface,
+            contentDescription = contentDescripiton,
+            modifier = Modifier.size(48.dp)
+                .align(Alignment.CenterVertically)
+                .padding(start = 8.dp)
+        )
+
+        Spacer(modifier = Modifier.size(8.dp))
+
+        Text(
+            text = text,
+            color = MaterialTheme.colorScheme.inverseOnSurface,
+            textAlign = TextAlign.Center,
+            fontSize = 24.sp,
+            modifier = Modifier.align(Alignment.CenterVertically)
+                .wrapContentSize()
+                .padding(6.dp)
+        )
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        Icon(
+            imageVector = Icons.Default.KeyboardArrowRight,
+            contentDescription = "Abrir senha",
+            tint = MaterialTheme.colorScheme.inverseOnSurface,
+            modifier = Modifier.align(Alignment.CenterVertically)
+        )
+    }
+}

@@ -110,9 +110,10 @@ fun InitialScreensDesign(
     bottomContent: @Composable () -> Unit
 ) {
     val systemUiController = rememberSystemUiController()
+    val darkIcons = !isSystemInDarkTheme()
     SideEffect { //aplicando as cores da barra de status e navegação
-        systemUiController.setStatusBarColor(statusBarColor, darkIcons = false)
-        systemUiController.setNavigationBarColor(navigationBarColor, darkIcons = false)
+        systemUiController.setStatusBarColor(statusBarColor, darkIcons = darkIcons)
+        systemUiController.setNavigationBarColor(navigationBarColor, darkIcons = darkIcons)
     }
 
     Box(
@@ -219,7 +220,7 @@ fun ViewPagerForInitialScreens(onFinish: () -> Unit) {
                         Text(
                             if (pagerState.currentPage == pagerState.pageCount - 1) "Começar" else "Próximo",
                             fontSize = 15.sp,
-                            color = Color.White,
+                            color = MaterialTheme.colorScheme.onBackground,
                             textDecoration = TextDecoration.Underline
                         )
                         Icon(
