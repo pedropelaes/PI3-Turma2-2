@@ -44,6 +44,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -126,7 +127,6 @@ class SenhasViewModel : ViewModel() {  //view model para buscar as senhas que es
 
 @Composable
 fun PasswordsScreen(categoria: String?, icone: Int, viewModel: SenhasViewModel){
-    var senhasCriadas by remember { mutableStateOf(listOf<Senha>()) } //variavel das senhas iniciada com o estado do view model
     var context = LocalContext.current
     val db = Firebase.firestore
     val auth = Firebase.auth
@@ -156,7 +156,7 @@ fun PasswordsScreen(categoria: String?, icone: Int, viewModel: SenhasViewModel){
 
                             // Agora salva isso no Firestore
                             val doc = mapOf(
-                                "senhaCriptografada" to senhaCripto,
+                                "senha" to senhaCripto,
                                 "iv" to iv,
                                 "accessToken" to accessToken,
                                 "login" to novaSenha.login,
@@ -164,6 +164,7 @@ fun PasswordsScreen(categoria: String?, icone: Int, viewModel: SenhasViewModel){
                                 "id" to novoId,
                             )
                             novaSenha.iv=iv
+                            novaSenha.senha=senhaCripto
                             senhasRef.document(novoId)
                                 .set(doc)
                                 .addOnSuccessListener {
@@ -190,13 +191,12 @@ fun PasswordsScreen(categoria: String?, icone: Int, viewModel: SenhasViewModel){
                 val intent = Intent(context, LogInActivity::class.java)
                 context.startActivity(intent)
             }
-
         }
     ) {
         LaunchedEffect(categoria) { //inicia o view model e busca as senhas
             viewModel.buscarSenhas(categoria)
         }
-        val senhas = viewModel.listaSenhas
+        val senhas by remember { derivedStateOf { viewModel.listaSenhas } }
         ColumnSenhas(senhasCriadas = senhas, categoria, viewModel)
     }
 }
@@ -491,31 +491,46 @@ fun EditPasswordDialog(
     )
 }
 
-fun EditPasswordOnFirestore(categoria: String?, senha: Senha, novaSenha: Senha){
+fun EditPasswordOnFirestore(categoria: String?, senha: Senha, novaSenha: Senha, viewModel: SenhasViewModel){
     val db = Firebase.firestore
     val auth = Firebase.auth
 
-    val senhaEditada = mapOf(  //junta os novos valores da senha
-        "login" to novaSenha.login,
-        "senha" to novaSenha.senha,
-        "descricao" to novaSenha.descricao
-    )
-
     val uid = auth.currentUser?.uid
     if (uid != null && categoria != null) {
-        db.collection("users")
-            .document(uid)
-            .collection("categorias")
-            .document(categoria)
-            .collection("senhas")
-            .document(senha.id)
-            .update(senhaEditada)
-            .addOnSuccessListener {
-                Log.d("UPDATEPASSWORD", "Senha atualizada")
-            }
-            .addOnFailureListener { e->
-                Log.e("UPDATEPASSWORD", "Erro ao atualizar senha", e)
-            }
+        ChaveAesUtils.recuperarChaveDoUsuario(
+            uid,
+            db,
+            onSuccess = { chaveBase64 ->
+                val secretKey = CriptoUtils.base64ToSecretKey(chaveBase64)
+
+                // Criptografa a senha que o usuário digitou
+                val (senhaCripto, iv, accessToken) = CriptoUtils.encrypt(novaSenha.senha, secretKey)
+
+                val doc = mapOf(
+                    "senha" to senhaCripto,
+                    "login" to novaSenha.login,
+                    "iv" to iv,
+                    "accessToken" to accessToken,
+                    "descricao" to novaSenha.descricao,
+                )
+
+                db.collection("users")
+                    .document(uid)
+                    .collection("categorias")
+                    .document(categoria)
+                    .collection("senhas")
+                    .document(senha.id)
+                    .update(doc)
+                    .addOnCompleteListener {
+                        Log.d("UPDATEPASSWORD", "Senha atualizada")
+                        viewModel.buscarSenhas(categoria)
+                    }
+                    .addOnFailureListener { e->
+                        Log.e("UPDATEPASSWORD", "Erro ao atualizar senha", e)
+                    }
+            },
+            onFailure = { e -> Log.e("CRYPTO", "Erro ao buscar chave AES", e) }
+        )
     } else {
         Log.e("GETPASSWORDS", "UID ou categoria nulo")
     }
@@ -569,32 +584,30 @@ fun ColumnSenhas(
                 text = "Senha: ${senha.descricao}",
                 onClick = {
                     senhaClicada = senha
-                    showInfoDialog = true
+                    if (uid != null) {
+                        ChaveAesUtils.recuperarChaveDoUsuario(
+                            uid,
+                            onSuccess = { chaveBase64 ->
+                                val secretKey = CriptoUtils.base64ToSecretKey(chaveBase64)
+                                Log.d("SENHA", "$senhaClicada")
+                                senhaDescriptografada = CriptoUtils.decrypt(
+                                    encryptedText = senhaClicada.senha,  // pego do Firestore
+                                    ivBase64 = senhaClicada.iv,                        // pego do Firestore
+                                    secretKey = secretKey
+                                )
+                                Log.d("DESCRIPTO", "Senha descriptografada:$senhaDescriptografada", )
+                                showInfoDialog = true
+                            },
+                            onFailure = { e ->
+                                Log.e("DESCRIPTO", "Erro ao descriptografar senha", e)
+                            }
+                        )
+                    }
                 }
             )
         }
     }
-    if(showInfoDialog && senhaDescriptografada.isNotBlank()){  //exibe o dialog de informações da senha
-        if (uid != null) {
-            ChaveAesUtils.recuperarChaveDoUsuario(
-                uid,
-                onSuccess = { chaveBase64 ->
-                    val secretKey = CriptoUtils.base64ToSecretKey(chaveBase64)
-
-                    senhaDescriptografada = CriptoUtils.decrypt(
-                        encryptedText = senhaClicada.senha,  // pego do Firestore
-                        ivBase64 = senhaClicada.iv,                        // pego do Firestore
-                        secretKey = secretKey
-                    )
-
-                    // Aqui você pode exibir a senha em um AlertDialog, Toast, ou atualizar um estado Compose
-
-                },
-                onFailure = { e ->
-                    Log.e("DESCRIPTO", "Erro ao descriptografar senha", e)
-                }
-            )
-        }
+    if(showInfoDialog){  //exibe o dialog de informações da senha
         ViewPasswordInfoDialog(
             senha = senhaClicada.copy(senha = senhaDescriptografada),
             onDismiss = {
@@ -607,12 +620,10 @@ fun ColumnSenhas(
                 senhaDescriptografada = ""
             }
         )
-
-
     }
     if(showEditDialog){ //exibe o dialog de editar senha
         EditPasswordDialog(
-            senha = senhaClicada,
+            senha = senhaClicada.copy(senha = senhaDescriptografada),
             onDismiss = { showEditDialog = false },
             onDelete = {
                 DeletePasswordOnFirestore(categoria, senhaClicada)
@@ -623,12 +634,12 @@ fun ColumnSenhas(
             onConfirm = { senhaAtualizada ->
                 EditPasswordOnFirestore(
                     categoria = categoria,
-                    senha = senhaClicada,
-                    novaSenha = senhaAtualizada
+                    senha = senhaClicada.copy(senha = senhaDescriptografada),
+                    novaSenha = senhaAtualizada,
+                    viewModel = SenhasViewModel()
                 )
                 showEditDialog = false
 
-                viewModel.buscarSenhas(categoria)
             }
         )
     }
