@@ -40,6 +40,7 @@ import com.example.superid.ui.theme.ui.common.SuperIdTitle
 import com.example.superid.ui.theme.ui.common.SuperIdTitlePainter
 import com.example.superid.ui.theme.ui.common.SuperIdTitlePainterVerified
 import com.example.superid.ui.theme.ui.common.TextFieldDesignForLoginAndSignUp
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -187,8 +188,19 @@ fun SignUpScreen() {
 
         Button(
             onClick = {
-                PerformSignUp(name, email, masterPassword) { msg ->
-                    result = msg
+                if (!isValidEmail(email)) {
+                    result = "Por favor, insira um e-mail válido."
+                    return@Button
+                }
+
+                checkIfEmailExists(email) { exists ->
+                    if (exists) {
+                        result = "Este e-mail já está em uso."
+                    } else {
+                        PerformSignUp(name, email, masterPassword) { msg ->
+                            result = msg
+                        }
+                    }
                 }
             },
             enabled = masterPassword == confirmPassword &&
@@ -226,4 +238,18 @@ fun SignUpScreen() {
             Text("Login", textDecoration = TextDecoration.Underline, color = MaterialTheme.colorScheme.onBackground)
         }
     }
+}
+fun isValidEmail(email: String): Boolean {
+    return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
+}
+fun checkIfEmailExists(email: String, onResult: (Boolean) -> Unit) {
+    FirebaseAuth.getInstance().fetchSignInMethodsForEmail(email)
+        .addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                val signInMethods = task.result?.signInMethods
+                onResult(!signInMethods.isNullOrEmpty())
+            } else {
+                onResult(false)
+            }
+        }
 }
