@@ -4,21 +4,6 @@
     <selectionStates>
       <SelectionState runConfigName="SuperId.app">
         <option name="selectionMode" value="DROPDOWN" />
-<<<<<<< HEAD
-        <DropdownSelection timestamp="2025-05-07T19:04:00.259696300Z">
-          <Target type="DEFAULT_BOOT">
-            <handle>
-              <DeviceId pluginId="PhysicalDevice" identifier="serial=RQCT803YSLA" />
-=======
-        <DropdownSelection timestamp="2025-05-08T01:36:56.103047800Z">
-          <Target type="DEFAULT_BOOT">
-            <handle>
-              <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\yrafa\.android\avd\Pixel_9_Pro.avd" />
->>>>>>> feature/Tela-de-senhas
-            </handle>
-          </Target>
-        </DropdownSelection>
-        <DialogSelection />
       </SelectionState>
     </selectionStates>
   </component>
