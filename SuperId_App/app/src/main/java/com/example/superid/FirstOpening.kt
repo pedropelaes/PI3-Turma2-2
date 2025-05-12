@@ -69,6 +69,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.superid.ui.theme.SuperIdTheme
+import com.example.superid.ui.theme.ui.common.StatusAndNavigationBarColors
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlinx.coroutines.launch
 import com.example.superid.ui.theme.ui.common.SuperIdTitle
@@ -104,16 +105,10 @@ fun SuperID() {
 @Composable //Essa função é responsável pelo design das páginas de íniciais
 fun InitialScreensDesign(
     imageResId: Int = themedBackgroundImage(),
-    statusBarColor: Color = Color.Transparent,
-    navigationBarColor: Color = Color.Transparent,
     content: @Composable () -> Unit,
     bottomContent: @Composable () -> Unit
 ) {
-    val systemUiController = rememberSystemUiController()
-    SideEffect { //aplicando as cores da barra de status e navegação
-        systemUiController.setStatusBarColor(statusBarColor, darkIcons = false)
-        systemUiController.setNavigationBarColor(navigationBarColor, darkIcons = false)
-    }
+    StatusAndNavigationBarColors()
 
     Box(
         modifier = Modifier
@@ -219,7 +214,7 @@ fun ViewPagerForInitialScreens(onFinish: () -> Unit) {
                         Text(
                             if (pagerState.currentPage == pagerState.pageCount - 1) "Começar" else "Próximo",
                             fontSize = 15.sp,
-                            color = Color.White,
+                            color = MaterialTheme.colorScheme.onBackground,
                             textDecoration = TextDecoration.Underline
                         )
                         Icon(

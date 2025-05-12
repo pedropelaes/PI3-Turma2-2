@@ -12,10 +12,9 @@ val Pink40 = Color(0xFF7D5260)
 
 
 val D_Blue80 = Color(0xFF152034) //cor azul escuro do lockers_background.
-val D_Blue70 = Color(0xFF192B45) //tom menos escuro para ser utilizado para detalhes(exemplo: borda fieldText)
-val D_Blue60 = Color(0xFF233354) //tom mediano para ser utilizado nas fieldTexts
-val D_Blue40 = Color(0xFF485C94) //tom claro para usar nas fieldTexts focadas
+val D_Blue70 = Color(0xFF233354)
+val D_Blue60 = Color(0xFF485C94)
 
 
-val Blue30 = Color(0xFF0061B7) // cor primaria do tema Escuro (equivalente a D_Blue60)
-val Blue20 = Color(0xFF1D8BE1) // cor secundaria do tema Escuro (equivalente a D_Blue40)
+val Blue30 = Color(0xFF1D8BE1) // cor primaria do tema Escuro (equivalente a D_Blue60)
+val Blue20 = Color(0xFF45659E) // cor secundaria do tema Escuro (equivalente a D_Blue40)

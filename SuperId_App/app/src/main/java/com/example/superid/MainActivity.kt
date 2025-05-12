@@ -28,11 +28,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.example.superid.ui.theme.SuperIdTheme
+import com.example.superid.ui.theme.ui.common.StatusAndNavigationBarColors
 import com.example.superid.ui.theme.ui.common.SuperIdTitle
 import com.example.superid.ui.theme.ui.common.TextFieldDesignForMainScreen
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -55,6 +57,7 @@ fun MainScreen() {
     var categoriasCriadas by remember { mutableStateOf(listOf<String>()) }
     var categoriaParaExcluir by remember { mutableStateOf<String?>(null) }
     var showDialogExcluir by remember { mutableStateOf(false) }
+    val categoriasFixas = listOf("aplicativos", "emails", "sites", "teclados")
 
     LaunchedEffect(userId) {
         userId?.let { uid ->
@@ -65,6 +68,8 @@ fun MainScreen() {
                     snapshot?.let {
                         categoriasCriadas = it.documents.mapNotNull { doc ->
                             doc.getString("nome")
+                        }.filterNot { nome-> //filtra as categorias pré criadas para evitar repetição
+                            nome in categoriasFixas
                         }
                     }
                 }
@@ -131,8 +136,6 @@ fun MainScreen() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreenDesign(
-    statusBarColor: Color = Color.Transparent,
-    navigationBarColor: Color = Color.Transparent,
     categoriasCriadas: List<String>,
     onAdicionarCategoria: (String) -> Unit,
     categoriaParaExcluir: String?,
@@ -142,6 +145,8 @@ fun MainScreenDesign(
     onCancelarExclusao: () -> Unit,
     content: @Composable () -> Unit = {}
 ) {
+    StatusAndNavigationBarColors()
+
     var showDialog by remember { mutableStateOf(false) }
     var showEditDialog by remember { mutableStateOf(false) }
     var categoriaParaEditar by remember { mutableStateOf("") }

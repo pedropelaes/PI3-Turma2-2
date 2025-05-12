@@ -21,7 +21,7 @@ private val DarkColorScheme = darkColorScheme(
     surface = D_Blue70,  //usar em bordas de botões e field texts
     onSurface = Color.White,
     inverseOnSurface = Color.Black,
-    surfaceVariant = D_Blue60,
+    surfaceVariant = D_Blue70,
     onSurfaceVariant = Color.Gray,
     onPrimary = Color.Black, //elementos sobre cor primaria
     onSecondary = Color.DarkGray, //elementos sobre cor secundaria
@@ -34,22 +34,21 @@ private val DarkColorScheme = darkColorScheme(
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = D_Blue60,
-    secondary = D_Blue40,
+    primary = D_Blue70,
+    secondary = D_Blue60,
     tertiary = Color.Red,
     background = Color.White,
     onBackground = Color.Black,
-    surface = Color.LightGray,
+    surface = Color.Gray,
     onSurface = Color.Black,
     inverseOnSurface = Color.White,
-    surfaceVariant = Blue30,
+    surfaceVariant = D_Blue70,
     onSurfaceVariant = Color.White,
     onPrimary = Color.White,
     onSecondary = Color.LightGray,
     onTertiary = Color.White,
     primaryContainer = D_Blue60,
     onPrimaryContainer = Color.White,
-    secondaryContainer = D_Blue40,
     onSecondaryContainer = Color.LightGray
 )
 

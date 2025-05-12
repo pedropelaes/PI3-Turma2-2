@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.sp
 import com.example.superid.ui.theme.SuperIdTheme
 import com.example.superid.ui.theme.ui.common.LoginAndSignUpDesign
 import com.example.superid.ui.theme.ui.common.SuperIdTitle
+import com.example.superid.ui.theme.ui.common.SuperIdTitlePainterVerified
 import com.example.superid.ui.theme.ui.common.TextFieldDesignForLoginAndSignUp
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
@@ -56,7 +57,7 @@ fun PasswordResetScreen() {
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        SuperIdTitle()
+        SuperIdTitlePainterVerified()
 
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -64,7 +65,7 @@ fun PasswordResetScreen() {
             "Recuperar Senha",
             fontFamily = FontFamily.SansSerif,
             fontSize = 30.sp,
-            color = Color.White,
+            color = MaterialTheme.colorScheme.onBackground,
             fontWeight = FontWeight.Bold
         )
 
@@ -75,7 +76,7 @@ fun PasswordResetScreen() {
 
             fontFamily = FontFamily.SansSerif,
             fontSize = 15.sp,
-            color = Color.White,
+            color = MaterialTheme.colorScheme.onBackground,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Justify,
             modifier = Modifier
@@ -151,9 +152,9 @@ fun PasswordResetScreen() {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                 contentDescription = "Voltar",
-                tint = Color.White
+                tint = MaterialTheme.colorScheme.onBackground
             )
-            Text("Voltar", fontSize = 15.sp, color = Color.White, textDecoration = TextDecoration.Underline)
+            Text("Voltar", fontSize = 15.sp, color = MaterialTheme.colorScheme.onBackground, textDecoration = TextDecoration.Underline)
         }
     }
 
