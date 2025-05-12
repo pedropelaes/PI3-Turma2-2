@@ -127,7 +127,9 @@ fun LoginScreen(){
                 containerColor = MaterialTheme.colorScheme.primary,
                 disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant
             ),
-            modifier = Modifier.height(45.dp).width(160.dp)
+            modifier = Modifier
+                .fillMaxWidth(0.85f) // Igual às caixas de texto
+                .height(50.dp)
         ){
             Text("Fazer Login")
         }
@@ -140,7 +142,7 @@ fun LoginScreen(){
             },
             modifier = Modifier
                 .height(45.dp)
-                .width(160.dp)
+                .width(190.dp)
                 .wrapContentSize()
         ) {
             Text("Esqueceu sua senha?", textDecoration = TextDecoration.Underline, color = MaterialTheme.colorScheme.onBackground)

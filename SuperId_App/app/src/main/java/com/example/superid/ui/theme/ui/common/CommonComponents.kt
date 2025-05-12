@@ -225,34 +225,37 @@ fun SuperIdTitle(modifier: Modifier = Modifier){
 
 @Composable
 fun LoginAndSignUpDesign(
-    imageResId: Int = themedBackgroundImage(),
     content: @Composable () -> Unit,
 ) {
-    StatusAndNavigationBarColors(MaterialTheme.colorScheme.background, MaterialTheme.colorScheme.background)
+    StatusAndNavigationBarColors(
+        MaterialTheme.colorScheme.background,
+        MaterialTheme.colorScheme.background
+    )
 
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background) // <- cor de fundo aplicada aqui
     ) {
-        Image(
-            painter = painterResource(id = imageResId),
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize()
-        )
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()),
+                .padding(
+                    bottom = WindowInsets.navigationBars
+                        .asPaddingValues()
+                        .calculateBottomPadding()
+                ),
             verticalArrangement = Arrangement.SpaceBetween,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
+            Box(
+                modifier = Modifier.weight(1f),
+                contentAlignment = Alignment.Center
+            ) {
                 content()
             }
         }
     }
-
 }
 @Composable
 fun themedBackgroundImage(): Int {

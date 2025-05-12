@@ -187,21 +187,22 @@ fun SignUpScreen() {
 
         Button(
             onClick = {
-                PerformSignUp(name, email, masterPassword){msg ->
-                result = msg
+                PerformSignUp(name, email, masterPassword) { msg ->
+                    result = msg
                 }
             },
-            enabled = if(masterPassword == confirmPassword && name.isNotEmpty() && email.isNotEmpty() && masterPassword.isNotEmpty()) true else false,
+            enabled = masterPassword == confirmPassword &&
+                    name.isNotEmpty() && email.isNotEmpty() && masterPassword.isNotEmpty(),
             border = BorderStroke(2.dp, MaterialTheme.colorScheme.secondary),
             colors = ButtonDefaults.buttonColors(
-                disabledContainerColor = MaterialTheme.colorScheme.primary.copy(0.5f),
+                disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
                 containerColor = MaterialTheme.colorScheme.primary,
                 disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant
             ),
             modifier = Modifier
-                .height(45.dp)
-                .width(160.dp)
-        ){
+                .fillMaxWidth(0.85f) // Igual às caixas de texto
+                .height(50.dp)
+        ) {
             Text("Fazer Cadastro")
         }
 
