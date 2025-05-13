@@ -367,7 +367,7 @@ fun PasswordsScreenDesign(
                     Icon(
                         painter = painterResource(R.drawable.qr_code),
                         contentDescription = "Escanear QR-Code",
-                        tint = MaterialTheme.colorScheme.onPrimary,
+                        tint = MaterialTheme.colorScheme.onBackground,
                         modifier = Modifier.size(28.dp)
                     )
                 }
@@ -381,10 +381,10 @@ fun PasswordsScreenDesign(
                     Icon(
                         imageVector = Icons.Default.Add,
                         contentDescription = "Criar Categoria",
-                        tint = MaterialTheme.colorScheme.onPrimary,
+                        tint = MaterialTheme.colorScheme.onBackground,
                         modifier = Modifier.size(28.dp)
                     )
-                    Text("Adicionar senha")
+                    Text("Adicionar senha", color = MaterialTheme.colorScheme.onBackground)
                 }
             }
         }
@@ -421,7 +421,7 @@ fun AddPasswordDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            Text(text = "Adicionar senha:")
+            Text(text = "Adicionar senha:", color = MaterialTheme.colorScheme.onBackground)
         },
         modifier = Modifier.wrapContentSize(),
         text = {
@@ -441,17 +441,17 @@ fun AddPasswordDialog(
                 onClick = { onConfirm(senha) },
                 enabled = senha.senha.isNotEmpty()
             ) {
-                Text("Confirmar", color = MaterialTheme.colorScheme.onPrimaryContainer)
+                Text("Confirmar", color = MaterialTheme.colorScheme.onBackground)
             }
         },
         dismissButton = {
             TextButton(
                 onClick = onDismiss
             ) {
-                Text("Cancelar", color = MaterialTheme.colorScheme.onPrimaryContainer)
+                Text("Cancelar", color = MaterialTheme.colorScheme.onBackground)
             }
         },
-        containerColor = MaterialTheme.colorScheme.primary, // Cor de fundo do dialog
+        containerColor = MaterialTheme.colorScheme.background, // Cor de fundo do dialog
         titleContentColor = MaterialTheme.colorScheme.onPrimary, // Cor do título
         textContentColor = MaterialTheme.colorScheme.onPrimary, // Cor do texto
     )
@@ -466,7 +466,7 @@ fun ViewPasswordInfoDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            Text(text = "Informação da senha:")
+            Text(text = "Informação da senha:", color = MaterialTheme.colorScheme.onBackground)
         },
         modifier = Modifier.wrapContentSize(),
         text = {
@@ -474,26 +474,26 @@ fun ViewPasswordInfoDialog(
                 verticalArrangement = Arrangement.SpaceBetween,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Text("Login:\n${senha.login}")
-                Text("Senha:\n${senha.senha}")
-                Text("Descrição:\n${senha.descricao}")
+                Text("Login:\n${senha.login}", color = MaterialTheme.colorScheme.onBackground)
+                Text("Senha:\n${senha.senha}", color = MaterialTheme.colorScheme.onBackground)
+                Text("Descrição:\n${senha.descricao}", color = MaterialTheme.colorScheme.onBackground)
             }
         },
         confirmButton = {
             TextButton(
                 onClick = onConfirm
             ) {
-                Text("Editar", color = MaterialTheme.colorScheme.onPrimaryContainer)
+                Text("Editar", color = MaterialTheme.colorScheme.onBackground)
             }
         },
         dismissButton = {
             TextButton(
                 onClick = onDismiss
             ) {
-                Text("Voltar", color = MaterialTheme.colorScheme.onPrimaryContainer)
+                Text("Voltar", color = MaterialTheme.colorScheme.onBackground)
             }
         },
-        containerColor = MaterialTheme.colorScheme.primary, // Cor de fundo do dialog
+        containerColor = MaterialTheme.colorScheme.background, // Cor de fundo do dialog
         titleContentColor = MaterialTheme.colorScheme.onPrimary, // Cor do título
         textContentColor = MaterialTheme.colorScheme.onPrimary, // Cor do texto
     )
@@ -510,7 +510,7 @@ fun EditPasswordDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            Text(text = "Editar senha:")
+            Text(text = "Editar senha:", color = MaterialTheme.colorScheme.onBackground)
         },
         modifier = Modifier.wrapContentSize(),
         text = {
@@ -539,7 +539,7 @@ fun EditPasswordDialog(
                     onClick = { onConfirm(senhaState) }
 
                 ) {
-                    Text("Confirmar", color = MaterialTheme.colorScheme.onPrimaryContainer)
+                    Text("Confirmar", color = MaterialTheme.colorScheme.onBackground)
                 }
             }
         },
@@ -547,10 +547,10 @@ fun EditPasswordDialog(
             TextButton(
                 onClick = onDismiss
             ) {
-                Text("Voltar", color = MaterialTheme.colorScheme.onPrimaryContainer)
+                Text("Voltar", color = MaterialTheme.colorScheme.onBackground)
             }
         },
-        containerColor = MaterialTheme.colorScheme.primary, // Cor de fundo do dialog
+        containerColor = MaterialTheme.colorScheme.background, // Cor de fundo do dialog
         titleContentColor = MaterialTheme.colorScheme.onPrimary, // Cor do título
         textContentColor = MaterialTheme.colorScheme.onPrimary, // Cor do texto
     )
