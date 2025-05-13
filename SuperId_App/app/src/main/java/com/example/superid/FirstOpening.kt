@@ -118,13 +118,9 @@ fun InitialScreensDesign(
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .background(Color.White)
     ) {
-        Image(
-            painter = painterResource(id = imageResId),
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize()
-        )
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
