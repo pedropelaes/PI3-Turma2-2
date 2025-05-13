@@ -84,6 +84,7 @@ fun TextFieldDesignForLoginAndSignUp(
     onValueChange: (String) -> Unit,
     label: String,
     isPassword: Boolean = false
+
 ) {
     val leadingIcon = when {
         label.contains("nome", ignoreCase = true) -> Icons.Default.Person

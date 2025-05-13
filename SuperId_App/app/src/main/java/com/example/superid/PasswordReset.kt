@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -29,6 +30,7 @@ import com.example.superid.ui.theme.ui.common.TextFieldDesignForLoginAndSignUp
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.launch
+
 
 
 class PasswordReset : ComponentActivity() {
@@ -72,28 +74,28 @@ fun PasswordResetScreen() {
         Spacer(modifier = Modifier.height(24.dp))
 
         Text(
-            "Por favor, insira o email associado à sua conta e nós enviaremos um link de recuperação de senha",
-
+            text = "Por favor, insira o e-mail associado à sua conta. Enviaremos um link para recuperação de senha.",
             fontFamily = FontFamily.SansSerif,
             fontSize = 15.sp,
             color = MaterialTheme.colorScheme.onBackground,
             fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Justify,
+            textAlign = TextAlign.Center,
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 12.dp)
+                .fillMaxWidth(0.9f)
+                .padding(horizontal = 16.dp)
+        )
+
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Campo de e-mail com o estilo padronizado
+        TextFieldDesignForLoginAndSignUp(value = email, onValueChange = { email = it },
+            label = stringResource(R.string.type_your_email)
         )
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        TextFieldDesignForLoginAndSignUp(
-            value = email,
-            onValueChange = { email = it },
-            label = "Digite seu e-mail"
-        )
-
-        Spacer(modifier = Modifier.height(24.dp))
-
+        // Botão com o mesmo estilo e dimensões das caixas
         Button(
             onClick = {
                 sendPasswordResetEmail(email) { success, error ->
@@ -107,36 +109,50 @@ fun PasswordResetScreen() {
                 }
             },
             enabled = email.isNotEmpty(),
-            border = BorderStroke(2.dp, Color.White),
+            border = BorderStroke(2.dp, MaterialTheme.colorScheme.surface),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF152034).copy(alpha = 0.5f),
-                disabledContentColor = Color.DarkGray
+                containerColor = MaterialTheme.colorScheme.primary,
+                disabledContainerColor = MaterialTheme.colorScheme.primary.copy(0.5f),
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+                disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant
             ),
             modifier = Modifier
-                .height(45.dp)
-                .width(220.dp)
+                .height(56.dp) // mesmo tamanho da TextField
+                .fillMaxWidth(0.5f) // largura igual às caixas
         ) {
-            Text("Enviar e-mail")
+            Text("Enviar E-mail")
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
         if (emailSent) {
             Text(
-                "E-mail enviado! Verifique sua caixa de entrada.",
-                color = Color.Green,
-                fontWeight = FontWeight.Bold
+                "Um E-mail para redefinição foi enviado!\n" +
+                        "Verifique sua caixa de entrada.",
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Normal,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentWidth(Alignment.CenterHorizontally),
+                textAlign = TextAlign.Center
+
             )
         }
 
         if (errorMessage.isNotEmpty()) {
             Text(
-                errorMessage,
+                "Erro ao enviar E-mail.",
                 color = Color.Red,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Normal,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentWidth(Alignment.CenterHorizontally),
+                textAlign = TextAlign.Center
             )
         }
     }
+
+    // Botão Voltar
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -154,12 +170,16 @@ fun PasswordResetScreen() {
                 contentDescription = "Voltar",
                 tint = MaterialTheme.colorScheme.onBackground
             )
-            Text("Voltar", fontSize = 15.sp, color = MaterialTheme.colorScheme.onBackground, textDecoration = TextDecoration.Underline)
+            Text(
+                "Voltar",
+                fontSize = 15.sp,
+                color = MaterialTheme.colorScheme.onBackground,
+                textDecoration = TextDecoration.Underline
+            )
         }
     }
-
-
 }
+
 
 fun sendPasswordResetEmail(email: String, onResult: (Boolean, String?) -> Unit) {
     val auth = Firebase.auth
