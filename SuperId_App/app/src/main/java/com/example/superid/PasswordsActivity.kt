@@ -14,11 +14,15 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -28,6 +32,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -35,6 +40,7 @@ import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -45,13 +51,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import com.example.superid.ui.theme.SuperIdTheme
 import com.example.superid.ui.theme.ui.common.PasswordRow
 import com.example.superid.ui.theme.ui.common.StatusAndNavigationBarColors
+import com.example.superid.ui.theme.ui.common.TextFieldDesignForLoginAndSignUp
 import com.example.superid.ui.theme.ui.common.TextFieldDesignForMainScreen
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
@@ -288,7 +301,7 @@ fun PasswordsScreenDesign(
     val context = LocalContext.current
     Scaffold(
         topBar = {
-            MediumTopAppBar(
+            TopAppBar(
                 title = {
                     Row(
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -296,7 +309,7 @@ fun PasswordsScreenDesign(
                     ){
                         Icon(
                             painter = painterResource(iconPainter),
-                            tint = MaterialTheme.colorScheme.onPrimary,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             contentDescription = "Icone da categoria",
                             modifier = Modifier
                                 .wrapContentHeight()
@@ -304,14 +317,14 @@ fun PasswordsScreenDesign(
                         )
                         Spacer(Modifier.width(8.dp))
                         if (categoria != null) {
-                            Text("${categoria.replaceFirstChar { it.uppercase() }}:", color = MaterialTheme.colorScheme.onPrimary)
+                            Text("${categoria.replaceFirstChar { it.uppercase() }}:", color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }else{
-                            Text("Senhas:", color = MaterialTheme.colorScheme.onPrimary)
+                            Text("Senhas:", color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant
                 ),
                 navigationIcon = {
                     IconButton(
@@ -323,7 +336,7 @@ fun PasswordsScreenDesign(
                         Icon(
                             imageVector = Icons.Default.KeyboardArrowLeft,
                             contentDescription = "Voltar",
-                            tint = MaterialTheme.colorScheme.onPrimary
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 },
@@ -339,7 +352,7 @@ fun PasswordsScreenDesign(
                             Icon(
                                 imageVector = Icons.Default.Search,
                                 contentDescription = "Buscar",
-                                tint = MaterialTheme.colorScheme.onPrimary
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }
@@ -367,7 +380,7 @@ fun PasswordsScreenDesign(
                     Icon(
                         painter = painterResource(R.drawable.qr_code),
                         contentDescription = "Escanear QR-Code",
-                        tint = MaterialTheme.colorScheme.onPrimary,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(28.dp)
                     )
                 }
@@ -381,10 +394,10 @@ fun PasswordsScreenDesign(
                     Icon(
                         imageVector = Icons.Default.Add,
                         contentDescription = "Criar Categoria",
-                        tint = MaterialTheme.colorScheme.onPrimary,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(28.dp)
                     )
-                    Text("Adicionar senha")
+                    Text("Adicionar senha", color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
         }
@@ -429,11 +442,11 @@ fun AddPasswordDialog(
                 verticalArrangement = Arrangement.SpaceBetween,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                TextFieldDesignForMainScreen(value = senha.login, onValueChange = {senha = senha.copy(login = it)}, label = "Login(opcional)")
+                TextFieldDesignForLoginAndSignUp(value = senha.login, onValueChange = {senha = senha.copy(login = it)}, label = "Login(opcional)")
                 Spacer(modifier = Modifier.size(4.dp))
-                TextFieldDesignForMainScreen(value = senha.senha, onValueChange = {senha = senha.copy(senha = it)}, label = "Senha(*obrigatório)", isPassword = true)
+                TextFieldDesignForLoginAndSignUp(value = senha.senha, onValueChange = {senha = senha.copy(senha = it)}, label = "Senha(*obrigatório)", isPassword = true)
                 Spacer(modifier = Modifier.size(4.dp))
-                TextFieldDesignForMainScreen(value = senha.descricao, onValueChange = {senha = senha.copy(descricao = it)}, label = "Descrição(opcional)")
+                TextFieldDesignForLoginAndSignUp(value = senha.descricao, onValueChange = {senha = senha.copy(descricao = it)}, label = "Descrição(opcional)")
             }
         },
         confirmButton = {
@@ -441,61 +454,148 @@ fun AddPasswordDialog(
                 onClick = { onConfirm(senha) },
                 enabled = senha.senha.isNotEmpty()
             ) {
-                Text("Confirmar", color = MaterialTheme.colorScheme.onPrimaryContainer)
+                Text("Confirmar", color = MaterialTheme.colorScheme.onBackground)
             }
         },
         dismissButton = {
             TextButton(
                 onClick = onDismiss
             ) {
-                Text("Cancelar", color = MaterialTheme.colorScheme.onPrimaryContainer)
+                Text("Cancelar", color = MaterialTheme.colorScheme.onBackground)
             }
         },
-        containerColor = MaterialTheme.colorScheme.primary, // Cor de fundo do dialog
-        titleContentColor = MaterialTheme.colorScheme.onPrimary, // Cor do título
-        textContentColor = MaterialTheme.colorScheme.onPrimary, // Cor do texto
+        containerColor = MaterialTheme.colorScheme.background, // Cor de fundo do dialog
+        titleContentColor = MaterialTheme.colorScheme.onBackground, // Cor do título
+        textContentColor = MaterialTheme.colorScheme.onBackground, // Cor do texto
     )
+}
+
+
+@Composable
+fun PasswordInfo(
+    senha: Senha
+){
+    Column(
+        horizontalAlignment = Alignment.Start,
+    ) {
+        Column(
+            Modifier.padding(bottom = 5.dp)
+        ) {
+            Text(
+                "Login:",
+                fontWeight = FontWeight.Bold,
+                fontSize = 19.sp
+            )
+            Text(senha.login, fontSize = 19.sp)
+        }
+        Column(
+            Modifier.padding(bottom = 5.dp)
+        ) {
+            Text(
+                "Senha:",
+                fontWeight = FontWeight.Bold,
+                fontSize = 19.sp
+            )
+            Text(senha.senha, fontSize = 19.sp)
+        }
+        Column {
+            Text(
+                "Descrição:",
+                fontWeight = FontWeight.Bold,
+                fontSize = 19.sp
+            )
+            Text(senha.descricao, fontSize = 19.sp)
+        }
+    }
 }
 
 @Composable
 fun ViewPasswordInfoDialog(
     senha: Senha,
     onDismiss: () -> Unit,
+    onDelete: () -> Unit,
     onConfirm: () -> Unit
 ){
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            Text(text = "Informação da senha:")
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ){
+                Text(text = "Informação da senha")
+                Spacer(modifier = Modifier.weight(1f))
+                IconButton(
+                    onClick = onDelete
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.delete),
+                        contentDescription = "Apagar senha",
+                        modifier = Modifier.size(24.dp, 34.dp),
+                        tint = Color.Red
+                    )
+                }
+            }
         },
         modifier = Modifier.wrapContentSize(),
         text = {
-            Column(
-                verticalArrangement = Arrangement.SpaceBetween,
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Text("Login:\n${senha.login}")
-                Text("Senha:\n${senha.senha}")
-                Text("Descrição:\n${senha.descricao}")
-            }
+            PasswordInfo(senha)
         },
         confirmButton = {
             TextButton(
                 onClick = onConfirm
             ) {
-                Text("Editar", color = MaterialTheme.colorScheme.onPrimaryContainer)
+                Text("Editar", color = MaterialTheme.colorScheme.onBackground)
             }
         },
         dismissButton = {
             TextButton(
                 onClick = onDismiss
             ) {
-                Text("Voltar", color = MaterialTheme.colorScheme.onPrimaryContainer)
+                Text("Voltar", color = MaterialTheme.colorScheme.onBackground)
             }
         },
-        containerColor = MaterialTheme.colorScheme.primary, // Cor de fundo do dialog
-        titleContentColor = MaterialTheme.colorScheme.onPrimary, // Cor do título
-        textContentColor = MaterialTheme.colorScheme.onPrimary, // Cor do texto
+        containerColor = MaterialTheme.colorScheme.background, // Cor de fundo do dialog
+        titleContentColor = MaterialTheme.colorScheme.onBackground, // Cor do título
+        textContentColor = MaterialTheme.colorScheme.onBackground, // Cor do texto
+    )
+}
+
+@Composable
+fun ConfirmDeletePasswordDialog(
+    senha: Senha,
+    onDelete: () -> Unit,
+    onDismiss: () -> Unit,
+){
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text("Deseja apagar esta senha?")
+        },
+        modifier = Modifier.wrapContentSize(),
+        text = {
+            Column(
+                horizontalAlignment = Alignment.Start
+            ) {
+                PasswordInfo(senha)
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = onDelete
+            ) {
+                Text("Sim", color = MaterialTheme.colorScheme.tertiary)
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = onDismiss
+            ) {
+                Text("Cancelar", color = MaterialTheme.colorScheme.onBackground)
+            }
+        },
+        containerColor = MaterialTheme.colorScheme.background, // Cor de fundo do dialog
+        titleContentColor = MaterialTheme.colorScheme.onBackground, // Cor do título
+        textContentColor = MaterialTheme.colorScheme.onBackground, // Cor do texto
     )
 }
 
@@ -503,7 +603,6 @@ fun ViewPasswordInfoDialog(
 fun EditPasswordDialog(
     senha: Senha,
     onDismiss: () -> Unit,
-    onDelete: () -> Unit,
     onConfirm: (Senha) -> Unit
 ){
     var senhaState by remember { mutableStateOf(senha) }
@@ -518,41 +617,31 @@ fun EditPasswordDialog(
                 verticalArrangement = Arrangement.SpaceBetween,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                TextFieldDesignForMainScreen(value = senhaState.login, onValueChange = {senhaState = senhaState.copy(login = it)}, label = "Login(opcional)")
+                TextFieldDesignForLoginAndSignUp(value = senhaState.login, onValueChange = {senhaState = senhaState.copy(login = it)}, label = "Login(opcional)")
                 Spacer(modifier = Modifier.size(4.dp))
-                TextFieldDesignForMainScreen(value = senhaState.senha, onValueChange = {senhaState = senhaState.copy(senha = it)}, label = "Senha(*obrigatório)", isPassword = true)
+                TextFieldDesignForLoginAndSignUp(value = senhaState.senha, onValueChange = {senhaState = senhaState.copy(senha = it)}, label = "Senha(*obrigatório)", isPassword = true)
                 Spacer(modifier = Modifier.size(4.dp))
-                TextFieldDesignForMainScreen(value = senhaState.descricao, onValueChange = {senhaState = senhaState.copy(descricao = it)}, label = "Descrição(opcional)")
+                TextFieldDesignForLoginAndSignUp(value = senhaState.descricao, onValueChange = {senhaState = senhaState.copy(descricao = it)}, label = "Descrição(opcional)")
             }
         },
         confirmButton = {
-            Row(
-                horizontalArrangement = Arrangement.SpaceBetween
-            ){
-                TextButton(
-                    onClick = onDelete
-                ) {
-                    Text("Apagar senha", color = MaterialTheme.colorScheme.tertiary)
-                }
-
-                TextButton(
-                    onClick = { onConfirm(senhaState) }
-
-                ) {
-                    Text("Confirmar", color = MaterialTheme.colorScheme.onPrimaryContainer)
-                }
+            TextButton(
+                onClick = { onConfirm(senhaState) },
+                enabled = senhaState.senha.isNotEmpty()
+            ) {
+                Text("Confirmar", color = MaterialTheme.colorScheme.onBackground)
             }
         },
         dismissButton = {
             TextButton(
                 onClick = onDismiss
             ) {
-                Text("Voltar", color = MaterialTheme.colorScheme.onPrimaryContainer)
+                Text("Voltar", color = MaterialTheme.colorScheme.onBackground)
             }
         },
-        containerColor = MaterialTheme.colorScheme.primary, // Cor de fundo do dialog
-        titleContentColor = MaterialTheme.colorScheme.onPrimary, // Cor do título
-        textContentColor = MaterialTheme.colorScheme.onPrimary, // Cor do texto
+        containerColor = MaterialTheme.colorScheme.background, // Cor de fundo do dialog
+        titleContentColor = MaterialTheme.colorScheme.onBackground, // Cor do título
+        textContentColor = MaterialTheme.colorScheme.onBackground, // Cor do texto
     )
 }
 
@@ -569,38 +658,46 @@ fun ColumnSenhas(
     var showInfoDialog by remember { mutableStateOf(false) } //variavel do estado de exibição do dialog de informação
     var showEditDialog by remember { mutableStateOf(false) } //variavel do estado de exibição do dialog de editar
     var senhaClicada by remember { mutableStateOf(Senha())} //variavel para guardar a senha da row que foi clicada
+    var showConfirmDelete by remember { mutableStateOf(false) } //variavel do estado de exibição do dialog de confirmação de deletar senha
     Column(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxSize()
     ) {
-        senhasCriadas.forEach{senha ->  //para cada senha da lista é criada uma row
-            PasswordRow(
-                contentDescripiton = "Senha: ${senha.descricao}",
-                text = "Senha: ${senha.descricao}",
-                onClick = {
-                    senhaClicada = senha
-                    if (uid != null) {
-                        ChaveAesUtils.recuperarChaveDoUsuario(
-                            uid,
-                            onSuccess = { chaveBase64 ->
-                                val secretKey = CriptoUtils.base64ToSecretKey(chaveBase64)
-                                Log.d("SENHA", "$senhaClicada")
-                                senhaDescriptografada = CriptoUtils.decrypt(
-                                    encryptedText = senhaClicada.senha,  // pego do Firestore
-                                    ivBase64 = senhaClicada.iv,                        // pego do Firestore
-                                    secretKey = secretKey
-                                )
-                                Log.d("DESCRIPTO", "Senha descriptografada:$senhaDescriptografada", )
-                                showInfoDialog = true
-                            },
-                            onFailure = { e ->
-                                Log.e("DESCRIPTO", "Erro ao descriptografar senha", e)
-                            }
-                        )
+        HorizontalDivider(
+            thickness = 4.dp,
+            color = Color.White,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+        LazyColumn {
+            items(senhasCriadas){senha->
+                PasswordRow(
+                    contentDescripiton = senha.descricao,
+                    text = senha.descricao,
+                    onClick = {
+                        senhaClicada = senha
+                        if (uid != null) {
+                            ChaveAesUtils.recuperarChaveDoUsuario(
+                                uid,
+                                onSuccess = { chaveBase64 ->
+                                    val secretKey = CriptoUtils.base64ToSecretKey(chaveBase64)
+                                    Log.d("SENHA", "$senhaClicada")
+                                    senhaDescriptografada = CriptoUtils.decrypt(
+                                        encryptedText = senhaClicada.senha,  // pego do Firestore
+                                        ivBase64 = senhaClicada.iv,                        // pego do Firestore
+                                        secretKey = secretKey
+                                    )
+                                    Log.d("DESCRIPTO", "Senha descriptografada:$senhaDescriptografada", )
+                                    showInfoDialog = true
+                                },
+                                onFailure = { e ->
+                                    Log.e("DESCRIPTO", "Erro ao descriptografar senha", e)
+                                }
+                            )
+                        }
                     }
-                }
-            )
+                )
+            }
         }
     }
     if(showInfoDialog){  //exibe o dialog de informações da senha
@@ -610,6 +707,10 @@ fun ColumnSenhas(
                 showInfoDialog = false
                 senhaDescriptografada = ""
             },
+            onDelete = {
+                showConfirmDelete = true
+                showInfoDialog = false
+            },
             onConfirm = {
                 showInfoDialog = false
                 showEditDialog = true
@@ -617,16 +718,26 @@ fun ColumnSenhas(
             }
         )
     }
+    if(showConfirmDelete){
+        ConfirmDeletePasswordDialog(
+            senha = senhaClicada.copy(senha = senhaDescriptografada),
+            onDelete = {
+                DeletePasswordOnFirestore(categoria, senhaClicada, db, auth)
+                showConfirmDelete = false
+
+                viewModel.buscarSenhas(categoria)
+            },
+            onDismiss = {
+                showConfirmDelete = false
+                senhaDescriptografada = ""
+            }
+        ) 
+    }
+    
     if(showEditDialog){ //exibe o dialog de editar senha
         EditPasswordDialog(
             senha = senhaClicada.copy(senha = senhaDescriptografada),
             onDismiss = { showEditDialog = false },
-            onDelete = {
-                DeletePasswordOnFirestore(categoria, senhaClicada, db, auth)
-                showEditDialog = false
-
-                viewModel.buscarSenhas(categoria)
-            },
             onConfirm = { senhaAtualizada ->
                 EditPasswordOnFirestore(
                     categoria = categoria,

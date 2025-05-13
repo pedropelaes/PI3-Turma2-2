@@ -43,6 +43,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
@@ -264,25 +265,33 @@ fun PasswordRow(contentDescripiton: String, text: String, onClick: () -> Unit){
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .size(80.dp)
-            .padding(vertical = 2.dp)
-            .background(color = MaterialTheme.colorScheme.secondary)
+            .height(112.dp)
+            .padding(8.dp)
+            .shadow(
+                elevation = 8.dp,
+                shape = RoundedCornerShape(15.dp),
+                clip = false
+            )
+            .background(
+                color = MaterialTheme.colorScheme.secondary,
+                shape = RoundedCornerShape(15.dp)
+            )
             .clickable { onClick() }
     ){
         Icon(
             painter = painterResource(R.drawable.logo_without_text,),
-            tint = MaterialTheme.colorScheme.inverseOnSurface,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
             contentDescription = contentDescripiton,
             modifier = Modifier.size(48.dp)
                 .align(Alignment.CenterVertically)
-                .padding(start = 8.dp)
+                .padding(start = 16.dp)
         )
 
         Spacer(modifier = Modifier.size(8.dp))
 
         Text(
             text = text,
-            color = MaterialTheme.colorScheme.inverseOnSurface,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
             fontSize = 24.sp,
             modifier = Modifier.align(Alignment.CenterVertically)
@@ -295,7 +304,7 @@ fun PasswordRow(contentDescripiton: String, text: String, onClick: () -> Unit){
         Icon(
             imageVector = Icons.Default.KeyboardArrowRight,
             contentDescription = "Abrir senha",
-            tint = MaterialTheme.colorScheme.inverseOnSurface,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.align(Alignment.CenterVertically)
         )
     }

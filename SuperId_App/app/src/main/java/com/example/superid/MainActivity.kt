@@ -231,25 +231,25 @@ fun MainScreenDesign(
                         painter = R.drawable.smartphone,
                         contentDescripiton = "Categoria Aplicativos",
                         text = "Aplicativos",
-                        onClick = { OpenPasswordsActivity("aplicativos", context) },
+                        onClick = { OpenPasswordsActivity("aplicativos", R.drawable.smartphone, context) },
                     )
                     CategoryRow(
                         painter = R.drawable.email,
                         contentDescripiton = "Categoria Emails",
                         text = "Emails",
-                        onClick = { OpenPasswordsActivity("emails", context) },
+                        onClick = { OpenPasswordsActivity("emails", R.drawable.email, context) },
                     )
                     CategoryRow(
                         painter = R.drawable.world_wide_web,
                         contentDescripiton = "Categoria Sites",
                         text = "Sites",
-                        onClick = { OpenPasswordsActivity("sites", context) },
+                        onClick = { OpenPasswordsActivity("sites", R.drawable.world_wide_web, context) },
                     )
                     CategoryRow(
                         painter = R.drawable.keyboard,
                         contentDescripiton = "Categoria Teclados de acesso físicos",
                         text = "Teclados de acesso físicos",
-                        onClick = { OpenPasswordsActivity("teclados", context) },
+                        onClick = { OpenPasswordsActivity("teclados", R.drawable.keyboard, context) },
                     )
                 }
                 items(categoriasCriadas) { nome ->
@@ -263,7 +263,7 @@ fun MainScreenDesign(
                             painter = R.drawable.smartphone,
                             contentDescripiton = "Categoria $nome",
                             text = nome,
-                            onClick = { OpenPasswordsActivity(nome, context) },
+                            onClick = { OpenPasswordsActivity(nome, R.drawable.logo_without_text, context) },
                             modifier = Modifier.weight(1f)
                         )
                         IconButton(
@@ -452,9 +452,10 @@ fun CategoryRow(
     }
 }
 
-fun OpenPasswordsActivity(categoria: String, context: Context) {
+fun OpenPasswordsActivity(categoria: String, icone: Int = R.drawable.logo_without_text, context: Context) {
     val intent = Intent(context, PasswordsActivity::class.java).apply {
         putExtra("categoria", categoria)
+        putExtra("icone", icone)
     }
     context.startActivity(intent)
 }
