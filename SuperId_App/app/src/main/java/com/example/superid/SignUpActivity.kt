@@ -100,6 +100,7 @@ fun SaveNewAccount(name: String, email: String, uid: String, tries: Int = 0){
         "name" to name,
         "email" to email,
         "AESkey" to chave,
+        "emailVerified" to false
     )
     db.collection("users").document(uid).set(taskDoc)
         .addOnCompleteListener{task->
@@ -253,3 +254,5 @@ fun checkIfEmailExists(email: String, onResult: (Boolean) -> Unit) {
             }
         }
 }
+
+

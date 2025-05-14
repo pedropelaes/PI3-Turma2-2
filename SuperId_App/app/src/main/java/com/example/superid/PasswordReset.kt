@@ -27,9 +27,13 @@ import com.example.superid.ui.theme.ui.common.LoginAndSignUpDesign
 import com.example.superid.ui.theme.ui.common.SuperIdTitle
 import com.example.superid.ui.theme.ui.common.SuperIdTitlePainterVerified
 import com.example.superid.ui.theme.ui.common.TextFieldDesignForLoginAndSignUp
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.launch
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.ktx.firestore
+
 
 
 
@@ -98,16 +102,39 @@ fun PasswordResetScreen() {
         // Botão com o mesmo estilo e dimensões das caixas
         Button(
             onClick = {
-                sendPasswordResetEmail(email) { success, error ->
-                    if (success) {
-                        emailSent = true
-                        errorMessage = ""
-                    } else {
-                        emailSent = false
-                        errorMessage = error ?: "Erro desconhecido."
+                val db = Firebase.firestore
+                db.collection("users")
+                    .whereEqualTo("email", email)
+                    .get()
+                    .addOnSuccessListener { result ->
+                        if (!result.isEmpty) {
+                            val doc = result.documents[0]
+                            val emailVerified = doc.getBoolean("emailVerified") ?: false
+                            if (emailVerified) {
+                                sendPasswordResetEmail(email) { success, error ->
+                                    if (success) {
+                                        emailSent = true
+                                        errorMessage = ""
+                                    } else {
+                                        emailSent = false
+                                        errorMessage = error ?: "Erro desconhecido."
+                                    }
+                                }
+                            } else {
+                                errorMessage = "Você precisa verificar seu e-mail antes de recuperar a senha."
+                                emailSent = false
+                            }
+                        } else {
+                            errorMessage = "E-mail não encontrado no sistema."
+                            emailSent = false
+                        }
                     }
-                }
+                    .addOnFailureListener {
+                        errorMessage = "Erro ao verificar status do e-mail."
+                        emailSent = false
+                    }
             },
+
             enabled = email.isNotEmpty(),
             border = BorderStroke(2.dp, MaterialTheme.colorScheme.surface),
             colors = ButtonDefaults.buttonColors(
@@ -182,15 +209,36 @@ fun PasswordResetScreen() {
 
 
 fun sendPasswordResetEmail(email: String, onResult: (Boolean, String?) -> Unit) {
-    val auth = Firebase.auth
-    auth.sendPasswordResetEmail(email)
+    val cleanEmail = email.trim().lowercase()
+    FirebaseAuth.getInstance().fetchSignInMethodsForEmail(cleanEmail)
         .addOnCompleteListener { task ->
             if (task.isSuccessful) {
-                Log.d("PasswordReset", "Email de recuperação enviado.")
-                onResult(true, null)
+                val signInMethods = task.result?.signInMethods
+                Log.d("RESET", "Métodos de login: $signInMethods")
+                if (!signInMethods.isNullOrEmpty()) {
+                    FirebaseAuth.getInstance().sendPasswordResetEmail(cleanEmail)
+                        .addOnCompleteListener { resetTask ->
+                            if (resetTask.isSuccessful) {
+                                onResult(true, null)
+                            } else {
+                                val exception = resetTask.exception
+                                Log.e("RESET", "Erro ao enviar email:", exception)
+                                onResult(false, exception?.localizedMessage ?: "Erro ao enviar e-mail de recuperação.")
+                            }
+                        }
+                } else {
+                    onResult(false, "Este e-mail não está registrado.")
+                }
             } else {
-                Log.e("PasswordReset", "Erro ao enviar email: ${task.exception?.message}")
-                onResult(false, task.exception?.message)
+                val exception = task.exception
+                Log.e("RESET", "Erro ao verificar métodos de login:", exception)
+                onResult(false, "Erro ao verificar o e-mail.")
             }
         }
 }
+
+
+
+
+
+
