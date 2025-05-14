@@ -24,25 +24,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.superid.ui.theme.SuperIdTheme
 import com.example.superid.ui.theme.ui.common.LoginAndSignUpDesign
-import com.example.superid.ui.theme.ui.common.SuperIdTitle
 import com.example.superid.ui.theme.ui.common.SuperIdTitlePainterVerified
 import com.example.superid.ui.theme.ui.common.TextFieldDesignForLoginAndSignUp
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
-import kotlinx.coroutines.launch
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.firestore.ktx.firestore
-
-
-
 
 class PasswordReset : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             SuperIdTheme {
-                LoginAndSignUpDesign(){
+                LoginAndSignUpDesign {
                     PasswordResetScreen()
                 }
             }
@@ -89,52 +80,30 @@ fun PasswordResetScreen() {
                 .padding(horizontal = 16.dp)
         )
 
-
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Campo de e-mail com o estilo padronizado
-        TextFieldDesignForLoginAndSignUp(value = email, onValueChange = { email = it },
+        TextFieldDesignForLoginAndSignUp(
+            value = email,
+            onValueChange = { email = it },
             label = stringResource(R.string.type_your_email)
         )
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Botão com o mesmo estilo e dimensões das caixas
         Button(
             onClick = {
-                val db = Firebase.firestore
-                db.collection("users")
-                    .whereEqualTo("email", email)
-                    .get()
-                    .addOnSuccessListener { result ->
-                        if (!result.isEmpty) {
-                            val doc = result.documents[0]
-                            val emailVerified = doc.getBoolean("emailVerified") ?: false
-                            if (emailVerified) {
-                                sendPasswordResetEmail(email) { success, error ->
-                                    if (success) {
-                                        emailSent = true
-                                        errorMessage = ""
-                                    } else {
-                                        emailSent = false
-                                        errorMessage = error ?: "Erro desconhecido."
-                                    }
-                                }
-                            } else {
-                                errorMessage = "Você precisa verificar seu e-mail antes de recuperar a senha."
-                                emailSent = false
-                            }
-                        } else {
-                            errorMessage = "E-mail não encontrado no sistema."
-                            emailSent = false
-                        }
-                    }
-                    .addOnFailureListener {
-                        errorMessage = "Erro ao verificar status do e-mail."
-                        emailSent = false
-                    }
-            },
+                val cleanEmail = email.trim().lowercase()
 
+                sendPasswordResetEmail(cleanEmail) { success, error ->
+                    if (success) {
+                        emailSent = true
+                        errorMessage = ""
+                    } else {
+                        emailSent = false
+                        errorMessage = error ?: "Erro desconhecido."
+                    }
+                }
+            },
             enabled = email.isNotEmpty(),
             border = BorderStroke(2.dp, MaterialTheme.colorScheme.surface),
             colors = ButtonDefaults.buttonColors(
@@ -144,8 +113,8 @@ fun PasswordResetScreen() {
                 disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant
             ),
             modifier = Modifier
-                .height(56.dp) // mesmo tamanho da TextField
-                .fillMaxWidth(0.5f) // largura igual às caixas
+                .height(56.dp)
+                .fillMaxWidth(0.5f)
         ) {
             Text("Enviar E-mail")
         }
@@ -154,21 +123,19 @@ fun PasswordResetScreen() {
 
         if (emailSent) {
             Text(
-                "Um E-mail para redefinição foi enviado!\n" +
-                        "Verifique sua caixa de entrada.",
+                "Um E-mail para redefinição foi enviado!\nVerifique sua caixa de entrada.",
                 color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Normal,
                 modifier = Modifier
                     .fillMaxWidth()
                     .wrapContentWidth(Alignment.CenterHorizontally),
                 textAlign = TextAlign.Center
-
             )
         }
 
         if (errorMessage.isNotEmpty()) {
             Text(
-                "Erro ao enviar E-mail.",
+                errorMessage,
                 color = Color.Red,
                 fontWeight = FontWeight.Normal,
                 modifier = Modifier
@@ -179,10 +146,7 @@ fun PasswordResetScreen() {
         }
     }
 
-    // Botão Voltar
-    Box(
-        modifier = Modifier.fillMaxSize()
-    ) {
+    Box(modifier = Modifier.fillMaxSize()) {
         TextButton(
             onClick = {
                 val intent = Intent(context, LogInActivity::class.java)
@@ -207,38 +171,41 @@ fun PasswordResetScreen() {
     }
 }
 
-
 fun sendPasswordResetEmail(email: String, onResult: (Boolean, String?) -> Unit) {
     val cleanEmail = email.trim().lowercase()
-    FirebaseAuth.getInstance().fetchSignInMethodsForEmail(cleanEmail)
+    val auth = FirebaseAuth.getInstance()
+
+    auth.fetchSignInMethodsForEmail(cleanEmail)
         .addOnCompleteListener { task ->
             if (task.isSuccessful) {
                 val signInMethods = task.result?.signInMethods
-                Log.d("RESET", "Métodos de login: $signInMethods")
                 if (!signInMethods.isNullOrEmpty()) {
-                    FirebaseAuth.getInstance().sendPasswordResetEmail(cleanEmail)
-                        .addOnCompleteListener { resetTask ->
-                            if (resetTask.isSuccessful) {
-                                onResult(true, null)
-                            } else {
-                                val exception = resetTask.exception
-                                Log.e("RESET", "Erro ao enviar email:", exception)
-                                onResult(false, exception?.localizedMessage ?: "Erro ao enviar e-mail de recuperação.")
+                    // Tenta assinar com senha falsa apenas para acessar currentUser
+                    auth.signInWithEmailAndPassword(cleanEmail, "senhaInvalida123")
+                        .addOnCompleteListener { loginTask ->
+                            val user = auth.currentUser
+                            user?.reload()?.addOnSuccessListener {
+                                if (user.isEmailVerified) {
+                                    auth.sendPasswordResetEmail(cleanEmail)
+                                        .addOnCompleteListener { resetTask ->
+                                            if (resetTask.isSuccessful) {
+                                                onResult(true, null)
+                                            } else {
+                                                onResult(false, "Erro ao enviar e-mail de recuperação.")
+                                            }
+                                        }
+                                } else {
+                                    onResult(false, "Você precisa verificar seu e-mail antes de recuperar a senha.")
+                                }
+                            } ?: run {
+                                onResult(false, "Erro ao carregar usuário. Verifique o e-mail.")
                             }
                         }
                 } else {
                     onResult(false, "Este e-mail não está registrado.")
                 }
             } else {
-                val exception = task.exception
-                Log.e("RESET", "Erro ao verificar métodos de login:", exception)
                 onResult(false, "Erro ao verificar o e-mail.")
             }
         }
 }
-
-
-
-
-
-
