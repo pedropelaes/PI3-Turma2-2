@@ -3,6 +3,7 @@ package com.example.superid
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.BorderStroke
@@ -27,6 +28,9 @@ import com.example.superid.ui.theme.ui.common.LoginAndSignUpDesign
 import com.example.superid.ui.theme.ui.common.SuperIdTitlePainterVerified
 import com.example.superid.ui.theme.ui.common.TextFieldDesignForLoginAndSignUp
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 
 class PasswordReset : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -94,13 +98,11 @@ fun PasswordResetScreen() {
             onClick = {
                 val cleanEmail = email.trim().lowercase()
 
-                sendPasswordResetEmail(cleanEmail) { success, error ->
+                sendPasswordResetIfEmailVerified("usuario@email.com", "senhaDoUsuario") { success, message ->
                     if (success) {
-                        emailSent = true
-                        errorMessage = ""
+                        Toast.makeText(context, "Email de redefinição enviado!", Toast.LENGTH_LONG).show()
                     } else {
-                        emailSent = false
-                        errorMessage = error ?: "Erro desconhecido."
+                        Toast.makeText(context, "Erro: $message", Toast.LENGTH_LONG).show()
                     }
                 }
             },
@@ -171,41 +173,41 @@ fun PasswordResetScreen() {
     }
 }
 
-fun sendPasswordResetEmail(email: String, onResult: (Boolean, String?) -> Unit) {
-    val cleanEmail = email.trim().lowercase()
-    val auth = FirebaseAuth.getInstance()
+fun sendPasswordResetIfEmailVerified(
+    email: String,
+    password: String,
+    onResult: (Boolean, String?) -> Unit
+) {
+    val auth = Firebase.auth
 
-    auth.fetchSignInMethodsForEmail(cleanEmail)
-        .addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                val signInMethods = task.result?.signInMethods
-                if (!signInMethods.isNullOrEmpty()) {
-                    // Tenta assinar com senha falsa apenas para acessar currentUser
-                    auth.signInWithEmailAndPassword(cleanEmail, "senhaInvalida123")
-                        .addOnCompleteListener { loginTask ->
-                            val user = auth.currentUser
-                            user?.reload()?.addOnSuccessListener {
-                                if (user.isEmailVerified) {
-                                    auth.sendPasswordResetEmail(cleanEmail)
-                                        .addOnCompleteListener { resetTask ->
-                                            if (resetTask.isSuccessful) {
-                                                onResult(true, null)
-                                            } else {
-                                                onResult(false, "Erro ao enviar e-mail de recuperação.")
-                                            }
-                                        }
-                                } else {
-                                    onResult(false, "Você precisa verificar seu e-mail antes de recuperar a senha.")
-                                }
-                            } ?: run {
-                                onResult(false, "Erro ao carregar usuário. Verifique o e-mail.")
-                            }
+    // Tenta login com email e senha
+    auth.signInWithEmailAndPassword(email, password)
+        .addOnSuccessListener { result ->
+            val user = result.user
+
+            if (user != null && user.isEmailVerified) {
+                // Email foi verificado — envia email de redefinição de senha
+                auth.sendPasswordResetEmail(email)
+                    .addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            Log.d("PasswordReset", "Email de redefinição enviado com sucesso.")
+                            onResult(true, null)
+                        } else {
+                            Log.e("PasswordReset", "Erro ao enviar email: ${task.exception?.message}")
+                            onResult(false, task.exception?.message)
                         }
-                } else {
-                    onResult(false, "Este e-mail não está registrado.")
-                }
+
+                        // Faz logout por segurança
+                        auth.signOut()
+                    }
             } else {
-                onResult(false, "Erro ao verificar o e-mail.")
+                Log.d("PasswordReset", "Email não verificado.")
+                auth.signOut()
+                onResult(false, "O email ainda não foi verificado.")
             }
+        }
+        .addOnFailureListener { exception ->
+            Log.e("PasswordReset", "Erro ao autenticar: ${exception.message}")
+            onResult(false, "Erro ao autenticar: ${exception.message}")
         }
 }
