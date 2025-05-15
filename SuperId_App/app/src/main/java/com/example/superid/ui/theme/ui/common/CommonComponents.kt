@@ -165,14 +165,14 @@ fun SuperIdTitle(modifier: Modifier = Modifier){
     Text(
         buildAnnotatedString { //junta strings com estilos diferentes
             withStyle(
-                style = SpanStyle(fontFamily = title_font, fontSize = 28.sp, color = MaterialTheme.colorScheme.onPrimary,
+                style = SpanStyle(fontFamily = title_font, fontSize = 28.sp, color = Color.White,
                     shadow = Shadow(Color.DarkGray, offset = Offset(1f, 1f),blurRadius = 4f)
                 )
             ){
                 append("Super")
             }
             withStyle(
-                style = SpanStyle(fontFamily = title_font, fontSize = 28.sp, color = MaterialTheme.colorScheme.surfaceVariant,
+                style = SpanStyle(fontFamily = title_font, fontSize = 28.sp, color = MaterialTheme.colorScheme.primary,
                     shadow = Shadow(Color.DarkGray, offset = Offset(1f, 1f),blurRadius = 4f)
                 )
             ){
