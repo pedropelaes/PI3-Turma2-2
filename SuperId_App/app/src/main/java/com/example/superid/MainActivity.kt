@@ -82,16 +82,22 @@ fun MainScreen() {
     MainScreenDesign(
         categoriasCriadas = categoriasCriadas,
         onAdicionarCategoria = { novaCategoria ->
-            categoriasCriadas = categoriasCriadas + novaCategoria
-            userId?.let { uid ->
-                db.collection("users")
-                    .document(uid)
-                    .collection("categorias")
-                    .document(novaCategoria)
-                    .set(hashMapOf("nome" to novaCategoria))
-                    .addOnSuccessListener {
-                        Toast.makeText(context, "Categoria criada!", Toast.LENGTH_SHORT).show()
-                    }
+            val nomeNormalizado = novaCategoria.trim().lowercase()
+            val nomesExistentes = categoriasCriadas.map { it.trim().lowercase() }
+
+            if (nomeNormalizado in nomesExistentes) {
+                Toast.makeText(context, "Já existe uma categoria com esse nome.", Toast.LENGTH_SHORT).show()
+            } else {
+                categoriasCriadas = categoriasCriadas + novaCategoria
+                userId?.let { uid ->
+                    db.collection("users")
+                        .document(uid)
+                        .collection("categorias")
+                        .add(mapOf("nome" to novaCategoria))
+                        .addOnSuccessListener {
+                            Toast.makeText(context, "Categoria criada!", Toast.LENGTH_SHORT).show()
+                        }
+                }
             }
         },
         categoriaParaExcluir = categoriaParaExcluir,
@@ -306,29 +312,39 @@ fun MainScreenDesign(
                 nomeAtual = categoriaParaEditar,
                 onDismiss = { showEditDialog = false },
                 onConfirm = { novoNome ->
-                    if (novoNome.isNotBlank() && userId != null) {
-                        db.collection("users")
-                            .document(userId)
-                            .collection("categorias")
-                            .whereEqualTo("nome", categoriaParaEditar)
-                            .get()
-                            .addOnSuccessListener { documents ->
-                                for (document in documents) {
-                                    db.collection("users")
-                                        .document(userId)
-                                        .collection("categorias")
-                                        .document(document.id)
-                                        .update("nome", novoNome)
-                                        .addOnSuccessListener {
-                                            Toast.makeText(context, "Categoria renomeada!", Toast.LENGTH_SHORT).show()
-                                        }
+                    val nomeNormalizado = novoNome.trim().lowercase()
+                    val nomesExistentes = categoriasCriadas
+                        .filter { it != categoriaParaEditar }
+                        .map { it.trim().lowercase() }
+
+                    if (nomeNormalizado in nomesExistentes) {
+                        Toast.makeText(context, "Já existe uma categoria com esse nome!", Toast.LENGTH_SHORT).show()
+                    } else {
+                        if (novoNome.isNotBlank() && userId != null) {
+                            db.collection("users")
+                                .document(userId)
+                                .collection("categorias")
+                                .whereEqualTo("nome", categoriaParaEditar)
+                                .get()
+                                .addOnSuccessListener { documents ->
+                                    for (document in documents) {
+                                        db.collection("users")
+                                            .document(userId)
+                                            .collection("categorias")
+                                            .document(document.id)
+                                            .update("nome", novoNome)
+                                            .addOnSuccessListener {
+                                                Toast.makeText(context, "Categoria renomeada!", Toast.LENGTH_SHORT).show()
+                                            }
+                                    }
                                 }
-                            }
+                        }
                     }
                     showEditDialog = false
                 }
             )
         }
+
 
         if (showDialogExcluir && categoriaParaExcluir != null) {
             AlertDialog(
