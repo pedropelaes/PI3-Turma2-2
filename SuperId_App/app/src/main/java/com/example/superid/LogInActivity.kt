@@ -43,6 +43,7 @@ import com.example.superid.ui.theme.ui.common.SuperIdTitlePainter
 import com.example.superid.ui.theme.ui.common.SuperIdTitlePainterVerified
 import com.example.superid.ui.theme.ui.common.TextFieldDesignForLoginAndSignUp
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 
 class LogInActivity : AppCompatActivity() {
@@ -70,6 +71,14 @@ fun PerformLogin(email: String, password: String, context: Context, onResult: (B
                 Log.d("LOGIN", "Login efetuado.")
                 val intent = Intent(context, MainActivity::class.java)
                 context.startActivity(intent)
+                val user = Firebase.auth.currentUser
+                user?.reload()?.addOnSuccessListener {
+                    if (user.isEmailVerified) {
+                        val db = Firebase.firestore
+                        db.collection("users").document(user.uid)
+                            .update("emailVerified", true)
+                    }
+                }
             }else{
                 Log.d("LOGIN", "Login efetuado.")
                 onResult(false)
@@ -127,7 +136,9 @@ fun LoginScreen(){
                 containerColor = MaterialTheme.colorScheme.primary,
                 disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant
             ),
-            modifier = Modifier.height(45.dp).width(160.dp)
+            modifier = Modifier
+                .fillMaxWidth(0.85f) // Igual às caixas de texto
+                .height(50.dp)
         ){
             Text("Fazer Login")
         }
@@ -140,7 +151,7 @@ fun LoginScreen(){
             },
             modifier = Modifier
                 .height(45.dp)
-                .width(160.dp)
+                .width(190.dp)
                 .wrapContentSize()
         ) {
             Text("Esqueceu sua senha?", textDecoration = TextDecoration.Underline, color = MaterialTheme.colorScheme.onBackground)

@@ -40,6 +40,7 @@ import com.example.superid.ui.theme.ui.common.SuperIdTitle
 import com.example.superid.ui.theme.ui.common.SuperIdTitlePainter
 import com.example.superid.ui.theme.ui.common.SuperIdTitlePainterVerified
 import com.example.superid.ui.theme.ui.common.TextFieldDesignForLoginAndSignUp
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -99,6 +100,7 @@ fun SaveNewAccount(name: String, email: String, uid: String, tries: Int = 0){
         "name" to name,
         "email" to email,
         "AESkey" to chave,
+        "emailVerified" to false
     )
     db.collection("users").document(uid).set(taskDoc)
         .addOnCompleteListener{task->
@@ -187,21 +189,33 @@ fun SignUpScreen() {
 
         Button(
             onClick = {
-                PerformSignUp(name, email, masterPassword){msg ->
-                result = msg
+                if (!isValidEmail(email)) {
+                    result = "Por favor, insira um e-mail válido."
+                    return@Button
+                }
+
+                checkIfEmailExists(email) { exists ->
+                    if (exists) {
+                        result = "Este e-mail já está em uso."
+                    } else {
+                        PerformSignUp(name, email, masterPassword) { msg ->
+                            result = msg
+                        }
+                    }
                 }
             },
-            enabled = if(masterPassword == confirmPassword && name.isNotEmpty() && email.isNotEmpty() && masterPassword.isNotEmpty()) true else false,
+            enabled = masterPassword == confirmPassword &&
+                    name.isNotEmpty() && email.isNotEmpty() && masterPassword.isNotEmpty(),
             border = BorderStroke(2.dp, MaterialTheme.colorScheme.secondary),
             colors = ButtonDefaults.buttonColors(
-                disabledContainerColor = MaterialTheme.colorScheme.primary.copy(0.5f),
+                disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
                 containerColor = MaterialTheme.colorScheme.primary,
                 disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant
             ),
             modifier = Modifier
-                .height(45.dp)
-                .width(160.dp)
-        ){
+                .fillMaxWidth(0.85f) // Igual às caixas de texto
+                .height(50.dp)
+        ) {
             Text("Fazer Cadastro")
         }
 
@@ -226,3 +240,19 @@ fun SignUpScreen() {
         }
     }
 }
+fun isValidEmail(email: String): Boolean {
+    return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
+}
+fun checkIfEmailExists(email: String, onResult: (Boolean) -> Unit) {
+    FirebaseAuth.getInstance().fetchSignInMethodsForEmail(email)
+        .addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                val signInMethods = task.result?.signInMethods
+                onResult(!signInMethods.isNullOrEmpty())
+            } else {
+                onResult(false)
+            }
+        }
+}
+
+

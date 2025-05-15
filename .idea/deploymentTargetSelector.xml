@@ -5,9 +5,11 @@
       <SelectionState runConfigName="SuperId.app">
         <option name="selectionMode" value="DROPDOWN" />
         <DropdownSelection timestamp="2025-05-12T18:51:08.312681900Z">
+        <DropdownSelection timestamp="2025-05-14T00:37:49.549906200Z">
           <Target type="DEFAULT_BOOT">
             <handle>
               <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\yrafa\.android\avd\Pixel_9_Pro.avd" />
+              <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\felip\.android\avd\Pixel_4_API_33_1.avd" />
             </handle>
           </Target>
         </DropdownSelection>

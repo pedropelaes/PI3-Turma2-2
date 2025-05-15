@@ -29,9 +29,13 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -61,6 +65,8 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
@@ -82,59 +88,99 @@ import com.google.firebase.firestore.auth.User
 
 
 @Composable
-//necessário passar a função de atualização por conta do estado do campo de texto ser gerenciado pela activity
-//isPassoword é passado quando true quando a função for chamada para senha,
-//label recebe um valor de strings.xml
-fun TextFieldDesignForLoginAndSignUp(value: String, onValueChange: (String) -> Unit, label: String, isPassword: Boolean = false){
+fun TextFieldDesignForLoginAndSignUp(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    isPassword: Boolean = false
+
+) {
+    val leadingIcon = when {
+        label.contains("nome", ignoreCase = true) -> Icons.Default.Person
+        label.contains("email", ignoreCase = true) -> Icons.Default.Email
+        isPassword -> Icons.Default.Lock
+        else -> null
+    }
+
     TextField(
         value = value,
         onValueChange = onValueChange,
         label = { Text(label) },
         singleLine = true,
         shape = CircleShape,
-        visualTransformation = if(isPassword) PasswordVisualTransformation() else VisualTransformation.None,
+        visualTransformation = if (isPassword) PasswordVisualTransformation() else VisualTransformation.None,
+        leadingIcon = {
+            leadingIcon?.let {
+                Icon(imageVector = it, contentDescription = null, tint = MaterialTheme.colorScheme.onBackground)
+            }
+        },
         colors = TextFieldDefaults.colors(
-            unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+            unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
             unfocusedLabelColor = MaterialTheme.colorScheme.onBackground,
             unfocusedContainerColor = MaterialTheme.colorScheme.background,
-            focusedContainerColor = MaterialTheme.colorScheme.surface,
+            focusedContainerColor = MaterialTheme.colorScheme.background,
             focusedTextColor = MaterialTheme.colorScheme.onBackground,
-            focusedLabelColor = MaterialTheme.colorScheme.onBackground,
+            focusedLabelColor = MaterialTheme.colorScheme.primary,
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
             disabledIndicatorColor = Color.Transparent,
             errorIndicatorColor = Color.Transparent,
+            cursorColor = MaterialTheme.colorScheme.primary
         ),
-        modifier = Modifier.wrapContentSize()
-            .border(2.dp, MaterialTheme.colorScheme.surface, CircleShape)
-            .padding(4.dp)
+
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(52.dp)
+            .padding(horizontal = 25.dp) // Espaço entre as bordas e os campos
+            .border(
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.onBackground,
+                shape = CircleShape
+            )
     )
 }
 
 @Composable
-fun TextFieldDesignForMainScreen(value: String, onValueChange: (String) -> Unit, label: String, isPassword: Boolean = false){
+fun TextFieldDesignForMainScreen(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    isPassword: Boolean = false,
+    leadingIcon: @Composable (() -> Unit)? = null
+) {
     TextField(
         value = value,
         onValueChange = onValueChange,
         label = { Text(label) },
         singleLine = true,
+        visualTransformation = if (isPassword) PasswordVisualTransformation() else VisualTransformation.None,
+        leadingIcon = leadingIcon,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(56.dp)
+            .border(
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.onBackground,
+                shape = CircleShape
+            ),
         shape = CircleShape,
-        visualTransformation = if(isPassword) PasswordVisualTransformation() else VisualTransformation.None,
         colors = TextFieldDefaults.colors(
-            unfocusedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
-            unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
-            unfocusedContainerColor = MaterialTheme.colorScheme.onSecondaryContainer,
-            focusedContainerColor = MaterialTheme.colorScheme.onPrimaryContainer,
-            focusedTextColor = MaterialTheme.colorScheme.onSurface,
-            focusedLabelColor = MaterialTheme.colorScheme.onSurface,
-            focusedIndicatorColor = Color.Transparent,
+            unfocusedContainerColor = MaterialTheme.colorScheme.background,
+            focusedContainerColor = MaterialTheme.colorScheme.background,
             unfocusedIndicatorColor = Color.Transparent,
+            focusedIndicatorColor = Color.Transparent,
             disabledIndicatorColor = Color.Transparent,
             errorIndicatorColor = Color.Transparent,
+            cursorColor = MaterialTheme.colorScheme.primary,
+            focusedTextColor = MaterialTheme.colorScheme.onBackground,
+            unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
+            focusedLabelColor = MaterialTheme.colorScheme.primary,
+            unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
         ),
-        modifier = Modifier.wrapContentSize()
-            .border(2.dp, colorResource(R.color.field_text_border), CircleShape)
-            .padding(4.dp)
+        keyboardOptions = KeyboardOptions(
+            keyboardType = if (isPassword) KeyboardType.Password else KeyboardType.Text,
+            imeAction = ImeAction.Next
+        )
     )
 }
 
@@ -189,34 +235,37 @@ fun SuperIdTitle(modifier: Modifier = Modifier){
 
 @Composable
 fun LoginAndSignUpDesign(
-    imageResId: Int = themedBackgroundImage(),
     content: @Composable () -> Unit,
 ) {
-    StatusAndNavigationBarColors(MaterialTheme.colorScheme.background, MaterialTheme.colorScheme.background)
+    StatusAndNavigationBarColors(
+        MaterialTheme.colorScheme.background,
+        MaterialTheme.colorScheme.background
+    )
 
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background) // <- cor de fundo aplicada aqui
     ) {
-        Image(
-            painter = painterResource(id = imageResId),
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize()
-        )
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()),
+                .padding(
+                    bottom = WindowInsets.navigationBars
+                        .asPaddingValues()
+                        .calculateBottomPadding()
+                ),
             verticalArrangement = Arrangement.SpaceBetween,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
+            Box(
+                modifier = Modifier.weight(1f),
+                contentAlignment = Alignment.Center
+            ) {
                 content()
             }
         }
     }
-
 }
 @Composable
 fun themedBackgroundImage(): Int {
