@@ -7,12 +7,14 @@ import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
@@ -22,6 +24,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -84,7 +87,8 @@ fun MainScreen() {
                 db.collection("users")
                     .document(uid)
                     .collection("categorias")
-                    .add(mapOf("nome" to novaCategoria))
+                    .document(novaCategoria)
+                    .set(hashMapOf("nome" to novaCategoria))
                     .addOnSuccessListener {
                         Toast.makeText(context, "Categoria criada!", Toast.LENGTH_SHORT).show()
                     }
@@ -160,7 +164,7 @@ fun MainScreenDesign(
                     SuperIdTitle(modifier = Modifier.size(10.dp))
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant
                 ),
                 actions = {
                     IconButton(onClick = {}) {
@@ -188,10 +192,10 @@ fun MainScreenDesign(
                     Icon(
                         imageVector = Icons.Default.Add,
                         contentDescription = "Criar Categoria",
-                        tint = MaterialTheme.colorScheme.onPrimary,
+                        tint = MaterialTheme.colorScheme.onBackground,
                         modifier = Modifier.size(28.dp)
                     )
-                    Text("Criar Categoria")
+                    Text("Criar Categoria", color = MaterialTheme.colorScheme.onBackground)
                 }
 
                 FloatingActionButton(
@@ -206,7 +210,7 @@ fun MainScreenDesign(
                     Icon(
                         painter = painterResource(R.drawable.qr_code),
                         contentDescription = "Escanear QR-Code",
-                        tint = MaterialTheme.colorScheme.onPrimary,
+                        tint = MaterialTheme.colorScheme.onBackground,
                         modifier = Modifier.size(28.dp)
                     )
                 }
@@ -232,64 +236,49 @@ fun MainScreenDesign(
                         contentDescripiton = "Categoria Aplicativos",
                         text = "Aplicativos",
                         onClick = { OpenPasswordsActivity("aplicativos", context) },
+                        onExcluirCategoria = {},
+                        onEditarCategoria = {},
                     )
                     CategoryRow(
                         painter = R.drawable.email,
                         contentDescripiton = "Categoria Emails",
                         text = "Emails",
                         onClick = { OpenPasswordsActivity("emails", context) },
+                        onExcluirCategoria = {},
+                        onEditarCategoria = {},
                     )
                     CategoryRow(
                         painter = R.drawable.world_wide_web,
                         contentDescripiton = "Categoria Sites",
                         text = "Sites",
                         onClick = { OpenPasswordsActivity("sites", context) },
+                        onExcluirCategoria = {},
+                        onEditarCategoria = {},
                     )
                     CategoryRow(
                         painter = R.drawable.keyboard,
                         contentDescripiton = "Categoria Teclados de acesso físicos",
                         text = "Teclados de acesso físicos",
                         onClick = { OpenPasswordsActivity("teclados", context) },
+                        onExcluirCategoria = {},
+                        onEditarCategoria = {},
                     )
                 }
                 items(categoriasCriadas) { nome ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        CategoryRow(
-                            painter = R.drawable.smartphone,
-                            contentDescripiton = "Categoria $nome",
-                            text = nome,
-                            onClick = { OpenPasswordsActivity(nome, context) },
-                            modifier = Modifier.weight(1f)
-                        )
-                        IconButton(
-                            onClick = {
-                                showEditDialog = true
-                                categoriaParaEditar = nome
-                            }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Edit,
-                                contentDescription = "Editar categoria",
-                                tint = MaterialTheme.colorScheme.primary
-                            )
+                    CategoryRow(
+                        painter = R.drawable.smartphone,
+                        contentDescripiton = "Categoria $nome",
+                        text = nome,
+                        onClick = { OpenPasswordsActivity(nome, context) },
+                        isCreatedByUser = true,
+                        onExcluirCategoria = {
+                            onExcluirCategoria(nome)
+                        },
+                        onEditarCategoria = {
+                            showEditDialog = true
+                            categoriaParaEditar = nome
                         }
-                        IconButton(
-                            onClick = {
-                                onExcluirCategoria(nome)
-                            }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Delete,
-                                contentDescription = "Deletar categoria",
-                                tint = Color.Red
-                            )
-                        }
-                    }
+                    )
                 }
             }
         }
@@ -338,19 +327,19 @@ fun MainScreenDesign(
         if (showDialogExcluir && categoriaParaExcluir != null) {
             AlertDialog(
                 onDismissRequest = onCancelarExclusao,
-                title = { Text("Confirmar exclusão") },
-                text = { Text("Tem certeza que deseja excluir a categoria \"${categoriaParaExcluir}\"?") },
+                title = { Text("Apagar categoria \"${categoriaParaExcluir}\"?", color = MaterialTheme.colorScheme.onBackground) },
+                text = { Text("Deseja mesmo apagar essa categoria?(não há reversão para esta ação, e todas as senhas dentro dela serão perdidas)", color = MaterialTheme.colorScheme.onBackground)  },
                 confirmButton = {
                     TextButton(onClick = onConfirmarExclusao) {
-                        Text("Confirmar", color = MaterialTheme.colorScheme.onPrimaryContainer)
+                        Text("Confirmar", color = MaterialTheme.colorScheme.onBackground)
                     }
                 },
                 dismissButton = {
                     TextButton(onClick = onCancelarExclusao) {
-                        Text("Cancelar", color = MaterialTheme.colorScheme.onPrimaryContainer)
+                        Text("Cancelar", color = MaterialTheme.colorScheme.onBackground)
                     }
                 },
-                containerColor = MaterialTheme.colorScheme.primary,
+                containerColor = MaterialTheme.colorScheme.background,
                 titleContentColor = MaterialTheme.colorScheme.onPrimary,
                 textContentColor = MaterialTheme.colorScheme.onPrimary,
             )
@@ -366,7 +355,7 @@ fun DialogCriarCategoria(
     var nomeDaCategoria by remember { mutableStateOf("") }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Criando categoria:") },
+        title = { Text("Criando categoria:", color = MaterialTheme.colorScheme.onBackground) },
         text = {
             TextFieldDesignForMainScreen(
                 value = nomeDaCategoria,
@@ -376,15 +365,15 @@ fun DialogCriarCategoria(
         },
         confirmButton = {
             TextButton(onClick = { onConfirm(nomeDaCategoria) }) {
-                Text("Confirmar", color = MaterialTheme.colorScheme.onPrimaryContainer)
+                Text("Confirmar", color = MaterialTheme.colorScheme.onBackground)
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancelar", color = MaterialTheme.colorScheme.onPrimaryContainer)
+                Text("Cancelar", color = MaterialTheme.colorScheme.onBackground)
             }
         },
-        containerColor = MaterialTheme.colorScheme.primary,
+        containerColor = MaterialTheme.colorScheme.background,
         titleContentColor = MaterialTheme.colorScheme.onPrimary,
         textContentColor = MaterialTheme.colorScheme.onPrimary,
     )
@@ -430,24 +419,70 @@ fun CategoryRow(
     contentDescripiton: String,
     text: String,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isCreatedByUser: Boolean = false,
+    onExcluirCategoria: (String) -> Unit,
+    onEditarCategoria: (String) -> Unit,
 ) {
     Row(
         modifier = modifier
-            .padding(8.dp)
+            .padding(12.dp)
             .fillMaxWidth()
-            .clickable { onClick() },
+            .clickable { onClick() }
+            .shadow(
+                elevation = 8.dp,
+                shape = RoundedCornerShape(15.dp),
+                clip = false // clip precisa ser false para a sombra aparecer fora do shape
+            )
+            .background(
+                color = MaterialTheme.colorScheme.background,
+                shape = RoundedCornerShape(15.dp)
+            )
+            .height(64.dp),
+
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
             painter = painterResource(id = painter),
             contentDescription = contentDescripiton,
-            modifier = Modifier.size(40.dp)
+            modifier = Modifier.size(56.dp)
+                .padding(start = 12.dp)
         )
         Spacer(modifier = Modifier.width(16.dp))
         Text(
             text,
             style = MaterialTheme.typography.bodyLarge
+        )
+        Spacer(modifier.weight(1f))
+        if (isCreatedByUser){
+            IconButton(
+                onClick = {
+                    onEditarCategoria
+                }
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Edit,
+                    contentDescription = "Editar categoria",
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+            IconButton(
+                onClick = {
+                    onExcluirCategoria(text)
+                }
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = "Deletar categoria",
+                    tint = Color.Red
+                )
+            }
+        }
+        Icon(
+            painter = painterResource(R.drawable.right_arrow),
+            contentDescription = contentDescripiton,
+            modifier = Modifier.size(32.dp)
+                .padding(end = 12.dp)
         )
     }
 }
