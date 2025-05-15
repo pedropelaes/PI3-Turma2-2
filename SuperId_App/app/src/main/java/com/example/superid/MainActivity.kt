@@ -159,23 +159,29 @@ fun MainScreenDesign(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    SuperIdTitle(modifier = Modifier.size(10.dp))
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant
-                ),
-                actions = {
-                    IconButton(onClick = {}) {
-                        Icon(
-                            imageVector = Icons.Default.Search,
-                            contentDescription = "Buscar",
-                            tint = MaterialTheme.colorScheme.onPrimary
-                        )
+            Column{
+                TopAppBar(
+                    title = {
+                        SuperIdTitle(modifier = Modifier.size(10.dp))
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant
+                    ),
+                    actions = {
+                        IconButton(onClick = {}) {
+                            Icon(
+                                imageVector = Icons.Default.Search,
+                                contentDescription = "Buscar",
+                                tint = MaterialTheme.colorScheme.onPrimary
+                            )
+                        }
                     }
-                }
-            )
+                )
+                Divider(
+                    color = Color.White,
+                    thickness = 4.dp
+                )
+            }
         },
         floatingActionButton = {
             Row(
@@ -192,10 +198,10 @@ fun MainScreenDesign(
                     Icon(
                         imageVector = Icons.Default.Add,
                         contentDescription = "Criar Categoria",
-                        tint = MaterialTheme.colorScheme.onBackground,
+                        tint = MaterialTheme.colorScheme.onPrimary,
                         modifier = Modifier.size(28.dp)
                     )
-                    Text("Criar Categoria", color = MaterialTheme.colorScheme.onBackground)
+                    Text("Criar Categoria", color = MaterialTheme.colorScheme.onPrimary)
                 }
 
                 FloatingActionButton(
@@ -210,7 +216,7 @@ fun MainScreenDesign(
                     Icon(
                         painter = painterResource(R.drawable.qr_code),
                         contentDescription = "Escanear QR-Code",
-                        tint = MaterialTheme.colorScheme.onBackground,
+                        tint = MaterialTheme.colorScheme.onPrimary,
                         modifier = Modifier.size(28.dp)
                     )
                 }
@@ -389,7 +395,7 @@ fun DialogEditarCategoria(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Editar categoria") },
+        title = { Text("Editar categoria", color = MaterialTheme.colorScheme.onBackground) },
         text = {
             TextFieldDesignForMainScreen(
                 value = novoNome,
@@ -399,15 +405,16 @@ fun DialogEditarCategoria(
         },
         confirmButton = {
             TextButton(onClick = { onConfirm(novoNome) }) {
-                Text("Confirmar", color = MaterialTheme.colorScheme.onPrimaryContainer)
+                Text("Confirmar", color = MaterialTheme.colorScheme.onBackground)
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancelar", color = MaterialTheme.colorScheme.onPrimaryContainer)
+                Text("Cancelar", color = MaterialTheme.colorScheme.onBackground)
             }
         },
-        containerColor = MaterialTheme.colorScheme.primary,
+
+        containerColor = MaterialTheme.colorScheme.background,
         titleContentColor = MaterialTheme.colorScheme.onPrimary,
         textContentColor = MaterialTheme.colorScheme.onPrimary,
     )
@@ -457,7 +464,7 @@ fun CategoryRow(
         if (isCreatedByUser){
             IconButton(
                 onClick = {
-                    onEditarCategoria
+                    onEditarCategoria(text)
                 }
             ) {
                 Icon(

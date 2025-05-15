@@ -367,7 +367,7 @@ fun PasswordsScreenDesign(
                     Icon(
                         painter = painterResource(R.drawable.qr_code),
                         contentDescription = "Escanear QR-Code",
-                        tint = MaterialTheme.colorScheme.onBackground,
+                        tint = MaterialTheme.colorScheme.onPrimary,
                         modifier = Modifier.size(28.dp)
                     )
                 }
@@ -381,10 +381,10 @@ fun PasswordsScreenDesign(
                     Icon(
                         imageVector = Icons.Default.Add,
                         contentDescription = "Criar Categoria",
-                        tint = MaterialTheme.colorScheme.onBackground,
+                        tint = MaterialTheme.colorScheme.onPrimary,
                         modifier = Modifier.size(28.dp)
                     )
-                    Text("Adicionar senha", color = MaterialTheme.colorScheme.onBackground)
+                    Text("Adicionar senha", color = MaterialTheme.colorScheme.onPrimary)
                 }
             }
         }
