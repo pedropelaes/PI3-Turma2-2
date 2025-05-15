@@ -2,6 +2,8 @@ package com.example.superid.ui.theme.ui.common
 
 import android.content.Context
 import android.content.Intent
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -29,10 +31,12 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -64,6 +68,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.superid.PasswordInfo
 import com.example.superid.PasswordsActivity
 import com.example.superid.QrCodeAuthActivity
 import com.example.superid.R
@@ -71,6 +76,9 @@ import com.example.superid.SignUpActivity
 import com.example.superid.SuperID
 import com.example.superid.ui.theme.SuperIdTheme
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.firestore.auth.User
 
 
 @Composable
@@ -320,5 +328,60 @@ fun StatusAndNavigationBarColors(
     SideEffect { //aplicando as cores da barra de status e navegação
         systemUiController.setStatusBarColor(statusBarColor, darkIcons = darkIcons)
         systemUiController.setNavigationBarColor(navigationBarColor, darkIcons = darkIcons)
+    }
+}
+
+@Composable
+fun DialogVerificarConta(
+    onVerificar: () -> Unit,
+    onDismiss: () -> Unit,
+){
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text("Atenção! Verifique seu e-mail")
+        },
+        modifier = Modifier.wrapContentSize(),
+        text = { Text("Para utilizar a função de login por QR-code, é necessário que o email da sua conta esteja verificado.") },
+        confirmButton = {
+            TextButton(
+                onClick = onVerificar
+            ) {
+                Text("Enviar e-mail", color = MaterialTheme.colorScheme.onBackground)
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = onDismiss
+            ) {
+                Text("Cancelar", color = MaterialTheme.colorScheme.onBackground)
+            }
+        },
+        containerColor = MaterialTheme.colorScheme.background, // Cor de fundo do dialog
+        titleContentColor = MaterialTheme.colorScheme.onBackground, // Cor do título
+        textContentColor = MaterialTheme.colorScheme.onBackground, // Cor do texto
+    )
+}
+
+fun SendEmailVerification(user: FirebaseUser?, context: Context) {
+    if (user != null) {
+        user.sendEmailVerification()
+            .addOnCompleteListener { verification ->
+                if (verification.isSuccessful) {
+                    Log.d("VERIFICATION", "Email de verificação enviado.")
+                    Toast.makeText(
+                        context,
+                        "Um email de verificação foi enviado para confirmar sua conta.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                } else {
+                    Log.e("VERIFICATION", "Erro ao mandar email de verificação.")
+                    Toast.makeText(
+                        context,
+                        "Erro ao enviar email de verificação, verifique o seu email.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
     }
 }

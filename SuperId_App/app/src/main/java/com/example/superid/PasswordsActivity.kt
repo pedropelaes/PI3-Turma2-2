@@ -62,7 +62,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import com.example.superid.ui.theme.SuperIdTheme
+import com.example.superid.ui.theme.ui.common.DialogVerificarConta
 import com.example.superid.ui.theme.ui.common.PasswordRow
+import com.example.superid.ui.theme.ui.common.SendEmailVerification
 import com.example.superid.ui.theme.ui.common.StatusAndNavigationBarColors
 import com.example.superid.ui.theme.ui.common.TextFieldDesignForLoginAndSignUp
 import com.example.superid.ui.theme.ui.common.TextFieldDesignForMainScreen
@@ -156,6 +158,7 @@ fun PasswordsScreen(categoria: String?, icone: Int, viewModel: SenhasViewModel){
     val auth = Firebase.auth
     PasswordsScreenDesign(
         categoria = categoria, //nome da categoria
+        auth = auth,
         iconPainter = icone, //icone da categoria
         onAddPassword = { novaSenha ->
             val uid = auth.currentUser?.uid
@@ -292,13 +295,16 @@ fun DeletePasswordOnFirestore(categoria: String?, senha: Senha, db:FirebaseFires
 @Composable
 fun PasswordsScreenDesign(
     categoria: String?,
+    auth: FirebaseAuth,
     onAddPassword: (Senha) -> Unit,
     iconPainter: Int,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ){
     StatusAndNavigationBarColors()
     var showAddPasswordDialog by remember { mutableStateOf(false) }
+    var showVerifyAccountDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current
+    val user = auth.currentUser
     Scaffold(
         topBar = {
             TopAppBar(
@@ -345,7 +351,6 @@ fun PasswordsScreenDesign(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically,
                     ){
-                        //SuperIdTitle()
                         IconButton(
                             onClick = {}
                         ) {
@@ -356,7 +361,6 @@ fun PasswordsScreenDesign(
                             )
                         }
                     }
-
                 }
             )
         },
@@ -370,8 +374,15 @@ fun PasswordsScreenDesign(
             ){
                 FloatingActionButton(
                     onClick = {
-                        val intent = Intent(context, QrCodeAuthActivity::class.java)
-                        context.startActivity(intent)
+                        if (user != null) {
+                            user.reload()
+                            if(user.isEmailVerified){
+                                val intent = Intent(context, QrCodeAuthActivity::class.java)
+                                context.startActivity(intent)
+                            }else{
+                                showVerifyAccountDialog = true
+                            }
+                        }
                     },
                     containerColor = MaterialTheme.colorScheme.primary,
                     shape = CircleShape,
@@ -420,6 +431,14 @@ fun PasswordsScreenDesign(
                     onAddPassword(senhaCriada)
                     showAddPasswordDialog = false
                 }
+            )
+        }
+        if(showVerifyAccountDialog){
+            DialogVerificarConta(
+                onVerificar = {
+                    SendEmailVerification(user, context)
+                },
+                onDismiss = { showVerifyAccountDialog = false }
             )
         }
     }
@@ -671,9 +690,14 @@ fun ColumnSenhas(
         )
         LazyColumn {
             items(senhasCriadas){senha->
+                val infoSenha = when{
+                    senha.descricao.isNotBlank() -> senha.descricao
+                    senha.login.isNotBlank() -> senha.login
+                    else -> "Senha sem titulo"
+                }
                 PasswordRow(
-                    contentDescripiton = senha.descricao,
-                    text = senha.descricao,
+                    contentDescripiton = infoSenha,
+                    text = infoSenha,
                     onClick = {
                         senhaClicada = senha
                         if (uid != null) {
