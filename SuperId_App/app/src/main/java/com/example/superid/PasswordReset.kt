@@ -30,6 +30,7 @@ import com.example.superid.ui.theme.ui.common.TextFieldDesignForLoginAndSignUp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.functions.ktx.functions
 import com.google.firebase.ktx.Firebase
 
 class PasswordReset : ComponentActivity() {
@@ -97,15 +98,10 @@ fun PasswordResetScreen() {
         Button(
             onClick = {
                 val cleanEmail = email.trim().lowercase()
-
-                sendPasswordResetIfEmailVerified("usuario@email.com", "senhaDoUsuario") { success, message ->
-                    if (success) {
-                        Toast.makeText(context, "Email de redefinição enviado!", Toast.LENGTH_LONG).show()
-                    } else {
-                        Toast.makeText(context, "Erro: $message", Toast.LENGTH_LONG).show()
-                    }
-                }
-            },
+                Log.d("DEBUG_EMAIL", "Email enviado: $email")
+                sendPasswordResetIfEmailVerified(cleanEmail, onResultado = {result ->
+                    Toast.makeText(context,result, Toast.LENGTH_LONG).show()
+                })},
             enabled = email.isNotEmpty(),
             border = BorderStroke(2.dp, MaterialTheme.colorScheme.surface),
             colors = ButtonDefaults.buttonColors(
@@ -173,41 +169,30 @@ fun PasswordResetScreen() {
     }
 }
 
-fun sendPasswordResetIfEmailVerified(
-    email: String,
-    password: String,
-    onResult: (Boolean, String?) -> Unit
-) {
-    val auth = Firebase.auth
+fun sendPasswordResetIfEmailVerified(email: String, onResultado: (String) -> Unit) {
+    val functions = Firebase.functions
 
-    // Tenta login com email e senha
-    auth.signInWithEmailAndPassword(email, password)
+    functions
+        .getHttpsCallable("checkEmailVerification")
+        .call(hashMapOf<String, Any>("email" to email))
         .addOnSuccessListener { result ->
-            val user = result.user
+            val data = result.data as? Map<*,*>
+            val isVerified = data?.get("verified") as? Boolean ?: false
 
-            if (user != null && user.isEmailVerified) {
-                // Email foi verificado — envia email de redefinição de senha
-                auth.sendPasswordResetEmail(email)
+            if (isVerified) {
+                Firebase.auth.sendPasswordResetEmail(email)
                     .addOnCompleteListener { task ->
                         if (task.isSuccessful) {
-                            Log.d("PasswordReset", "Email de redefinição enviado com sucesso.")
-                            onResult(true, null)
+                            onResultado("E-mail de redefinição enviado com sucesso.")
                         } else {
-                            Log.e("PasswordReset", "Erro ao enviar email: ${task.exception?.message}")
-                            onResult(false, task.exception?.message)
+                            onResultado("Erro ao enviar o e-mail: ${task.exception?.message}")
                         }
-
-                        // Faz logout por segurança
-                        auth.signOut()
                     }
             } else {
-                Log.d("PasswordReset", "Email não verificado.")
-                auth.signOut()
-                onResult(false, "O email ainda não foi verificado.")
+                onResultado("Este e-mail ainda não foi verificado.")
             }
         }
         .addOnFailureListener { exception ->
-            Log.e("PasswordReset", "Erro ao autenticar: ${exception.message}")
-            onResult(false, "Erro ao autenticar: ${exception.message}")
+            onResultado("Erro ao verificar e-mail: ${exception.message}")
         }
 }

@@ -86,5 +86,6 @@ dependencies {
     implementation("com.google.firebase:firebase-firestore-ktx:25.1.3")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
+    implementation("com.google.firebase:firebase-functions-ktx")
 
 }

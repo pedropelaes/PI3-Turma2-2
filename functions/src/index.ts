@@ -25,9 +25,17 @@ admin.initializeApp();
 
 export const checkEmailVerification = functions.https.onCall(
   async (data: any, context) => {
-    const email = (data?.email || "").trim();
+    console.log("Recebido pela função:", JSON.stringify(data));
+
+    if (!data || typeof data.email !== "string") {
+      console.log("Erro: data.email ausente ou inválido");
+      throw new functions.https.HttpsError("invalid-argument", "E-mail não fornecido.");
+    }
+
+    const email = data.email.trim().toLowerCase();
 
     if (!email) {
+      console.log("E-mail ausente ou vazio:", data);
       throw new functions.https.HttpsError("invalid-argument", "E-mail não fornecido.");
     }
 
