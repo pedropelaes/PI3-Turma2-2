@@ -173,7 +173,7 @@ fun sendPasswordResetIfEmailVerified(email: String, onResultado: (String) -> Uni
     val functions = Firebase.functions
 
     functions
-        .getHttpsCallable("checkEmailVerification")
+        .getHttpsCallable("checkEmailVerificationV2")
         .call(hashMapOf<String, Any>("email" to email))
         .addOnSuccessListener { result ->
             val data = result.data as? Map<*,*>
