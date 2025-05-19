@@ -1,43 +1,50 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-functions.js";
 
 let timerInterval;
 
-function generateQRCode() {
-    const qrCodeElement = document.getElementById('qrcodeCanvas');
-    const timerElement = document.getElementById('timer');
-    const resetButton = document.getElementById('resetButton');
-    const qrCodeContext = qrCodeElement.getContext('2d');
-    timerElement.textContent = '';
-    resetButton.style.display = 'none'; // Oculta o botão inicialmente
+const firebaseConfig = {
+  apiKey: "AIzaSyAsdNeVhKB-kYlwmnry-XPJfojHbs-5zIc",
+  authDomain: "superid-e53fb.firebaseapp.com",
+  projectId: "superid-e53fb",
+  appId: "1:459214844582:web:63d89c9f5692be2533ba67",
+};
 
-    // Simula um conteúdo único para o QR Code
-    const qrCodeContent = `https://superid.app/login?token=${Date.now()}`;
-    QRCode.toCanvas(qrCodeElement, qrCodeContent, { width: 200 }, function (error) {
-        if (error) console.error(error);
+const app = initializeApp(firebaseConfig);
+const functions = getFunctions(app);
+
+const performAuth = httpsCallable(functions, "performAuth");
+
+window.callPerformAuth = () =>{
+    performAuth({
+        site: "www.donabet.com.br",
+        apiKey: "APIKEYTESTE"
+    }).then(result => {
+        const base64 = result.data.qrCodeImage;
+        document.getElementById("qrCodeImg").src = base64;
+
+        const timerElement = document.getElementById('timer');
+        const resetButton = document.getElementById('resetButton');
+        resetButton.style.display = 'none'; // Oculta o botão inicialmente
+        // Inicia o temporizador de 1 minuto
+        let timeLeft = 60;
+        timerElement.textContent = `Expira em: ${timeLeft} segundos`;
+        timerElement.textContent = '';
+        clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                timerElement.textContent = 'QR Code expirado. Gere um novo.';
+                document.getElementById("qrCodeImg").src = ""
+                resetButton.style.display = 'block'; // Exibe o botão após o término do temporizador
+            } else {
+                timerElement.textContent = `Expira em: ${timeLeft} segundos`;
+            }
+        }, 1000);
+    }).catch(err => {
+        console.error("Erro:", err.message);
     });
+};
 
-    // Inicia o temporizador de 1 minuto
-    let timeLeft = 60;
-    timerElement.textContent = `Expira em: ${timeLeft} segundos`;
-    clearInterval(timerInterval);
-    timerInterval = setInterval(() => {
-        timeLeft--;
-        if (timeLeft <= 0) {
-            clearInterval(timerInterval);
-            timerElement.textContent = 'QR Code expirado. Gere um novo.';
-            qrCodeContext.clearRect(0, 0, qrCodeElement.width, qrCodeElement.height); // Limpa o canvas
-            resetButton.style.display = 'block'; // Exibe o botão após o término do temporizador
-        } else {
-            timerElement.textContent = `Expira em: ${timeLeft} segundos`;
-        }
-    }, 1000);
-}
-
-function handleButtonClick() {
-    const resetButton = document.getElementById('resetButton');
-    if (resetButton.style.display === 'block') {
-        location.reload(); // Recarrega a página
-    }
-}
-
-// Gera o QR Code ao carregar a página
-window.onload = generateQRCode;
+window.onload = window.callPerformAuth
