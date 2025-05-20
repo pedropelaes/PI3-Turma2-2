@@ -58,3 +58,32 @@ export const performAuth = onRequest({region: "southamerica-east1"},(req: Reques
     res.status(500).json({ error: "Erro interno no servidor." });
   });
 });
+
+export const getLoginStatus = onRequest({region: "southamerica-east1"},(req: Request, res: Response): void => {
+  (async () => {
+    const { loginToken } = req.body
+    console.log(`loginToken: ${loginToken}`)
+    
+    if(!loginToken){
+      res.status(400).json({ error: "uid é parametro obrigatório" })
+    }
+
+    const snapshot = await db.collection("login")
+    .where("loginToken", "==", loginToken)
+    .limit(1)
+    .get()
+
+    if (snapshot.empty) throw new Error("Documento de login não encontrado.");
+
+    const loginData = snapshot.docs[0].data();
+    const uid = loginData?.uid
+    if(!uid){
+      throw new Error("Uid não encontrado")
+    }
+    
+    res.status(200).json({ uid })
+  })().catch(error=>{
+    console.error("Erro interno:", error)
+    res.status(500).json({error: "Erro interno no servidor."})
+  });
+});

@@ -37,6 +37,26 @@ routes.post("/api/perform-auth", async (req: Request, res: Response) => {
   }
 });
 
+routes.post("/api/get-login-status", async (req: Request, res: Response)=>{
+  const { loginToken } = req.body;
+
+  try{
+    const response = await fetch("https://getloginstatus-snp2owcvrq-rj.a.run.app", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ loginToken })
+    });
+
+    const data = await response.json();
+    res.json(data);
+  }catch(error: any){
+    console.error("Erro ao chamar getLoginStatus:", error.message);
+    res.status(500).json({ error: "Erro identificar usuário fazendo login." });
+  }
+})
+
 routes.get('/', (req: Request, res: Response)=>{
     res.statusCode = 403;
     res.send('Acesso não permitido. Rota default não definida.');

@@ -14,9 +14,9 @@ function callPerformAuth() {
       .then(data => {
         const base64 = data.qrCodeImage;
         document.getElementById("qrCodeImg").src = base64;
-
+        //callGetLoginStatus(base64)
         resetButton.style.display = 'none';
-        let timeLeft = 10;
+        let timeLeft = 60;
         timerElement.textContent = `Expira em: ${timeLeft} segundos`;
 
         clearInterval(timerInterval);
@@ -39,4 +39,22 @@ function callPerformAuth() {
       });
     }
 
-    window.onload = callPerformAuth;
+  
+function callGetLoginStatus(base64){
+  const loginTokenTeste = "2hahjlbumzjn31xy326tapom8npxz80096fvsjcfasqdptql6ruiexqlilu6tdr2owl48ys8fvy083zddenpj1xzojcyfiu1d3uvc72wdybxvvbhc4h0mchek0xeynzv0w5mh6mrgyp1kdp88mrk6nxptwbi0vu2wdehznqbyykm0bpw45rkabx2t3mb67pofij4bkgo68a1m2c84wv1ndytml1vjplab0gnnnbvr2rjvjh9axoh16kz44j4ea6u"
+  fetch("http://localhost:3000/api/get-login-status", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ loginToken: loginTokenTeste })
+  })
+  .then(response => response.json())
+  .then(data=>{
+    console.log(data.uid)
+  })
+}
+
+window.onload = () => {
+  callPerformAuth();
+  callGetLoginStatus(); 
+};
+   
