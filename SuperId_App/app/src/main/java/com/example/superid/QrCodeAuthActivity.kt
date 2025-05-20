@@ -46,6 +46,39 @@ fun QrCodeScannerScreen(
 ) {
     var scanResult by remember { mutableStateOf("Resultado do QR Code aparecerá aqui") }
 
+    // Inicia a câmera automaticamente
+    LaunchedEffect(Unit) {
+        val optionsBuilder = GmsBarcodeScannerOptions.Builder()
+            .enableAutoZoom()
+            .allowManualInput()
+
+        val scanner = GmsBarcodeScanning.getClient(context, optionsBuilder.build())
+        scanner.startScan()
+            .addOnSuccessListener { barcode ->
+                scanResult = """
+                    Display Value: ${barcode.displayValue}
+                    Raw Value: ${barcode.rawValue}
+                    Format: ${barcode.format}
+                    Value Type: ${barcode.valueType}
+                """.trimIndent()
+            }
+            .addOnFailureListener { e ->
+                scanResult = when (e) {
+                    is MlKitException -> when (e.errorCode) {
+                        MlKitException.CODE_SCANNER_CAMERA_PERMISSION_NOT_GRANTED ->
+                            "Permissão da câmera não concedida"
+                        MlKitException.CODE_SCANNER_APP_NAME_UNAVAILABLE ->
+                            "Nome do app não disponível"
+                        else -> "Erro desconhecido: ${e.message}"
+                    }
+                    else -> e.message ?: "Erro desconhecido"
+                }
+            }
+            .addOnCanceledListener {
+                scanResult = "Escaneamento cancelado"
+            }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -60,6 +93,7 @@ fun QrCodeScannerScreen(
         )
 
         Button(onClick = {
+            // Botão extra para escanear novamente
             val optionsBuilder = GmsBarcodeScannerOptions.Builder()
                 .enableAutoZoom()
                 .allowManualInput()
@@ -90,7 +124,7 @@ fun QrCodeScannerScreen(
                     scanResult = "Escaneamento cancelado"
                 }
         }) {
-            Text("Escanear QR Code")
+            Text("Escanear novamente")
         }
     }
 }
