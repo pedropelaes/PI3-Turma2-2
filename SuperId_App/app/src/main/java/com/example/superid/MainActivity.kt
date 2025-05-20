@@ -31,6 +31,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.example.superid.ui.theme.SuperIdTheme
+import com.example.superid.ui.theme.ui.common.DialogVerificarConta
+import com.example.superid.ui.theme.ui.common.SendEmailVerification
 import com.example.superid.ui.theme.ui.common.StatusAndNavigationBarColors
 import com.example.superid.ui.theme.ui.common.SuperIdTitle
 import com.example.superid.ui.theme.ui.common.TextFieldDesignForMainScreen
@@ -155,12 +157,13 @@ fun MainScreenDesign(
     content: @Composable () -> Unit = {}
 ) {
     StatusAndNavigationBarColors()
-
+    var showVerifyAccountDialog by remember { mutableStateOf(false) }
     var showDialog by remember { mutableStateOf(false) }
     var showEditDialog by remember { mutableStateOf(false) }
     var categoriaParaEditar by remember { mutableStateOf("") }
     val context = LocalContext.current
     val db = FirebaseFirestore.getInstance()
+    val user = FirebaseAuth.getInstance().currentUser
     val userId = FirebaseAuth.getInstance().currentUser?.uid
 
     Scaffold(
@@ -212,8 +215,15 @@ fun MainScreenDesign(
 
                 FloatingActionButton(
                     onClick = {
-                        val intent = Intent(context, QrCodeAuthActivity::class.java)
-                        context.startActivity(intent)
+                        if (user != null) {
+                            user.reload()
+                            if(user.isEmailVerified){
+                                val intent = Intent(context, QrCodeAuthActivity::class.java)
+                                context.startActivity(intent)
+                            }else{
+                                showVerifyAccountDialog = true
+                            }
+                        }
                     },
                     containerColor = MaterialTheme.colorScheme.primary,
                     shape = CircleShape,
@@ -342,6 +352,14 @@ fun MainScreenDesign(
                     }
                     showEditDialog = false
                 }
+            )
+        }
+        if(showVerifyAccountDialog){
+            DialogVerificarConta(
+                onVerificar = {
+                    SendEmailVerification(user, context)
+                },
+                onDismiss = { showVerifyAccountDialog = false }
             )
         }
 
