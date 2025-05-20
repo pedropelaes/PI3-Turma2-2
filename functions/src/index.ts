@@ -52,38 +52,57 @@ export const performAuth = onRequest({region: "southamerica-east1"},(req: Reques
     });
 
     const qrCodeImage = await QRCode.toDataURL(loginToken);
-    res.status(200).json({ qrCodeImage });
+    res.status(200).json({ qrCodeImage: qrCodeImage, loginToken: loginToken });
   })().catch(error => {
     console.error("Erro interno:", error);
     res.status(500).json({ error: "Erro interno no servidor." });
   });
 });
 
-export const getLoginStatus = onRequest({region: "southamerica-east1"},(req: Request, res: Response): void => {
+export const getLoginStatus = onRequest({ region: "southamerica-east1" }, (req: Request, res: Response): void => {
   (async () => {
-    const { loginToken } = req.body
-    console.log(`loginToken: ${loginToken}`)
+    const { loginToken } = req.body;
     
-    if(!loginToken){
-      res.status(400).json({ error: "uid é parametro obrigatório" })
+    if (!loginToken) {
+      return res.status(400).json({ error: "uid é parametro obrigatório" });
     }
 
     const snapshot = await db.collection("login")
-    .where("loginToken", "==", loginToken)
-    .limit(1)
-    .get()
+      .where("loginToken", "==", loginToken)
+      .limit(1)
+      .get();
 
-    if (snapshot.empty) throw new Error("Documento de login não encontrado.");
-
-    const loginData = snapshot.docs[0].data();
-    const uid = loginData?.uid
-    if(!uid){
-      throw new Error("Uid não encontrado")
+    if (snapshot.empty) {
+      return res.status(404).json({ error: "Documento de login não encontrado." });
     }
-    
-    res.status(200).json({ uid })
-  })().catch(error=>{
-    console.error("Erro interno:", error)
-    res.status(500).json({error: "Erro interno no servidor."})
+
+    const docRef = snapshot.docs[0].ref;
+    const loginData = snapshot.docs[0].data();
+
+    const createdAt = loginData.createdAt?.toDate?.() || loginData.createdAt;
+    const now = new Date();
+    const diffInSeconds = (now.getTime() - createdAt.getTime()) / 1000;
+    const attempts = loginData.attempts || 0;
+    //const newAttempts = attempts + 1
+
+    await docRef.update({ attempts: attempts + 1 });
+
+    if (diffInSeconds > 60 || attempts >= 3) {
+      await docRef.delete();
+      return res.status(403).json({
+        error: diffInSeconds > 60 ? "Token expirado" : "Tentativas excedidas"
+      });
+    }
+
+
+    const uid = loginData?.uid;
+    if (!uid) {
+      return res.status(404).json({ uid: null });
+    }
+
+    return res.status(200).json({ uid });
+  })().catch(error => {
+    console.error("Erro interno:", error);
+    res.status(500).json({ error: "Erro interno no servidor." });
   });
 });
