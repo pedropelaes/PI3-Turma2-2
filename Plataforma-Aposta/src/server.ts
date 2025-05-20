@@ -15,14 +15,6 @@ app.use(express.json());
 app.use(express.static("public"));
 app.use(routes);
 
-const firebaseConfig = {
-  apiKey: "AIzaSyAsdNeVhKB-kYlwmnry-XPJfojHbs-5zIc",
-  authDomain: "superid-e53fb.firebaseapp.com",
-  projectId: "superid-e53fb",
-  appId: "1:459214844582:web:63d89c9f5692be2533ba67",
-};
-
-admin.initializeApp();
 
 routes.post("/api/perform-auth", async (req: Request, res: Response) => {
   const { site } = req.body;
