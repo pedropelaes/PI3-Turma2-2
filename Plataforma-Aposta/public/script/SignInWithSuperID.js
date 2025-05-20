@@ -1,6 +1,10 @@
 let timerInterval;
 
 function callPerformAuth() {
+
+  const timerElement = document.getElementById('timer');
+  const resetButton = document.getElementById('resetButton');
+  resetButton.disabled = true;
       fetch("http://localhost:3000/api/perform-auth", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -11,10 +15,8 @@ function callPerformAuth() {
         const base64 = data.qrCodeImage;
         document.getElementById("qrCodeImg").src = base64;
 
-        const timerElement = document.getElementById('timer');
-        const resetButton = document.getElementById('resetButton');
         resetButton.style.display = 'none';
-        let timeLeft = 60;
+        let timeLeft = 10;
         timerElement.textContent = `Expira em: ${timeLeft} segundos`;
 
         clearInterval(timerInterval);
@@ -25,6 +27,7 @@ function callPerformAuth() {
             timerElement.textContent = 'QR Code expirado. Gere um novo.';
             document.getElementById("qrCodeImg").src = "";
             resetButton.style.display = 'block';
+            resetButton.disabled = false;
           } else {
             timerElement.textContent = `Expira em: ${timeLeft} segundos`;
           }
@@ -32,6 +35,7 @@ function callPerformAuth() {
       })
       .catch(err => {
         console.error("Erro:", err.message);
+        resetButton.disabled = false;
       });
     }
 
