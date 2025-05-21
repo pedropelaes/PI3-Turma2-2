@@ -39,7 +39,7 @@ class QrCodeAuthActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContent{
             SuperIdTheme(darkTheme = isSystemInDarkTheme()) {
-                SearchLoginDocument("6fmhgfj91wjpzkph00lk60lozdimtgkmu9866f5p3esm0te2bqowonacgvar2h80qu3i0a21v625yy2gy2x7d7a39jzholr2b7ew128s8cb5eew09x9mtb8btcjv835igm1b143p0u9e18tag4909dksgt365xvvqlism4jl8v1s9m96iz5yflyjden7ps91x610va391tgt0ydib4mvet64lyglscad4bfa5rf67estu7l2be4upr12mp5ovbvd")
+                SearchLoginDocument("jyad0ox3sbshnmuuzu9ws3h953duxqceix09hl9lc8af4jl5wqfpn83ez4a12egpdfb15drfek0v0llot9r0wk80nic141cwq93omjfv0khnbztfpvtadrwjsc7kr70gtn3cc1rxr684rpyx40lpot9ev0cbbr5hskyjgh75ijkwhax050ujqr9ve90q6vgrqt9hz32uljsrwx329pxikg6q4lonliwmgb6dbx65y8hgccy1bkgrkuo2ry5bwpcy")
                 QrCodeScannerScreen()
             }
         }

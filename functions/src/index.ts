@@ -89,6 +89,7 @@ export const getLoginStatus = onRequest({ region: "southamerica-east1" }, (req: 
 
     const uid = loginData?.uid;
     if (uid) {
+      docRef.update({ status: "aprovado" });
       return res.status(200).json({ uid });
     }
 
