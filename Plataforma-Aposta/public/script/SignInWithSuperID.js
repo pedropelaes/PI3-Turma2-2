@@ -82,6 +82,12 @@ function startGetLoginStatusPolling(loginToken, inicio) {
           successText.textContent = "Login confirmado! Redirecionando...";
           document.getElementById("qrCodeImg").src = "";
           console.log("Login confirmado:", uid);
+          localStorage.setItem("uid", uid);        
+          //localStorage.setItem("login", login);
+          //localStorage.setItem("senha", senha);
+          setTimeout(() => {
+            window.location.href = "/home";
+          }, 3000);
         } else {
           console.log(`Tentativa ${index + 1} (${segundos}s): aguardando login...`);
           if (index === tentativas.length - 1) {

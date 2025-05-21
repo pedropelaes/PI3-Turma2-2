@@ -62,10 +62,17 @@ routes.get('/', (req: Request, res: Response)=>{
     res.send('Acesso não permitido. Rota default não definida.');
 });
 
+routes.get("/home", (req: Request, res: Response) => {
+  res.sendFile(path.join(__dirname, "../public/pages/home.html"));
+});
+
 routes.get("/loginSuperId", (req: Request, res: Response) => {
   res.sendFile(path.join(__dirname, "../public/pages/signInWithSuperID.html"));
 });
 
+routes.get("/login", (req: Request, res: Response) => {
+  res.sendFile(path.join(__dirname, "../public/pages/SignIn.html"));
+});
 
 app.listen(port, ()=>{
     console.log(`Server is running on: ${port}`)
