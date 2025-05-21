@@ -44,15 +44,17 @@ export const performAuth = onRequest({region: "southamerica-east1"},(req: Reques
 
     const loginToken = [...Array(256)].map(() => Math.random().toString(36)[2]).join('');
 
+    const createdAt = admin.firestore.Timestamp.now();
+
     await db.collection("login").doc(loginToken).set({
       site,
       apiKey,
       loginToken,
-      createdAt: admin.firestore.FieldValue.serverTimestamp()
+      createdAt: createdAt
     });
 
     const qrCodeImage = await QRCode.toDataURL(loginToken);
-    res.status(200).json({ qrCodeImage: qrCodeImage, loginToken: loginToken });
+    res.status(200).json({ qrCodeImage: qrCodeImage, loginToken: loginToken, createdAt: createdAt.toMillis() });
   })().catch(error => {
     console.error("Erro interno:", error);
     res.status(500).json({ error: "Erro interno no servidor." });
@@ -83,9 +85,14 @@ export const getLoginStatus = onRequest({ region: "southamerica-east1" }, (req: 
     const now = new Date();
     const diffInSeconds = (now.getTime() - createdAt.getTime()) / 1000;
     const attempts = loginData.attempts || 0;
-    //const newAttempts = attempts + 1
+    const newAttempts = attempts + 1
 
-    await docRef.update({ attempts: attempts + 1 });
+    const uid = loginData?.uid;
+    if (uid) {
+      return res.status(200).json({ uid });
+    }
+
+    await docRef.update({ attempts: newAttempts });
 
     if (diffInSeconds > 60 || attempts >= 3) {
       await docRef.delete();
@@ -94,13 +101,7 @@ export const getLoginStatus = onRequest({ region: "southamerica-east1" }, (req: 
       });
     }
 
-
-    const uid = loginData?.uid;
-    if (!uid) {
-      return res.status(404).json({ uid: null });
-    }
-
-    return res.status(200).json({ uid });
+    return res.status(404).json({ uid:null });
   })().catch(error => {
     console.error("Erro interno:", error);
     res.status(500).json({ error: "Erro interno no servidor." });

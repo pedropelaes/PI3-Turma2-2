@@ -69,3 +69,8 @@ body {
         height: 160px;
     }
 }
+
+.texto-verde {
+  color: #00c851; /* verde suave */
+  font-weight: bold;
+}

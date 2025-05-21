@@ -15,11 +15,14 @@ function callPerformAuth() {
         const base64 = data.qrCodeImage;
         const loginToken = data.loginToken;
         document.getElementById("qrCodeImg").src = base64;
+
         resetButton.style.display = 'none';
-        let timeLeft = 60;
+
+        const createdAt = data.createdAt;
+        const drift = Date.now() - createdAt;
+        let timeLeft = Math.max(60 - Math.floor(drift / 1000), 0);
         timerElement.textContent = `Expira em: ${timeLeft} segundos`;
 
-        clearInterval(timerInterval);
         timerInterval = setInterval(() => {
           timeLeft--;
           if (timeLeft <= 0) {
@@ -33,7 +36,10 @@ function callPerformAuth() {
           }
         }, 1000);
 
-        startGetLoginStatusPolling(loginToken)
+        setTimeout(() => {
+        const inicio = performance.now(); 
+        startGetLoginStatusPolling(loginToken, inicio);
+      }, 1000);
       })
       .catch(err => {
         console.error("Erro:", err.message);
@@ -50,6 +56,7 @@ function callGetLoginStatus(base64){
   })
   .then(response => response.json())
   .then(data=>{
+    console.log("uid:", data.uid)
     return data.uid
   })
   .catch(err =>{
@@ -57,30 +64,40 @@ function callGetLoginStatus(base64){
   })
 }
 
-function startGetLoginStatusPolling(loginToken) {
-  let attempts = 0;
-  const maxAttempts = 3;
+function startGetLoginStatusPolling(loginToken, inicio) {
+  const tentativas = [15, 35, 59]; // segundos
+  let loginConfirmado = false;
 
-  function poll() {
-    callGetLoginStatus(loginToken).then(uid => {
-      if (uid) {
-        console.log("Login confirmado:", uid);
-      } else {
-        console.log("Tentativa", attempts + 1, "aguardando login");
-        attempts++;
+  function agendarTentativa(segundos, index) {
+    const delay = segundos * 1000 - (performance.now() - inicio);
+    setTimeout(() => {
+      if (loginConfirmado) return;
 
-        if (attempts > maxAttempts) {
-          console.log("Tentativas esgotadas, gerar outro QR Code");
-          return;
+      callGetLoginStatus(loginToken).then(uid => {
+        if (uid) {
+          loginConfirmado = true;
+          clearInterval(timerInterval);
+          const successText = document.getElementById("timer");
+          successText.className = "texto-verde";
+          successText.textContent = "Login confirmado! Redirecionando...";
+          document.getElementById("qrCodeImg").src = "";
+          console.log("Login confirmado:", uid);
+        } else {
+          console.log(`Tentativa ${index + 1} (${segundos}s): aguardando login...`);
+          if (index === tentativas.length - 1) {
+            console.log("Tentativas esgotadas. QR Code precisa ser renovado.");
+          }
         }
-        setTimeout(poll, 22000); 
-      }
-    }).catch(err => {
-      console.error("Erro ao verificar login:", err);
-    });
+      }).catch(err => {
+        console.error("Erro ao verificar login:", err);
+      });
+
+    }, Math.max(delay, 0)); // evita delay negativo caso o tempo tenha passado
   }
 
-  setTimeout(poll, 15000); 
+  tentativas.forEach((segundos, index) => {
+    agendarTentativa(segundos, index);
+  });
 }
 
 
