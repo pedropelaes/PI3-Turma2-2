@@ -3,6 +3,7 @@ package com.example.superid
 import android.content.Context
 import android.os.Bundle
 import android.text.Layout
+import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -25,6 +26,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import com.google.mlkit.common.MlKitException
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.codescanner.GmsBarcodeScannerOptions
@@ -107,6 +111,7 @@ fun QrCodeScannerScreen(
                         Format: ${barcode.format}
                         Value Type: ${barcode.valueType}
                     """.trimIndent()
+                    barcode.rawValue?.let { SearchLoginDocument(it) }
                 }
                 .addOnFailureListener { e ->
                     scanResult = when (e) {
@@ -127,4 +132,34 @@ fun QrCodeScannerScreen(
             Text("Escanear novamente")
         }
     }
+}
+
+fun SearchLoginDocument(loginToken: String){
+    val db = Firebase.firestore
+    val auth = Firebase.auth
+    val currentUser = auth.currentUser
+
+    db.collection("login")
+        .whereEqualTo("loginToken", loginToken)
+        .get()
+        .addOnSuccessListener {result->
+            if(!result.isEmpty){
+                val document = result.documents.first()
+                Log.d("LOGINSEMSENHA", "Documento encontrado ${document.id}")
+                document.reference.update("uid", currentUser?.uid)
+                    .addOnSuccessListener {
+                        Log.d("LOGINSEMSENHA", "UID adicionado com sucesso ao documento ${document.id}")
+                    }
+                    .addOnFailureListener { e ->
+                        Log.e("LOGINSEMSENHA", "Falha ao atualizar UID no documento", e)
+                    }
+                Log.d("LOGINSEMSENHA", "Documento encontrado ${document.id}")
+            }else{
+                Log.e("LOGINSEMSENHA", "Nenhum documento de login encontrado")
+            }
+        }
+        .addOnFailureListener { exception->
+            Log.e("LOGINSEMSENHA", "Erro ao encontrar documento de login no banco", exception)
+        }
+
 }
