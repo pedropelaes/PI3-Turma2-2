@@ -1,140 +1,171 @@
 package com.example.superid
 
+import android.Manifest
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
-import android.text.Layout
 import android.util.Log
+import android.widget.Toast
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.sp
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import com.example.superid.ui.theme.SuperIdTheme
-import androidx.compose.runtime.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.superid.ui.theme.SuperIdTheme
+import com.example.superid.ui.theme.ui.common.LoginAndSignUpDesign
+import com.example.superid.ui.theme.ui.common.SuperIdTitlePainterVerified
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.mlkit.common.MlKitException
-import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.codescanner.GmsBarcodeScannerOptions
 import com.google.mlkit.vision.codescanner.GmsBarcodeScanning
 
-class QrCodeAuthActivity : AppCompatActivity() {
+class QrCodeAuthActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent{
+        setContent {
             SuperIdTheme(darkTheme = isSystemInDarkTheme()) {
                 QrCodeScannerScreen()
             }
         }
     }
 }
+
 @Composable
 fun QrCodeScannerScreen(
     context: Context = LocalContext.current
 ) {
-    var scanResult by remember { mutableStateOf("Resultado do QR Code aparecerá aqui") }
+    var shouldRequestPermission by remember { mutableStateOf(true) }
 
-    // Inicia a câmera automaticamente
-    LaunchedEffect(Unit) {
-        val optionsBuilder = GmsBarcodeScannerOptions.Builder()
-            .enableAutoZoom()
-            .allowManualInput()
-
-        val scanner = GmsBarcodeScanning.getClient(context, optionsBuilder.build())
-        scanner.startScan()
-            .addOnSuccessListener { barcode ->
-                scanResult = """
-                    Display Value: ${barcode.displayValue}
-                    Raw Value: ${barcode.rawValue}
-                    Format: ${barcode.format}
-                    Value Type: ${barcode.valueType}
-                """.trimIndent()
-            }
-            .addOnFailureListener { e ->
-                scanResult = when (e) {
-                    is MlKitException -> when (e.errorCode) {
-                        MlKitException.CODE_SCANNER_CAMERA_PERMISSION_NOT_GRANTED ->
-                            "Permissão da câmera não concedida"
-                        MlKitException.CODE_SCANNER_APP_NAME_UNAVAILABLE ->
-                            "Nome do app não disponível"
-                        else -> "Erro desconhecido: ${e.message}"
-                    }
-                    else -> e.message ?: "Erro desconhecido"
-                }
-            }
-            .addOnCanceledListener {
-                scanResult = "Escaneamento cancelado"
-            }
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        shouldRequestPermission = false
+        if (isGranted) {
+            iniciarLeituraQr(context)
+        } else {
+            Toast.makeText(context, "Permissão da câmera negada", Toast.LENGTH_SHORT).show()
+        }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text(
-            text = scanResult,
-            modifier = Modifier.padding(16.dp),
-            fontSize = 18.sp
-        )
+    LaunchedEffect(Unit) {
+        if (shouldRequestPermission) {
+            permissionLauncher.launch(Manifest.permission.CAMERA)
+        }
+    }
 
-        Button(onClick = {
-            // Botão extra para escanear novamente
-            val optionsBuilder = GmsBarcodeScannerOptions.Builder()
-                .enableAutoZoom()
-                .allowManualInput()
+    LoginAndSignUpDesign {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            SuperIdTitlePainterVerified()
 
-            val scanner = GmsBarcodeScanning.getClient(context, optionsBuilder.build())
-            scanner.startScan()
-                .addOnSuccessListener { barcode ->
-                    scanResult = """
-                        Display Value: ${barcode.displayValue}
-                        Raw Value: ${barcode.rawValue}
-                        Format: ${barcode.format}
-                        Value Type: ${barcode.valueType}
-                    """.trimIndent()
-                    barcode.rawValue?.let { SearchLoginDocument(it) }
-                }
-                .addOnFailureListener { e ->
-                    scanResult = when (e) {
-                        is MlKitException -> when (e.errorCode) {
-                            MlKitException.CODE_SCANNER_CAMERA_PERMISSION_NOT_GRANTED ->
-                                "Permissão da câmera não concedida"
-                            MlKitException.CODE_SCANNER_APP_NAME_UNAVAILABLE ->
-                                "Nome do app não disponível"
-                            else -> "Erro desconhecido: ${e.message}"
-                        }
-                        else -> e.message ?: "Erro desconhecido"
-                    }
-                }
-                .addOnCanceledListener {
-                    scanResult = "Escaneamento cancelado"
-                }
-        }) {
-            Text("Escanear novamente")
+            Spacer(modifier = Modifier.height(32.dp))
+
+            Button(
+                onClick = {
+                    permissionLauncher.launch(Manifest.permission.CAMERA)
+                },
+                modifier = Modifier
+                    .fillMaxWidth(0.85f)
+                    .height(50.dp),
+                enabled = true,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary
+                )
+            ) {
+                Text("Escanear QR Code", fontSize = 16.sp)
+            }
+        }
+
+        // Botão de voltar (canto inferior esquerdo)
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            contentAlignment = Alignment.BottomStart
+        ) {
+            Row(
+                modifier = Modifier.clickable {
+                    val intent = Intent(context, MainActivity::class.java)
+                    context.startActivity(intent)
+                },
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Voltar",
+                    tint = MaterialTheme.colorScheme.onBackground
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text = "Voltar",
+                    textDecoration = TextDecoration.Underline,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    fontSize = 15.sp
+                )
+            }
         }
     }
 }
 
-fun SearchLoginDocument(loginToken: String){
+fun iniciarLeituraQr(context: Context) {
+    val options = GmsBarcodeScannerOptions.Builder()
+        .enableAutoZoom()
+        .allowManualInput()
+        .build()
+
+    val scanner = GmsBarcodeScanning.getClient(context, options)
+
+    scanner.startScan()
+        .addOnSuccessListener { barcode ->
+            val valor = barcode.displayValue ?: barcode.rawValue ?: ""
+
+            // Chama a função que busca no Firestore
+            SearchLoginDocument(valor)
+
+            // Mostra feedback visual
+            if (valor.equals("aprovado", ignoreCase = true)) {
+                Toast.makeText(context, "Login aprovado", Toast.LENGTH_LONG).show()
+            } else {
+                Toast.makeText(context, "Login negado", Toast.LENGTH_LONG).show()
+            }
+        }
+        .addOnFailureListener { e ->
+            val mensagem = when (e) {
+                is MlKitException -> when (e.errorCode) {
+                    MlKitException.CODE_SCANNER_CAMERA_PERMISSION_NOT_GRANTED -> "Permissão da câmera não concedida"
+                    MlKitException.CODE_SCANNER_APP_NAME_UNAVAILABLE -> "Nome do app não disponível"
+                    else -> "Erro desconhecido: ${e.message}"
+                }
+                else -> e.message ?: "Erro desconhecido"
+            }
+            Toast.makeText(context, mensagem, Toast.LENGTH_LONG).show()
+        }
+        .addOnCanceledListener {
+            Toast.makeText(context, "Escaneamento cancelado", Toast.LENGTH_SHORT).show()
+        }
+}
+
+fun SearchLoginDocument(loginToken: String) {
     val db = Firebase.firestore
     val auth = Firebase.auth
     val currentUser = auth.currentUser
@@ -142,8 +173,8 @@ fun SearchLoginDocument(loginToken: String){
     db.collection("login")
         .whereEqualTo("loginToken", loginToken)
         .get()
-        .addOnSuccessListener {result->
-            if(!result.isEmpty){
+        .addOnSuccessListener { result ->
+            if (!result.isEmpty) {
                 val document = result.documents.first()
                 Log.d("LOGINSEMSENHA", "Documento encontrado ${document.id}")
                 document.reference.update("uid", currentUser?.uid)
@@ -153,13 +184,11 @@ fun SearchLoginDocument(loginToken: String){
                     .addOnFailureListener { e ->
                         Log.e("LOGINSEMSENHA", "Falha ao atualizar UID no documento", e)
                     }
-                Log.d("LOGINSEMSENHA", "Documento encontrado ${document.id}")
-            }else{
+            } else {
                 Log.e("LOGINSEMSENHA", "Nenhum documento de login encontrado")
             }
         }
-        .addOnFailureListener { exception->
+        .addOnFailureListener { exception ->
             Log.e("LOGINSEMSENHA", "Erro ao encontrar documento de login no banco", exception)
         }
-
 }
