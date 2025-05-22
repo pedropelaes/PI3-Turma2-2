@@ -15,7 +15,6 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -139,15 +138,8 @@ fun iniciarLeituraQr(context: Context) {
         .addOnSuccessListener { barcode ->
             val valor = barcode.displayValue ?: barcode.rawValue ?: ""
 
-            // Chama a função que busca no Firestore
-            SearchLoginDocument(valor)
-
-            // Mostra feedback visual
-            if (valor.equals("aprovado", ignoreCase = true)) {
-                Toast.makeText(context, "Login aprovado", Toast.LENGTH_LONG).show()
-            } else {
-                Toast.makeText(context, "Login negado", Toast.LENGTH_LONG).show()
-            }
+            // Chama a função que busca no Firestore e trata o status
+            SearchLoginDocument(valor, context)
         }
         .addOnFailureListener { e ->
             val mensagem = when (e) {
@@ -165,7 +157,7 @@ fun iniciarLeituraQr(context: Context) {
         }
 }
 
-fun SearchLoginDocument(loginToken: String) {
+fun SearchLoginDocument(loginToken: String, context: Context) {
     val db = Firebase.firestore
     val auth = Firebase.auth
     val currentUser = auth.currentUser
@@ -177,6 +169,8 @@ fun SearchLoginDocument(loginToken: String) {
             if (!result.isEmpty) {
                 val document = result.documents.first()
                 Log.d("LOGINSEMSENHA", "Documento encontrado ${document.id}")
+
+                // Atualiza o UID (opcional, pode ser antes ou depois)
                 document.reference.update("uid", currentUser?.uid)
                     .addOnSuccessListener {
                         Log.d("LOGINSEMSENHA", "UID adicionado com sucesso ao documento ${document.id}")
@@ -184,11 +178,29 @@ fun SearchLoginDocument(loginToken: String) {
                     .addOnFailureListener { e ->
                         Log.e("LOGINSEMSENHA", "Falha ao atualizar UID no documento", e)
                     }
+
+                // Escuta mudanças no documento em tempo real
+                document.reference.addSnapshotListener { snapshot, e ->
+                    if (e != null) {
+                        Log.e("LOGINSEMSENHA", "Erro no listener de status", e)
+                        return@addSnapshotListener
+                    }
+
+                    if (snapshot != null && snapshot.exists()) {
+                        val status = snapshot.getString("status")
+                        if (status.equals("aprovado", ignoreCase = true)) {
+                            Toast.makeText(context, "Login aprovado", Toast.LENGTH_LONG).show()
+                        }
+                    }
+                }
+
             } else {
                 Log.e("LOGINSEMSENHA", "Nenhum documento de login encontrado")
+                Toast.makeText(context, "Login inválido", Toast.LENGTH_LONG).show()
             }
         }
         .addOnFailureListener { exception ->
             Log.e("LOGINSEMSENHA", "Erro ao encontrar documento de login no banco", exception)
+            Toast.makeText(context, "Erro ao acessar o banco de dados", Toast.LENGTH_LONG).show()
         }
 }
