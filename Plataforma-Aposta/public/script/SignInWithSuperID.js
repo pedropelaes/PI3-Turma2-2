@@ -19,8 +19,11 @@ function callPerformAuth() {
         resetButton.style.display = 'none';
 
         const createdAt = data.createdAt;
-        const drift = Date.now() - createdAt;
-        let timeLeft = Math.max(60 - Math.floor(drift / 1000), 0);
+        const expiresAt = data.expiresAt;
+        const drift = Date.now() - createdAt;  // diferença do relógio local em relação ao servidor
+        let serverNow = Date.now() - drift  // horario do servidor: data local subtrai a diferença entre ela e o servidor
+        let timeLeft = Math.max(Math.floor((expiresAt - serverNow) / 1000), 0); // calcula o tempo restante até a expiração
+        console.log(`Drift:${drift} | serverNow: ${serverNow} | timeLeft:${timeLeft}`)
         timerElement.textContent = `Expira em: ${timeLeft} segundos`;
 
         timerInterval = setInterval(() => {

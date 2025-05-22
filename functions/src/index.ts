@@ -45,6 +45,9 @@ export const performAuth = onRequest({region: "southamerica-east1"},(req: Reques
     const loginToken = [...Array(256)].map(() => Math.random().toString(36)[2]).join('');
 
     const createdAt = admin.firestore.Timestamp.now();
+    const expiresAt = admin.firestore.Timestamp.fromMillis(
+      createdAt.toMillis() + 60 * 1000
+    )
 
     await db.collection("login").doc(loginToken).set({
       site,
@@ -54,7 +57,7 @@ export const performAuth = onRequest({region: "southamerica-east1"},(req: Reques
     });
 
     const qrCodeImage = await QRCode.toDataURL(loginToken);
-    res.status(200).json({ qrCodeImage: qrCodeImage, loginToken: loginToken, createdAt: createdAt.toMillis() });
+    res.status(200).json({ qrCodeImage: qrCodeImage, loginToken: loginToken, createdAt: createdAt.toMillis(), expiresAt: expiresAt.toMillis() });
   })().catch(error => {
     console.error("Erro interno:", error);
     res.status(500).json({ error: "Erro interno no servidor." });
