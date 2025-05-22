@@ -85,7 +85,8 @@ data class Senha(
     var senha: String = "",
     var descricao: String = "",
     val id: String = "",
-    var iv:  String = ""
+    var iv:  String = "",
+    var url: String = ""
 )
 
 class PasswordsActivity : AppCompatActivity() {
@@ -184,7 +185,7 @@ fun PasswordsScreen(categoria: String?, icone: Int, viewModel: SenhasViewModel){
                             novaSenha.senha = senhaCripto
                             novaSenha.iv = iv
 
-                            val doc = mapOf(
+                            val doc = mutableMapOf(
                                 "senha" to senhaCripto,
                                 "iv" to iv,
                                 "accessToken" to accessToken,
@@ -192,21 +193,31 @@ fun PasswordsScreen(categoria: String?, icone: Int, viewModel: SenhasViewModel){
                                 "descricao" to novaSenha.descricao,
                                 "id" to novoId,
                             )
+                            if(categoria == "sites") {
+                                senhasRef.whereEqualTo("url", novaSenha.url).get()
+                                    .addOnSuccessListener { result ->
+                                        if (result.isEmpty) {
+                                            doc["url"] = novaSenha.url
+                                            // Salva no Firestore
+                                            senhasRef.document(novoId).set(doc)
+                                                .addOnSuccessListener {
+                                                    viewModel.buscarSenhas(categoria)
+                                                }
 
-                            // Salva no Firestore
-                            senhasRef.document(novoId).set(doc)
-                                .addOnSuccessListener {
-                                    viewModel.buscarSenhas(categoria)
-                                }
-
-                            // Remove placeholder, se ainda existir
-                            senhasRef.document("placeholder").delete()
-                                .addOnSuccessListener {
-                                    Log.d("ADDPASSWORD", "Placeholder deletado")
-                                }
-                                .addOnFailureListener {
-                                    Log.w("ADDPASSWORD", "Erro ao deletar placeholder", it)
-                                }
+                                            // Remove placeholder, se ainda existir
+                                            senhasRef.document("placeholder").delete()
+                                                .addOnSuccessListener {
+                                                    Log.d("ADDPASSWORD", "Placeholder deletado")
+                                                }
+                                                .addOnFailureListener {
+                                                    Log.w("ADDPASSWORD", "Erro ao deletar placeholder", it)
+                                                }
+                                        } else {
+                                            Log.e("ADDPASSWORD", "URL já cadastrada!")
+                                            Toast.makeText(context, "Só é possivel usar um URL apenas para uma senha.", Toast.LENGTH_SHORT).show()
+                                        }
+                                    }
+                            }
                         },
                         onFailure = { e ->
                             Log.e("CRYPTO", "Erro ao buscar chave AES", e)
@@ -430,7 +441,8 @@ fun PasswordsScreenDesign(
                 onConfirm = { senhaCriada->
                     onAddPassword(senhaCriada)
                     showAddPasswordDialog = false
-                }
+                },
+                categoria = categoria
             )
         }
         if(showVerifyAccountDialog){
@@ -447,7 +459,8 @@ fun PasswordsScreenDesign(
 @Composable
 fun AddPasswordDialog(
     onDismiss: () -> Unit,
-    onConfirm: (Senha) -> Unit
+    onConfirm: (Senha) -> Unit,
+    categoria: String?
 ){
     var senha by remember { mutableStateOf(Senha()) }
     AlertDialog(
@@ -461,6 +474,9 @@ fun AddPasswordDialog(
                 verticalArrangement = Arrangement.SpaceBetween,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
+                if(categoria == "sites"){
+                    TextFieldDesignForLoginAndSignUp(value = senha.url, onValueChange = {senha = senha.copy(url = it)}, label = "Url(*obrigatório: www.site.com.br)")
+                }
                 TextFieldDesignForLoginAndSignUp(value = senha.login, onValueChange = {senha = senha.copy(login = it)}, label = "Login(opcional)")
                 Spacer(modifier = Modifier.size(4.dp))
                 TextFieldDesignForLoginAndSignUp(value = senha.senha, onValueChange = {senha = senha.copy(senha = it)}, label = "Senha(*obrigatório)", isPassword = true)
@@ -492,11 +508,24 @@ fun AddPasswordDialog(
 
 @Composable
 fun PasswordInfo(
-    senha: Senha
+    senha: Senha,
+    categoria: String?
 ){
     Column(
         horizontalAlignment = Alignment.Start,
     ) {
+        Column(
+            Modifier.padding(bottom = 5.dp)
+        ) {
+            if (categoria == "sites") {
+                Text(
+                    "Url:",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 19.sp
+                )
+                Text(senha.url, fontSize = 19.sp)
+            }
+        }
         Column(
             Modifier.padding(bottom = 5.dp)
         ) {
@@ -533,7 +562,8 @@ fun ViewPasswordInfoDialog(
     senha: Senha,
     onDismiss: () -> Unit,
     onDelete: () -> Unit,
-    onConfirm: () -> Unit
+    onConfirm: () -> Unit,
+    categoria: String?
 ){
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -557,7 +587,7 @@ fun ViewPasswordInfoDialog(
         },
         modifier = Modifier.wrapContentSize(),
         text = {
-            PasswordInfo(senha)
+            PasswordInfo(senha, categoria)
         },
         confirmButton = {
             TextButton(
@@ -584,6 +614,7 @@ fun ConfirmDeletePasswordDialog(
     senha: Senha,
     onDelete: () -> Unit,
     onDismiss: () -> Unit,
+    categoria: String?
 ){
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -595,7 +626,7 @@ fun ConfirmDeletePasswordDialog(
             Column(
                 horizontalAlignment = Alignment.Start
             ) {
-                PasswordInfo(senha)
+                PasswordInfo(senha, categoria)
             }
         },
         confirmButton = {
@@ -622,7 +653,8 @@ fun ConfirmDeletePasswordDialog(
 fun EditPasswordDialog(
     senha: Senha,
     onDismiss: () -> Unit,
-    onConfirm: (Senha) -> Unit
+    onConfirm: (Senha) -> Unit,
+    categoria: String?
 ){
     var senhaState by remember { mutableStateOf(senha) }
     AlertDialog(
@@ -636,6 +668,9 @@ fun EditPasswordDialog(
                 verticalArrangement = Arrangement.SpaceBetween,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
+                if(categoria == "sites"){
+                    TextFieldDesignForLoginAndSignUp(value = senha.url, onValueChange = {senhaState = senha.copy(url = it)}, label = "Url(*obrigatório: www.site.com.br)")
+                }
                 TextFieldDesignForLoginAndSignUp(value = senhaState.login, onValueChange = {senhaState = senhaState.copy(login = it)}, label = "Login(opcional)")
                 Spacer(modifier = Modifier.size(4.dp))
                 TextFieldDesignForLoginAndSignUp(value = senhaState.senha, onValueChange = {senhaState = senhaState.copy(senha = it)}, label = "Senha(*obrigatório)", isPassword = true)
@@ -739,7 +774,8 @@ fun ColumnSenhas(
                 showInfoDialog = false
                 showEditDialog = true
                 senhaDescriptografada = ""
-            }
+            },
+            categoria = categoria
         )
     }
     if(showConfirmDelete){
@@ -754,7 +790,8 @@ fun ColumnSenhas(
             onDismiss = {
                 showConfirmDelete = false
                 senhaDescriptografada = ""
-            }
+            },
+            categoria = categoria
         )
     }
 
@@ -772,8 +809,8 @@ fun ColumnSenhas(
                     auth = auth,
                 )
                 showEditDialog = false
-
-            }
+            },
+            categoria = categoria
         )
     }
 }

@@ -15,7 +15,7 @@ object CriptoUtils {
         return iv
     }
 
-    private fun generateAccessToken(): String {
+    fun generateAccessToken(): String {
         val randomBytes = ByteArray(192)   // Gera um token aleatório de 256 caracteres (usado como accessToken da senha).
         SecureRandom().nextBytes(randomBytes)
         return Base64.encodeToString(randomBytes, Base64.NO_WRAP)

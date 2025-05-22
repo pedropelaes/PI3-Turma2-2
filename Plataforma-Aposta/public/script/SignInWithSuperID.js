@@ -60,7 +60,7 @@ function callGetLoginStatus(base64){
   .then(response => response.json())
   .then(data=>{
     console.log("uid:", data.uid)
-    return data.uid
+    return {uid: data.uid, accessToken: data.accessToken}
   })
   .catch(err =>{
     console.error("Erro ao consultar status do login", err.message);
@@ -76,18 +76,17 @@ function startGetLoginStatusPolling(loginToken, inicio) {
     setTimeout(() => {
       if (loginConfirmado) return;
 
-      callGetLoginStatus(loginToken).then(uid => {
-        if (uid) {
+      callGetLoginStatus(loginToken).then(({ uid, accessToken }) => {
+        if (uid && accessToken) {
           loginConfirmado = true;
           clearInterval(timerInterval);
           const successText = document.getElementById("timer");
           successText.className = "texto-verde";
           successText.textContent = "Login confirmado! Redirecionando...";
           document.getElementById("qrCodeImg").src = "";
-          console.log("Login confirmado:", uid);
+          console.log("Login confirmado:", uid, "accesToken:",accessToken);
           localStorage.setItem("uid", uid);        
-          //localStorage.setItem("login", login);
-          //localStorage.setItem("senha", senha);
+          localStorage.setItem("accessToken", accessToken)
           setTimeout(() => {
             window.location.href = "/home";
           }, 3000);

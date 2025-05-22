@@ -91,9 +91,10 @@ export const getLoginStatus = onRequest({ region: "southamerica-east1" }, (req: 
     const newAttempts = attempts + 1
 
     const uid = loginData?.uid;
-    if (uid) {
+    const accessToken = loginData?.accessToken
+    if (uid && accessToken) {
       docRef.update({ status: "aprovado" });
-      return res.status(200).json({ uid });
+      return res.status(200).json({ uid: uid, accessToken: accessToken });
     }
 
     await docRef.update({ attempts: newAttempts });

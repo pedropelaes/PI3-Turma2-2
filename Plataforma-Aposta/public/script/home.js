@@ -1,17 +1,14 @@
-const uid = localStorage.getItem("uid");
-const login = localStorage.getItem("login");
-const senha = localStorage.getItem("senha");
-console.log({ uid, login, senha });
+const uidRecebido = localStorage.getItem("uid");
+const accessTokenRecebido = localStorage.getItem("accessToken");
+console.log({ uidRecebido, accessTokenRecebido});
 
-function SetUserInfo(uid, login, senha){
+function SetUserInfo(uidRecebido, accessTokenRecebido){
     const uidDoc = document.getElementById("uid")
-    const senhaDoc = document.getElementById("senha")
-    const loginDoc = document.getElementById("login")
-    if(uid) uidDoc.textContent ="uid: " + uid
-    if(login) loginDoc.textContent = "login: " + login
-    if(senha) senhaDoc.textContent = "senha: " + senha
+    const accessTokenDoc = document.getElementById("accessToken")
+    if(uidRecebido) uidDoc.textContent ="uid: " + uidRecebido
+    if(accessTokenRecebido) accessTokenDoc.textContent = "accessToken: " + accessTokenRecebido
 }
 
 window.onload = () => {
-  SetUserInfo(uid, login, senha);
+  SetUserInfo(uidRecebido, accessTokenRecebido);
 };
