@@ -3,6 +3,7 @@ package com.example.superid
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.BorderStroke
@@ -145,44 +146,68 @@ fun SignUpScreen() {
     var email by remember { mutableStateOf("") }
     var masterPassword by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
-    var result by remember { mutableStateOf("") }
-    val context = LocalContext.current
-    Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally){
-        SuperIdTitlePainterVerified()
+    var isLoading by remember { mutableStateOf(false) }
 
+    val context = LocalContext.current
+
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        SuperIdTitlePainterVerified()
         Spacer(modifier = Modifier.height(24.dp))
 
-        Text("Crie sua conta:",fontFamily = FontFamily.SansSerif ,fontSize = 30.sp, color = MaterialTheme.colorScheme.onBackground,
-            fontWeight = FontWeight.Bold, modifier = Modifier.align(Alignment.CenterHorizontally)
+        Text(
+            "Crie sua conta:",
+            fontFamily = FontFamily.SansSerif,
+            fontSize = 30.sp,
+            color = MaterialTheme.colorScheme.onBackground,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.align(Alignment.CenterHorizontally)
         )
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        TextFieldDesignForLoginAndSignUp(value = name, onValueChange = { name = it },
+        TextFieldDesignForLoginAndSignUp(
+            value = name,
+            onValueChange = { name = it },
             label = stringResource(R.string.type_your_name)
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        TextFieldDesignForLoginAndSignUp(value = email, onValueChange = { email = it },
+        TextFieldDesignForLoginAndSignUp(
+            value = email,
+            onValueChange = { email = it },
             label = stringResource(R.string.type_your_email)
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        TextFieldDesignForLoginAndSignUp(value = masterPassword, onValueChange = { masterPassword = it },
-            label = stringResource(R.string.type_your_password,), isPassword = true
+        TextFieldDesignForLoginAndSignUp(
+            value = masterPassword,
+            onValueChange = { masterPassword = it },
+            label = stringResource(R.string.type_your_password),
+            isPassword = true
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        TextFieldDesignForLoginAndSignUp(value = confirmPassword, onValueChange = { confirmPassword = it },
-            label = stringResource(R.string.confirm_your_password,), isPassword = true
+        TextFieldDesignForLoginAndSignUp(
+            value = confirmPassword,
+            onValueChange = { confirmPassword = it },
+            label = stringResource(R.string.confirm_your_password),
+            isPassword = true
         )
+
         Spacer(modifier = Modifier.height(8.dp))
 
-        if(masterPassword != confirmPassword) {
-            Text(stringResource(R.string.passwords_must_match), color = MaterialTheme.colorScheme.onBackground, textAlign = TextAlign.Center)
+        if (masterPassword != confirmPassword) {
+            Text(
+                stringResource(R.string.passwords_must_match),
+                color = MaterialTheme.colorScheme.onBackground,
+                textAlign = TextAlign.Center
+            )
         }
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -190,21 +215,40 @@ fun SignUpScreen() {
         Button(
             onClick = {
                 if (!isValidEmail(email)) {
-                    result = "Por favor, insira um e-mail válido."
+                    Toast.makeText(context, "Por favor, insira um e-mail válido.", Toast.LENGTH_SHORT).show()
                     return@Button
                 }
 
                 checkIfEmailExists(email) { exists ->
                     if (exists) {
-                        result = "Este e-mail já está em uso."
+                        Toast.makeText(context, "Já existe uma conta com este e-mail.", Toast.LENGTH_SHORT).show()
                     } else {
                         PerformSignUp(name, email, masterPassword) { msg ->
-                            result = msg
+                            Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
+                        }
+                    }
+                }
+
+                if (masterPassword.length < 6) {
+                    Toast.makeText(context, "A senha deve ter pelo menos 6 caracteres.", Toast.LENGTH_SHORT).show()
+                    return@Button
+                }
+
+                isLoading = true
+
+                checkIfEmailExists(email) { exists ->
+                    if (exists) {
+                        Toast.makeText(context, "Este e-mail já está em uso.", Toast.LENGTH_SHORT).show()
+                        isLoading = false
+                    } else {
+                        PerformSignUp(name, email, masterPassword) { msg ->
+                            Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
+                            isLoading = false
                         }
                     }
                 }
             },
-            enabled = masterPassword == confirmPassword &&
+            enabled = !isLoading && masterPassword == confirmPassword &&
                     name.isNotEmpty() && email.isNotEmpty() && masterPassword.isNotEmpty(),
             border = BorderStroke(2.dp, MaterialTheme.colorScheme.secondary),
             colors = ButtonDefaults.buttonColors(
@@ -213,15 +257,19 @@ fun SignUpScreen() {
                 disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant
             ),
             modifier = Modifier
-                .fillMaxWidth(0.85f) // Igual às caixas de texto
+                .fillMaxWidth(0.85f)
                 .height(50.dp)
         ) {
-            Text("Fazer Cadastro")
+            if (isLoading) {
+                androidx.compose.material3.CircularProgressIndicator(
+                    modifier = Modifier.height(24.dp).width(24.dp),
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    strokeWidth = 2.dp
+                )
+            } else {
+                Text("Fazer Cadastro")
+            }
         }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Text(result, color = MaterialTheme.colorScheme.tertiary, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
 
         Spacer(modifier = Modifier.height(12.dp))
 
@@ -240,6 +288,7 @@ fun SignUpScreen() {
         }
     }
 }
+
 fun isValidEmail(email: String): Boolean {
     return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
 }
