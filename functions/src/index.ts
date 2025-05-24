@@ -1,22 +1,31 @@
-import { onCall, onRequest } from "firebase-functions/v2/https";
+import { onRequest } from "firebase-functions/v2/https";
 import * as admin from "firebase-admin";
 import { Request, Response } from "express";
 const QRCode = require("qrcode");
 
 admin.initializeApp();
 
-export const checkEmailVerificationV2 = onCall({region: "southamerica-east1"},
-  async (request) => {
-    const email = (request.data?.email || "").trim().toLowerCase();
+export const checkEmailIsVerified = onRequest({ region: "southamerica-east1" }, async (req, res) => {
+  const email = (req.body?.data?.email || "").trim().toLowerCase();
+  console.log("E-mail recebido:", email);
 
-    if (!email) {
-      throw new Error("E-mail não fornecido.");
-    }
-
-    const userRecord = await admin.auth().getUserByEmail(email);
-    return { verified: userRecord.emailVerified };
+  if (!email) {
+    res.status(400).json({ error: "E-mail não fornecido." });
+    return;
   }
-);
+
+  try {
+    const userRecord = await admin.auth().getUserByEmail(email);
+    res.status(200).json({ data: { verified: userRecord.emailVerified } });
+  } catch (error: any) {
+    console.error("Erro ao buscar e-mail:", email, error.code);
+    if (error.code === "auth/user-not-found") {
+      res.status(404).json({ error: "Usuário não encontrado." });
+    } else {
+      res.status(500).json({ error: "Erro interno ao buscar usuário." });
+    }
+  }
+});
 
 const db = admin.firestore();
 

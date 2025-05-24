@@ -87,6 +87,9 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.auth.User
 
 
+fun IsEmailValid(email: String): Boolean = android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
+
+
 @Composable
 fun TextFieldDesignForLoginAndSignUp(
     value: String,

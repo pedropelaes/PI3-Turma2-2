@@ -24,14 +24,17 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.superid.ui.theme.SuperIdTheme
+import com.example.superid.ui.theme.ui.common.IsEmailValid
 import com.example.superid.ui.theme.ui.common.LoginAndSignUpDesign
 import com.example.superid.ui.theme.ui.common.SuperIdTitlePainterVerified
 import com.example.superid.ui.theme.ui.common.TextFieldDesignForLoginAndSignUp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.functions.FirebaseFunctionsException
 import com.google.firebase.functions.ktx.functions
 import com.google.firebase.ktx.Firebase
+import java.net.URL
 
 class PasswordReset : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -98,7 +101,6 @@ fun PasswordResetScreen() {
         Button(
             onClick = {
                 val cleanEmail = email.trim().lowercase()
-                Log.d("DEBUG_EMAIL", "Email enviado: $email")
                 sendPasswordResetIfEmailVerified(cleanEmail, onResultado = {result ->
                     Toast.makeText(context,result, Toast.LENGTH_LONG).show()
                 })},
@@ -171,28 +173,50 @@ fun PasswordResetScreen() {
 
 fun sendPasswordResetIfEmailVerified(email: String, onResultado: (String) -> Unit) {
     val functions = Firebase.functions
-
+    if(!IsEmailValid(email)){
+        onResultado("Digite um email válido")
+        return
+    }
+    Log.d("DEBUG_EMAIL", email)
     functions
-        .getHttpsCallable("checkEmailVerificationV2")
-        .call(hashMapOf<String, Any>("email" to email))
+        .getHttpsCallableFromUrl(URL("https://checkemailisverified-snp2owcvrq-rj.a.run.app"))
+        .call(hashMapOf("email" to email))
         .addOnSuccessListener { result ->
-            val data = result.data as? Map<*,*>
-            val isVerified = data?.get("verified") as? Boolean ?: false
+            val data = result.data as? Map<*,*> ?: run {
+                onResultado("Erro: resposta inválida do servidor.")
+                return@addOnSuccessListener
+            }
+            val isVerified = data.get("verified") as? Boolean ?: false
+            Log.d("DEBUG_EMAIL", "Função chamada")
 
             if (isVerified) {
                 Firebase.auth.sendPasswordResetEmail(email)
                     .addOnCompleteListener { task ->
                         if (task.isSuccessful) {
-                            onResultado("E-mail de redefinição enviado com sucesso.")
+                            onResultado("Um e-mail de recuperação foi enviado.")
                         } else {
                             onResultado("Erro ao enviar o e-mail: ${task.exception?.message}")
                         }
                     }
             } else {
-                onResultado("Este e-mail ainda não foi verificado.")
+                onResultado("Seu e-mail ainda não foi verificado.")
             }
         }
         .addOnFailureListener { exception ->
-            onResultado("Erro ao verificar e-mail: ${exception.message}")
+            if (exception is FirebaseFunctionsException) {
+                when (exception.code) {
+                    FirebaseFunctionsException.Code.NOT_FOUND -> {
+                        onResultado("Nenhum usuário com esse e-mail.")
+                    }
+                    FirebaseFunctionsException.Code.INVALID_ARGUMENT -> {
+                        onResultado("E-mail inválido.")
+                    }
+                    else -> {
+                        onResultado("Erro inesperado: ${exception.message}")
+                    }
+                }
+            } else {
+                onResultado("Erro de conexão: ${exception.message}")
+            }
         }
 }
