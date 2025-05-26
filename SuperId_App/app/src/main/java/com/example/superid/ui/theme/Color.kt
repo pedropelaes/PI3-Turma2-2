@@ -17,4 +17,4 @@ val D_Blue60 = Color(0xFF485C94)
 
 
 val Blue30 = Color(0xFF1D8BE1) // cor primaria do tema Escuro (equivalente a D_Blue60)
-val Blue20 = Color(0xFF45659E) // cor secundaria do tema Escuro (equivalente a D_Blue40)
+val Blue20 = Color(0xFF496BA6) // cor secundaria do tema Escuro (equivalente a D_Blue40)
