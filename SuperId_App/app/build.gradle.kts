@@ -90,4 +90,6 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-test-manifest")
     implementation("com.google.firebase:firebase-functions-ktx")
 
+    implementation("androidx.compose.material:material-icons-extended:1.6.1")
+
 }

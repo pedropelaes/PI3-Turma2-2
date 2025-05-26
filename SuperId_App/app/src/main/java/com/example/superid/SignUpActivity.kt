@@ -3,25 +3,15 @@ package com.example.superid
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.TextButton
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -36,8 +26,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.superid.ui.theme.SuperIdTheme
 import com.example.superid.ui.theme.ui.common.LoginAndSignUpDesign
-import com.example.superid.ui.theme.ui.common.SuperIdTitle
-import com.example.superid.ui.theme.ui.common.SuperIdTitlePainter
 import com.example.superid.ui.theme.ui.common.SuperIdTitlePainterVerified
 import com.example.superid.ui.theme.ui.common.TextFieldDesignForLoginAndSignUp
 import com.google.firebase.auth.FirebaseAuth
@@ -45,7 +33,6 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import utils.ChaveAesUtils
-
 
 class SignUpActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -57,73 +44,83 @@ class SignUpActivity : AppCompatActivity() {
         }
     }
 }
+
 @Preview
 @Composable
-fun SignUp(){
-    LoginAndSignUpDesign() {
+fun SignUp() {
+    LoginAndSignUpDesign {
         SignUpScreen()
     }
 }
 
-fun PerformSignUp(name: String,email: String, password: String, onResult: (String) -> Unit){
+fun PerformSignUp(
+    context: android.content.Context,
+    name: String,
+    email: String,
+    password: String,
+    onResult: (String) -> Unit
+) {
     val auth = Firebase.auth
 
     auth.createUserWithEmailAndPassword(email, password)
         .addOnCompleteListener { task ->
-            if (task.isSuccessful){
+            if (task.isSuccessful) {
                 val user = auth.currentUser
                 user?.let {
                     SaveNewAccount(name, email, it.uid)
                     SaveUserDefaultCategories(it.uid)
                 }
+
                 user?.sendEmailVerification()
-                    ?.addOnCompleteListener{ verification ->
-                        if(verification.isSuccessful){
+                    ?.addOnCompleteListener { verification ->
+                        if (verification.isSuccessful) {
                             Log.d("SIGNUP", "Email de verificação enviado.")
-                            onResult("Um email de verificação foi enviado para confirmar sua conta.")
-                        }else{
-                            Log.e("SIGNUP", "Erro ao mandar email de veriricação.")
-                            onResult("Erro ao enviar email de verificação, verifique o seu email.")
+                            onResult("Conta criada com sucesso! Verifique seu e-mail.")
+
+                            val intent = Intent(context, LogInActivity::class.java)
+                            context.startActivity(intent)
+                        } else {
+                            Log.e("SIGNUP", "Erro ao enviar email de verificação.")
+                            onResult("Erro ao enviar email de verificação. Verifique o seu e-mail.")
                         }
                     }
-            }else{
+            } else {
                 Log.e("SIGNUP", "Erro ao criar usuário ${task.exception?.message}.")
-                onResult("Erro ao criar sua conta, verifique seus dados.")
+                onResult("Erro ao criar sua conta. Verifique seus dados ou tente novamente.")
             }
         }
 }
 
-fun SaveNewAccount(name: String, email: String, uid: String, tries: Int = 0){
+fun SaveNewAccount(name: String, email: String, uid: String, tries: Int = 0) {
     val db = Firebase.firestore
     val chave = ChaveAesUtils.gerarChaveAesBase64()
     val taskDoc = hashMapOf(
         "name" to name,
         "email" to email,
         "AESkey" to chave,
-        "emailVerified" to false
     )
     db.collection("users").document(uid).set(taskDoc)
-        .addOnCompleteListener{task->
-            if(task.isSuccessful){
+        .addOnCompleteListener { task ->
+            if (task.isSuccessful) {
                 Log.d("SIGNUP", "Documento do usuário salvo no banco de dados. ${task.result}")
             }
         }
-        .addOnFailureListener{retry->
-            if (tries < 5){
+        .addOnFailureListener { retry ->
+            if (tries < 5) {
                 SaveNewAccount(name, email, uid, tries + 1)
-            }else{
+            } else {
                 Log.e("SIGNUP", "Falha ao salvar usuário no banco de dados.")
             }
         }
 }
 
-fun SaveUserDefaultCategories(uid: String){
+fun SaveUserDefaultCategories(uid: String) {
     val db = Firebase.firestore
     val batch = db.batch()
     val categorias = listOf("aplicativos", "emails", "sites", "teclados")
     val categoriasRef = db.collection("users").document(uid).collection("categorias")
 
-    for(categoria in categorias){
+    for (categoria in categorias) {
         val docRef = categoriasRef.document(categoria)
 
         val nameCategoria = mapOf("nome" to categoria)
@@ -145,44 +142,68 @@ fun SignUpScreen() {
     var email by remember { mutableStateOf("") }
     var masterPassword by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
-    var result by remember { mutableStateOf("") }
-    val context = LocalContext.current
-    Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally){
-        SuperIdTitlePainterVerified()
+    var isLoading by remember { mutableStateOf(false) }
 
+    val context = LocalContext.current
+
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        SuperIdTitlePainterVerified()
         Spacer(modifier = Modifier.height(24.dp))
 
-        Text("Crie sua conta:",fontFamily = FontFamily.SansSerif ,fontSize = 30.sp, color = MaterialTheme.colorScheme.onBackground,
-            fontWeight = FontWeight.Bold, modifier = Modifier.align(Alignment.CenterHorizontally)
+        Text(
+            "Crie sua conta:",
+            fontFamily = FontFamily.SansSerif,
+            fontSize = 30.sp,
+            color = MaterialTheme.colorScheme.onBackground,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.align(Alignment.CenterHorizontally)
         )
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        TextFieldDesignForLoginAndSignUp(value = name, onValueChange = { name = it },
+        TextFieldDesignForLoginAndSignUp(
+            value = name,
+            onValueChange = { name = it },
             label = stringResource(R.string.type_your_name)
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        TextFieldDesignForLoginAndSignUp(value = email, onValueChange = { email = it },
+        TextFieldDesignForLoginAndSignUp(
+            value = email,
+            onValueChange = { email = it },
             label = stringResource(R.string.type_your_email)
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        TextFieldDesignForLoginAndSignUp(value = masterPassword, onValueChange = { masterPassword = it },
-            label = stringResource(R.string.type_your_password,), isPassword = true
+        TextFieldDesignForLoginAndSignUp(
+            value = masterPassword,
+            onValueChange = { masterPassword = it },
+            label = stringResource(R.string.type_your_password),
+            isPassword = true
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        TextFieldDesignForLoginAndSignUp(value = confirmPassword, onValueChange = { confirmPassword = it },
-            label = stringResource(R.string.confirm_your_password,), isPassword = true
+        TextFieldDesignForLoginAndSignUp(
+            value = confirmPassword,
+            onValueChange = { confirmPassword = it },
+            label = stringResource(R.string.confirm_your_password),
+            isPassword = true
         )
+
         Spacer(modifier = Modifier.height(8.dp))
 
-        if(masterPassword != confirmPassword) {
-            Text(stringResource(R.string.passwords_must_match), color = MaterialTheme.colorScheme.onBackground, textAlign = TextAlign.Center)
+        if (masterPassword != confirmPassword) {
+            Text(
+                stringResource(R.string.passwords_must_match),
+                color = MaterialTheme.colorScheme.onBackground,
+                textAlign = TextAlign.Center
+            )
         }
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -190,21 +211,30 @@ fun SignUpScreen() {
         Button(
             onClick = {
                 if (!isValidEmail(email)) {
-                    result = "Por favor, insira um e-mail válido."
+                    Toast.makeText(context, "Por favor, insira um e-mail válido.", Toast.LENGTH_SHORT).show()
                     return@Button
                 }
 
+                if (masterPassword.length < 6) {
+                    Toast.makeText(context, "A senha deve ter pelo menos 6 caracteres.", Toast.LENGTH_SHORT).show()
+                    return@Button
+                }
+
+                isLoading = true
+
                 checkIfEmailExists(email) { exists ->
                     if (exists) {
-                        result = "Este e-mail já está em uso."
+                        Toast.makeText(context, "Já existe uma conta com este e-mail.", Toast.LENGTH_SHORT).show()
+                        isLoading = false
                     } else {
-                        PerformSignUp(name, email, masterPassword) { msg ->
-                            result = msg
+                        PerformSignUp(context, name, email, masterPassword) { msg ->
+                            Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
+                            isLoading = false
                         }
                     }
                 }
             },
-            enabled = masterPassword == confirmPassword &&
+            enabled = !isLoading && masterPassword == confirmPassword &&
                     name.isNotEmpty() && email.isNotEmpty() && masterPassword.isNotEmpty(),
             border = BorderStroke(2.dp, MaterialTheme.colorScheme.secondary),
             colors = ButtonDefaults.buttonColors(
@@ -213,15 +243,19 @@ fun SignUpScreen() {
                 disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant
             ),
             modifier = Modifier
-                .fillMaxWidth(0.85f) // Igual às caixas de texto
+                .fillMaxWidth(0.85f)
                 .height(50.dp)
         ) {
-            Text("Fazer Cadastro")
+            if (isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.height(24.dp).width(24.dp),
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    strokeWidth = 2.dp
+                )
+            } else {
+                Text("Fazer Cadastro")
+            }
         }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Text(result, color = MaterialTheme.colorScheme.tertiary, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
 
         Spacer(modifier = Modifier.height(12.dp))
 
@@ -240,9 +274,11 @@ fun SignUpScreen() {
         }
     }
 }
+
 fun isValidEmail(email: String): Boolean {
     return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
 }
+
 fun checkIfEmailExists(email: String, onResult: (Boolean) -> Unit) {
     FirebaseAuth.getInstance().fetchSignInMethodsForEmail(email)
         .addOnCompleteListener { task ->
@@ -254,5 +290,3 @@ fun checkIfEmailExists(email: String, onResult: (Boolean) -> Unit) {
             }
         }
 }
-
-
