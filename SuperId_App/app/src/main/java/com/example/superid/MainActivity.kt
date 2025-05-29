@@ -38,6 +38,8 @@ import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import androidx.compose.material3.TextFieldDefaults
+
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -54,6 +56,8 @@ class MainActivity : AppCompatActivity() {
 
 @Composable
 fun MainScreen() {
+    var searchQuery by remember { mutableStateOf("") }
+    var isSearching by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val db = FirebaseFirestore.getInstance()
     val userId = FirebaseAuth.getInstance().currentUser?.uid
@@ -138,7 +142,11 @@ fun MainScreen() {
         onCancelarExclusao = {
             showDialogExcluir = false
             categoriaParaExcluir = null
-        }
+        },
+        searchQuery = searchQuery,
+        onSearchQueryChange = { searchQuery = it },
+        isSearching = isSearching,
+        onToggleSearch = { isSearching = !isSearching }
     )
 }
 
@@ -152,10 +160,13 @@ fun MainScreenDesign(
     showDialogExcluir: Boolean,
     onConfirmarExclusao: () -> Unit,
     onCancelarExclusao: () -> Unit,
+    searchQuery: String,
+    onSearchQueryChange: (String) -> Unit,
+    isSearching: Boolean,
+    onToggleSearch: () -> Unit,
     content: @Composable () -> Unit = {}
 ) {
     StatusAndNavigationBarColors()
-
     var showDialog by remember { mutableStateOf(false) }
     var showEditDialog by remember { mutableStateOf(false) }
     var categoriaParaEditar by remember { mutableStateOf("") }
@@ -168,21 +179,39 @@ fun MainScreenDesign(
             Column{
                 TopAppBar(
                     title = {
-                        SuperIdTitle(modifier = Modifier.size(10.dp))
+                        if (isSearching) {
+                            TextField(
+                                value = searchQuery,
+                                onValueChange = onSearchQueryChange,
+                                placeholder = { Text("Buscar categoria...") },
+                                singleLine = true,
+                                colors = TextFieldDefaults.colors(
+                                    focusedContainerColor = MaterialTheme.colorScheme.onSurface,
+                                    unfocusedContainerColor = MaterialTheme.colorScheme.onSurface,
+                                    focusedIndicatorColor = Color.Transparent,
+                                    unfocusedIndicatorColor = Color.Transparent,
+                                    focusedTextColor = Color.Black,
+                                    unfocusedTextColor = Color.Black
+                                )
+                            )
+                        } else {
+                            SuperIdTitle(modifier = Modifier.size(10.dp))
+                        }
                     },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant
-                    ),
                     actions = {
-                        IconButton(onClick = {}) {
+                        IconButton(onClick = onToggleSearch) {
                             Icon(
                                 imageVector = Icons.Default.Search,
                                 contentDescription = "Buscar",
                                 tint = MaterialTheme.colorScheme.onPrimary
                             )
                         }
-                    }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.primary
+                    )
                 )
+
                 Divider(
                     color = Color.White,
                     thickness = 4.dp
@@ -276,7 +305,12 @@ fun MainScreenDesign(
                         onEditarCategoria = {},
                     )
                 }
-                items(categoriasCriadas) { nome ->
+                val categoriasFiltradas = if (searchQuery.isBlank()) {
+                    categoriasCriadas
+                } else {
+                    categoriasCriadas.filter { it.contains(searchQuery, ignoreCase = true) }
+                }
+                items(categoriasFiltradas) { nome ->
                     CategoryRow(
                         painter = R.drawable.smartphone,
                         contentDescripiton = "Categoria $nome",
