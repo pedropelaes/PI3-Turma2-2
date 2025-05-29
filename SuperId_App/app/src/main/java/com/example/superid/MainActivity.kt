@@ -197,19 +197,6 @@ fun MainScreenDesign(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                ExtendedFloatingActionButton(
-                    onClick = { showDialog = true },
-                    containerColor = MaterialTheme.colorScheme.primary,
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "Criar Categoria",
-                        tint = MaterialTheme.colorScheme.onPrimary,
-                        modifier = Modifier.size(28.dp)
-                    )
-                    Text("Criar Categoria", color = MaterialTheme.colorScheme.onPrimary)
-                }
-
                 FloatingActionButton(
                     onClick = {
                         val intent = Intent(context, QrCodeAuthActivity::class.java)
@@ -225,6 +212,18 @@ fun MainScreenDesign(
                         tint = MaterialTheme.colorScheme.onPrimary,
                         modifier = Modifier.size(28.dp)
                     )
+                }
+                ExtendedFloatingActionButton(
+                    onClick = { showDialog = true },
+                    containerColor = MaterialTheme.colorScheme.primary,
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Criar Categoria",
+                        tint = MaterialTheme.colorScheme.onPrimary,
+                        modifier = Modifier.size(28.dp)
+                    )
+                    Text("Criar Categoria", color = MaterialTheme.colorScheme.onPrimary)
                 }
             }
         },
