@@ -1,4 +1,4 @@
-import QRCode from 'qrcode';
+/*import QRCode from 'qrcode';
 
 // Primeiro, certifique-se de instalar a biblioteca qrcode via npm:
 // npm install qrcode
@@ -24,3 +24,4 @@ function generateQRCode(text, canvasId) {
 // Adicione um elemento <canvas id="qrcodeCanvas"></canvas> no HTML
 // E chame a função assim:
 // generateQRCode('https://example.com', 'qrcodeCanvas');
+*/

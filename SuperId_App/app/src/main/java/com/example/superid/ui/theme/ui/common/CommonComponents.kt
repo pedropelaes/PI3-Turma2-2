@@ -36,8 +36,12 @@ import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -76,7 +80,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.superid.PasswordInfo
 import com.example.superid.PasswordsActivity
-import com.example.superid.QrCodeAuthActivity
 import com.example.superid.R
 import com.example.superid.SignUpActivity
 import com.example.superid.SuperID
@@ -87,14 +90,18 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.auth.User
 
 
+fun IsEmailValid(email: String): Boolean = android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
+
+
 @Composable
 fun TextFieldDesignForLoginAndSignUp(
     value: String,
     onValueChange: (String) -> Unit,
     label: String,
     isPassword: Boolean = false
-
 ) {
+    var passwordVisible by remember { mutableStateOf(false) }
+
     val leadingIcon = when {
         label.contains("nome", ignoreCase = true) -> Icons.Default.Person
         label.contains("email", ignoreCase = true) -> Icons.Default.Email
@@ -108,12 +115,29 @@ fun TextFieldDesignForLoginAndSignUp(
         label = { Text(label) },
         singleLine = true,
         shape = CircleShape,
-        visualTransformation = if (isPassword) PasswordVisualTransformation() else VisualTransformation.None,
+        visualTransformation = if (isPassword && !passwordVisible) PasswordVisualTransformation() else VisualTransformation.None,
         leadingIcon = {
             leadingIcon?.let {
-                Icon(imageVector = it, contentDescription = null, tint = MaterialTheme.colorScheme.onBackground)
+                Icon(
+                    imageVector = it,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onBackground
+                )
             }
         },
+        trailingIcon = if (isPassword) {
+            {
+                val image = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff
+                val description = if (passwordVisible) "Esconder senha" else "Mostrar senha"
+                IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                    Icon(
+                        imageVector = image,
+                        contentDescription = description,
+                        tint = MaterialTheme.colorScheme.onBackground
+                    )
+                }
+            }
+        } else null,
         colors = TextFieldDefaults.colors(
             unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
             unfocusedLabelColor = MaterialTheme.colorScheme.onBackground,
@@ -127,11 +151,10 @@ fun TextFieldDesignForLoginAndSignUp(
             errorIndicatorColor = Color.Transparent,
             cursorColor = MaterialTheme.colorScheme.primary
         ),
-
         modifier = Modifier
             .fillMaxWidth()
             .height(52.dp)
-            .padding(horizontal = 25.dp) // Espaço entre as bordas e os campos
+            .padding(horizontal = 25.dp)
             .border(
                 width = 1.dp,
                 color = MaterialTheme.colorScheme.onBackground,
@@ -195,6 +218,7 @@ fun SuperIdTitlePainter(painter: Int = R.drawable.super_id_title_light ){
             .height(48.dp)
     )
 }
+
 @Composable
 fun SuperIdTitlePainterVerified(){
     if(isSystemInDarkTheme()){
@@ -209,7 +233,7 @@ fun SuperIdTitlePainterVerified(){
 fun SuperIdTitle(modifier: Modifier = Modifier){
     val title_font = FontFamily(Font(R.font.fonte_titulo))
     Text(
-        buildAnnotatedString { //junta strings com estilos diferentes
+        buildAnnotatedString {
             withStyle(
                 style = SpanStyle(fontFamily = title_font, fontSize = 28.sp, color = Color.White,
                     shadow = Shadow(Color.DarkGray, offset = Offset(1f, 1f),blurRadius = 4f)
@@ -230,7 +254,6 @@ fun SuperIdTitle(modifier: Modifier = Modifier){
             .wrapContentWidth()
             .padding(horizontal = 16.dp)
     )
-
 }
 
 @Composable
@@ -245,7 +268,7 @@ fun LoginAndSignUpDesign(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background) // <- cor de fundo aplicada aqui
+            .background(MaterialTheme.colorScheme.background)
     ) {
         Column(
             modifier = Modifier
@@ -267,53 +290,13 @@ fun LoginAndSignUpDesign(
         }
     }
 }
+
 @Composable
 fun themedBackgroundImage(): Int {
     return if (isSystemInDarkTheme()){
         R.drawable.lockers_background_dark
     } else{
         R.drawable.lockers_backgroud_light
-    }
-}
-
-@Composable
-fun CategoryRow(painter: Int = R.drawable.logo_without_text, contentDescripiton: String, text: String, onClick: () -> Unit){
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .size(80.dp)
-            .padding(vertical = 2.dp)
-            .background(color = MaterialTheme.colorScheme.secondary)
-            .clickable { onClick() }
-    ){
-        Icon(
-            painter = painterResource(painter),
-            tint = MaterialTheme.colorScheme.inverseOnSurface,
-            contentDescription = contentDescripiton,
-            modifier = Modifier.size(48.dp)
-                .align(Alignment.CenterVertically)
-                .padding(start = 8.dp)
-        )
-
-        Spacer(modifier = Modifier.size(8.dp))
-
-        Text(
-            text = text,
-            color = MaterialTheme.colorScheme.inverseOnSurface,
-            textAlign = TextAlign.Center,
-            fontSize = 24.sp,
-            modifier = Modifier.align(Alignment.CenterVertically)
-        )
-
-        Spacer(modifier = Modifier.weight(1f))
-
-        Icon(
-            imageVector = Icons.Default.KeyboardArrowRight,
-            contentDescription = "Abrir categoria",
-            tint = MaterialTheme.colorScheme.inverseOnSurface,
-            modifier = Modifier.align(Alignment.CenterVertically)
-
-        )
     }
 }
 
@@ -374,7 +357,7 @@ fun StatusAndNavigationBarColors(
 ){
     val systemUiController = rememberSystemUiController()
     val darkIcons = isSystemInDarkTheme()
-    SideEffect { //aplicando as cores da barra de status e navegação
+    SideEffect {
         systemUiController.setStatusBarColor(statusBarColor, darkIcons = darkIcons)
         systemUiController.setNavigationBarColor(navigationBarColor, darkIcons = darkIcons)
     }
@@ -406,9 +389,9 @@ fun DialogVerificarConta(
                 Text("Cancelar", color = MaterialTheme.colorScheme.onBackground)
             }
         },
-        containerColor = MaterialTheme.colorScheme.background, // Cor de fundo do dialog
-        titleContentColor = MaterialTheme.colorScheme.onBackground, // Cor do título
-        textContentColor = MaterialTheme.colorScheme.onBackground, // Cor do texto
+        containerColor = MaterialTheme.colorScheme.background,
+        titleContentColor = MaterialTheme.colorScheme.onBackground,
+        textContentColor = MaterialTheme.colorScheme.onBackground,
     )
 }
 

@@ -20,9 +20,9 @@
         <div class="card text-center shadow-lg" style="width: 24rem;">
             <h3 class="card-title mb-3"><i class="bi bi-shield-lock me-2"></i>Login com SuperID</h3>
             <p class="card-text mb-3">Escaneie o QR Code abaixo com o aplicativo SuperID para fazer login.</p>
-            <canvas id="qrcodeCanvas" class="mb-3"></canvas>
+            <img id="qrCodeImg" class="mb-3"></img>
             <p id="timer" class="text-danger fw-bold"></p>
-            <button id="resetButton" class="btn btn-primary mt-3" onclick="handleButtonClick()" style="display: none;">
+            <button id="resetButton" class="btn btn-primary mt-3" onclick="callPerformAuth()" style="display: none;">
                 <i class="bi bi-arrow-clockwise me-1"></i> Gerar Novo QR Code
             </button>
         </div>

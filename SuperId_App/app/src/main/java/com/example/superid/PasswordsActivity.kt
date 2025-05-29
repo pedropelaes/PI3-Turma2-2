@@ -1,11 +1,19 @@
 package com.example.superid
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.MutableTransitionState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -46,8 +54,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -75,6 +85,8 @@ import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import utils.ChaveAesUtils
 import utils.CriptoUtils
 import utils.getSenhasRef
@@ -84,8 +96,9 @@ data class Senha(
     var login: String = "",
     var senha: String = "",
     var descricao: String = "",
-    val id: String = "",
-    var iv:  String = ""
+    var id: String = "",
+    var iv:  String = "",
+    var url: String = ""
 )
 
 class PasswordsActivity : AppCompatActivity() {
@@ -180,33 +193,52 @@ fun PasswordsScreen(categoria: String?, icone: Int, viewModel: SenhasViewModel){
                             val (senhaCripto, iv, accessToken) = CriptoUtils.encrypt(novaSenha.senha, secretKey)
                             val novoId = senhasRef.document().id
 
+
                             // Preenche os campos criptografados na instância
                             novaSenha.senha = senhaCripto
                             novaSenha.iv = iv
+                            novaSenha.id = novoId
 
-                            val doc = mapOf(
+                            val doc = mutableMapOf(
                                 "senha" to senhaCripto,
                                 "iv" to iv,
                                 "accessToken" to accessToken,
                                 "login" to novaSenha.login,
                                 "descricao" to novaSenha.descricao,
-                                "id" to novoId,
+                                "id" to novaSenha.id,
                             )
+                            if(categoria == "sites") {
+                                senhasRef.whereEqualTo("url", novaSenha.url).get()
+                                    .addOnSuccessListener { result ->
+                                        if (result.isEmpty) {
+                                            doc["url"] = novaSenha.url
+                                            // Salva no Firestore
+                                            senhasRef.document(novoId).set(doc)
+                                                .addOnSuccessListener {
+                                                    Toast.makeText(context, "Senha criada!", Toast.LENGTH_SHORT).show()
+                                                    viewModel.buscarSenhas(categoria)
+                                                }
 
-                            // Salva no Firestore
-                            senhasRef.document(novoId).set(doc)
-                                .addOnSuccessListener {
-                                    viewModel.buscarSenhas(categoria)
-                                }
-
-                            // Remove placeholder, se ainda existir
-                            senhasRef.document("placeholder").delete()
-                                .addOnSuccessListener {
-                                    Log.d("ADDPASSWORD", "Placeholder deletado")
-                                }
-                                .addOnFailureListener {
-                                    Log.w("ADDPASSWORD", "Erro ao deletar placeholder", it)
-                                }
+                                            // Remove placeholder, se ainda existir
+                                            senhasRef.document("placeholder").delete()
+                                                .addOnSuccessListener {
+                                                    Log.d("ADDPASSWORD", "Placeholder deletado")
+                                                }
+                                                .addOnFailureListener {
+                                                    Log.w("ADDPASSWORD", "Erro ao deletar placeholder", it)
+                                                }
+                                        } else {
+                                            Log.e("ADDPASSWORD", "URL já cadastrada!")
+                                            Toast.makeText(context, "Só é possivel usar um URL apenas para uma senha.", Toast.LENGTH_SHORT).show()
+                                        }
+                                    }
+                            }else{
+                                senhasRef.document(novoId).set(doc)
+                                    .addOnSuccessListener {
+                                        viewModel.buscarSenhas(categoria)
+                                        Toast.makeText(context, "Senha criada!", Toast.LENGTH_SHORT).show()
+                                    }
+                            }
                         },
                         onFailure = { e ->
                             Log.e("CRYPTO", "Erro ao buscar chave AES", e)
@@ -227,7 +259,7 @@ fun PasswordsScreen(categoria: String?, icone: Int, viewModel: SenhasViewModel){
     }
 }
 
-fun EditPasswordOnFirestore(categoria: String?, senha: Senha, novaSenha: Senha, viewModel: SenhasViewModel, db:FirebaseFirestore, auth: FirebaseAuth){
+fun EditPasswordOnFirestore(categoria: String?, senha: Senha, novaSenha: Senha, viewModel: SenhasViewModel, db:FirebaseFirestore, auth: FirebaseAuth, context: Context){
     val uid = auth.currentUser?.uid
     if (uid != null && categoria != null) {
         ChaveAesUtils.recuperarChaveDoUsuario(
@@ -253,9 +285,19 @@ fun EditPasswordOnFirestore(categoria: String?, senha: Senha, novaSenha: Senha, 
                             .update(doc)
                             .addOnSuccessListener {
                                 Log.d("UPDATEPASSWORD", "Senha atualizada")
+                                Toast.makeText(
+                                    context,
+                                    "Senha atualizada!",
+                                    Toast.LENGTH_SHORT
+                                ).show()
                                 viewModel.buscarSenhas(categoria)
                             }
                             .addOnFailureListener { e ->
+                                Toast.makeText(
+                                    context,
+                                    "Houve um erro ao editar a senha!",
+                                    Toast.LENGTH_SHORT
+                                ).show()
                                 Log.e("UPDATEPASSWORD", "Erro ao atualizar senha", e)
                             }
                     },
@@ -269,7 +311,7 @@ fun EditPasswordOnFirestore(categoria: String?, senha: Senha, novaSenha: Senha, 
     }
 }
 
-fun DeletePasswordOnFirestore(categoria: String?, senha: Senha, db:FirebaseFirestore, auth: FirebaseAuth){
+fun DeletePasswordOnFirestore(categoria: String?, senha: Senha, db:FirebaseFirestore, auth: FirebaseAuth, context: Context){
     val uid = auth.currentUser?.uid
 
     if (uid != null && categoria != null) {
@@ -278,9 +320,19 @@ fun DeletePasswordOnFirestore(categoria: String?, senha: Senha, db:FirebaseFires
                 senhasRef.document(senha.id)
                     .delete()
                     .addOnSuccessListener {
+                        Toast.makeText(
+                            context,
+                            "Senha deletada!",
+                            Toast.LENGTH_SHORT
+                        ).show()
                         Log.d("DELETEPASSWORD", "Senha deletada")
                     }
                     .addOnFailureListener { e ->
+                        Toast.makeText(
+                            context,
+                            "Houve um erro ao deletar a senha!",
+                            Toast.LENGTH_SHORT
+                        ).show()
                         Log.e("DELETEPASSWORD", "Erro ao apagar senha", e)
                     }
             },
@@ -430,7 +482,8 @@ fun PasswordsScreenDesign(
                 onConfirm = { senhaCriada->
                     onAddPassword(senhaCriada)
                     showAddPasswordDialog = false
-                }
+                },
+                categoria = categoria
             )
         }
         if(showVerifyAccountDialog){
@@ -447,7 +500,8 @@ fun PasswordsScreenDesign(
 @Composable
 fun AddPasswordDialog(
     onDismiss: () -> Unit,
-    onConfirm: (Senha) -> Unit
+    onConfirm: (Senha) -> Unit,
+    categoria: String?
 ){
     var senha by remember { mutableStateOf(Senha()) }
     AlertDialog(
@@ -461,6 +515,9 @@ fun AddPasswordDialog(
                 verticalArrangement = Arrangement.SpaceBetween,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
+                if(categoria == "sites"){
+                    TextFieldDesignForLoginAndSignUp(value = senha.url, onValueChange = {senha = senha.copy(url = it)}, label = "Url(*obrigatório: www.site.com.br)")
+                }
                 TextFieldDesignForLoginAndSignUp(value = senha.login, onValueChange = {senha = senha.copy(login = it)}, label = "Login(opcional)")
                 Spacer(modifier = Modifier.size(4.dp))
                 TextFieldDesignForLoginAndSignUp(value = senha.senha, onValueChange = {senha = senha.copy(senha = it)}, label = "Senha(*obrigatório)", isPassword = true)
@@ -471,7 +528,7 @@ fun AddPasswordDialog(
         confirmButton = {
             TextButton(
                 onClick = { onConfirm(senha) },
-                enabled = senha.senha.isNotEmpty()
+                enabled = if (categoria == "sites") senha.url.isNotEmpty() && senha.senha.isNotEmpty() else senha.senha.isNotEmpty()
             ) {
                 Text("Confirmar", color = MaterialTheme.colorScheme.onBackground)
             }
@@ -492,11 +549,24 @@ fun AddPasswordDialog(
 
 @Composable
 fun PasswordInfo(
-    senha: Senha
+    senha: Senha,
+    categoria: String?
 ){
     Column(
         horizontalAlignment = Alignment.Start,
     ) {
+        Column(
+            Modifier.padding(bottom = 5.dp)
+        ) {
+            if (categoria == "sites") {
+                Text(
+                    "Url:",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 19.sp
+                )
+                Text(senha.url, fontSize = 19.sp)
+            }
+        }
         Column(
             Modifier.padding(bottom = 5.dp)
         ) {
@@ -533,7 +603,8 @@ fun ViewPasswordInfoDialog(
     senha: Senha,
     onDismiss: () -> Unit,
     onDelete: () -> Unit,
-    onConfirm: () -> Unit
+    onConfirm: () -> Unit,
+    categoria: String?
 ){
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -557,7 +628,7 @@ fun ViewPasswordInfoDialog(
         },
         modifier = Modifier.wrapContentSize(),
         text = {
-            PasswordInfo(senha)
+            PasswordInfo(senha, categoria)
         },
         confirmButton = {
             TextButton(
@@ -584,6 +655,7 @@ fun ConfirmDeletePasswordDialog(
     senha: Senha,
     onDelete: () -> Unit,
     onDismiss: () -> Unit,
+    categoria: String?
 ){
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -595,7 +667,7 @@ fun ConfirmDeletePasswordDialog(
             Column(
                 horizontalAlignment = Alignment.Start
             ) {
-                PasswordInfo(senha)
+                PasswordInfo(senha, categoria)
             }
         },
         confirmButton = {
@@ -622,7 +694,8 @@ fun ConfirmDeletePasswordDialog(
 fun EditPasswordDialog(
     senha: Senha,
     onDismiss: () -> Unit,
-    onConfirm: (Senha) -> Unit
+    onConfirm: (Senha) -> Unit,
+    categoria: String?
 ){
     var senhaState by remember { mutableStateOf(senha) }
     AlertDialog(
@@ -636,6 +709,9 @@ fun EditPasswordDialog(
                 verticalArrangement = Arrangement.SpaceBetween,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
+                if(categoria == "sites"){
+                    TextFieldDesignForLoginAndSignUp(value = senha.url, onValueChange = {senhaState = senha.copy(url = it)}, label = "Url(*obrigatório: www.site.com.br)")
+                }
                 TextFieldDesignForLoginAndSignUp(value = senhaState.login, onValueChange = {senhaState = senhaState.copy(login = it)}, label = "Login(opcional)")
                 Spacer(modifier = Modifier.size(4.dp))
                 TextFieldDesignForLoginAndSignUp(value = senhaState.senha, onValueChange = {senhaState = senhaState.copy(senha = it)}, label = "Senha(*obrigatório)", isPassword = true)
@@ -672,12 +748,25 @@ fun ColumnSenhas(
     auth: FirebaseAuth,
     db: FirebaseFirestore
 ){
+    val context = LocalContext.current
     var senhaDescriptografada by remember { mutableStateOf("") }
     val uid=auth.currentUser?.uid
     var showInfoDialog by remember { mutableStateOf(false) } //variavel do estado de exibição do dialog de informação
     var showEditDialog by remember { mutableStateOf(false) } //variavel do estado de exibição do dialog de editar
     var senhaClicada by remember { mutableStateOf(Senha())} //variavel para guardar a senha da row que foi clicada
     var showConfirmDelete by remember { mutableStateOf(false) } //variavel do estado de exibição do dialog de confirmação de deletar senha
+    val visibleMap = remember { mutableStateMapOf<String, MutableTransitionState<Boolean>>() }
+    val scope = rememberCoroutineScope()
+    LaunchedEffect(senhasCriadas) {
+        senhasCriadas.forEachIndexed { index, senha ->
+            val state = visibleMap.getOrPut(senha.id) {
+                MutableTransitionState(false)
+            }
+            delay(50L * index) // cascata de entrada
+            state.targetState = true
+        }
+    }
+
     Column(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -688,39 +777,56 @@ fun ColumnSenhas(
             color = Color.White,
             modifier = Modifier.padding(bottom = 16.dp)
         )
-        LazyColumn {
+        LazyColumn(
+            modifier = Modifier.padding(bottom = 80.dp)
+        ) {
             items(senhasCriadas){senha->
                 val infoSenha = when{
                     senha.descricao.isNotBlank() -> senha.descricao
                     senha.login.isNotBlank() -> senha.login
                     else -> "Senha sem titulo"
                 }
-                PasswordRow(
-                    contentDescripiton = infoSenha,
-                    text = infoSenha,
-                    onClick = {
-                        senhaClicada = senha
-                        if (uid != null) {
-                            ChaveAesUtils.recuperarChaveDoUsuario(
-                                uid,
-                                onSuccess = { chaveBase64 ->
-                                    val secretKey = CriptoUtils.base64ToSecretKey(chaveBase64)
-                                    Log.d("SENHA", "$senhaClicada")
-                                    senhaDescriptografada = CriptoUtils.decrypt(
-                                        encryptedText = senhaClicada.senha,  // pego do Firestore
-                                        ivBase64 = senhaClicada.iv,                        // pego do Firestore
-                                        secretKey = secretKey
+                val transitionState = visibleMap.getOrPut(senha.id) {
+                    MutableTransitionState(false)
+                }
+                AnimatedVisibility(
+                    visibleState = transitionState,
+                    enter = slideInVertically(initialOffsetY = { it / 4 }) + fadeIn(tween(300)),
+                    exit = slideOutVertically() + fadeOut()
+                ) {
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        PasswordRow(
+                            contentDescripiton = infoSenha,
+                            text = infoSenha,
+                            onClick = {
+                                senhaClicada = senha
+                                if (uid != null) {
+                                    ChaveAesUtils.recuperarChaveDoUsuario(
+                                        uid,
+                                        onSuccess = { chaveBase64 ->
+                                            val secretKey =
+                                                CriptoUtils.base64ToSecretKey(chaveBase64)
+                                            Log.d("SENHA", "$senhaClicada")
+                                            senhaDescriptografada = CriptoUtils.decrypt(
+                                                encryptedText = senhaClicada.senha,  // pego do Firestore
+                                                ivBase64 = senhaClicada.iv,                        // pego do Firestore
+                                                secretKey = secretKey
+                                            )
+                                            Log.d(
+                                                "DESCRIPTO",
+                                                "Senha descriptografada:$senhaDescriptografada",
+                                            )
+                                            showInfoDialog = true
+                                        },
+                                        onFailure = { e ->
+                                            Log.e("DESCRIPTO", "Erro ao descriptografar senha", e)
+                                        }
                                     )
-                                    Log.d("DESCRIPTO", "Senha descriptografada:$senhaDescriptografada", )
-                                    showInfoDialog = true
-                                },
-                                onFailure = { e ->
-                                    Log.e("DESCRIPTO", "Erro ao descriptografar senha", e)
                                 }
-                            )
-                        }
+                            }
+                        )
                     }
-                )
+                }
             }
         }
     }
@@ -739,22 +845,32 @@ fun ColumnSenhas(
                 showInfoDialog = false
                 showEditDialog = true
                 senhaDescriptografada = ""
-            }
+            },
+            categoria = categoria
         )
     }
     if(showConfirmDelete){
         ConfirmDeletePasswordDialog(
             senha = senhaClicada.copy(senha = senhaDescriptografada),
             onDelete = {
-                DeletePasswordOnFirestore(categoria, senhaClicada, db, auth)
+                val senhaId = senhaClicada.copy(senha = senhaDescriptografada).id
+                val transitionState = visibleMap[senhaId]
                 showConfirmDelete = false
 
-                viewModel.buscarSenhas(categoria)
+                scope.launch {
+                    delay(200L)
+                    transitionState?.targetState = false
+                    delay(300L)
+                    DeletePasswordOnFirestore(categoria, senhaClicada.copy(senha = senhaDescriptografada), db, auth, context)
+                    visibleMap.remove(senhaId)
+                    viewModel.buscarSenhas(categoria)
+                }
             },
             onDismiss = {
                 showConfirmDelete = false
                 senhaDescriptografada = ""
-            }
+            },
+            categoria = categoria
         )
     }
 
@@ -763,17 +879,29 @@ fun ColumnSenhas(
             senha = senhaClicada.copy(senha = senhaDescriptografada),
             onDismiss = { showEditDialog = false },
             onConfirm = { senhaAtualizada ->
-                EditPasswordOnFirestore(
-                    categoria = categoria,
-                    senha = senhaClicada.copy(senha = senhaDescriptografada),
-                    novaSenha = senhaAtualizada,
-                    viewModel = viewModel,
-                    db = db,
-                    auth = auth,
-                )
+                val senha = senhaClicada.copy(senha = senhaDescriptografada)
+                val transitionState = visibleMap[senha.id]
                 showEditDialog = false
 
-            }
+                scope.launch {
+                    transitionState?.targetState = false
+                    delay(300L)
+                    EditPasswordOnFirestore(
+                        categoria = categoria,
+                        senha = senhaClicada.copy(senha = senhaDescriptografada),
+                        novaSenha = senhaAtualizada,
+                        viewModel = viewModel,
+                        db = db,
+                        auth = auth,
+                        context = context
+                    )
+                    transitionState?.targetState = true
+                    visibleMap[senha.id] = MutableTransitionState(false)
+                    delay(50L)
+                    visibleMap[senha.id]?.targetState = true
+                }
+            },
+            categoria = categoria
         )
     }
 }

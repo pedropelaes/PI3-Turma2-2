@@ -71,14 +71,6 @@ fun PerformLogin(email: String, password: String, context: Context, onResult: (B
                 Log.d("LOGIN", "Login efetuado.")
                 val intent = Intent(context, MainActivity::class.java)
                 context.startActivity(intent)
-                val user = Firebase.auth.currentUser
-                user?.reload()?.addOnSuccessListener {
-                    if (user.isEmailVerified) {
-                        val db = Firebase.firestore
-                        db.collection("users").document(user.uid)
-                            .update("emailVerified", true)
-                    }
-                }
             }else{
                 Log.d("LOGIN", "Login efetuado.")
                 onResult(false)
@@ -105,7 +97,7 @@ fun LoginScreen(){
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        Text("Entrar:",fontFamily = FontFamily.SansSerif ,fontSize = 30.sp, color = MaterialTheme.colorScheme.onBackground,
+        Text("Login:",fontFamily = FontFamily.SansSerif ,fontSize = 30.sp, color = MaterialTheme.colorScheme.onBackground,
             fontWeight = FontWeight.Bold, modifier = Modifier.align(Alignment.CenterHorizontally)
         )
 

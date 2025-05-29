@@ -24,13 +24,17 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.superid.ui.theme.SuperIdTheme
+import com.example.superid.ui.theme.ui.common.IsEmailValid
 import com.example.superid.ui.theme.ui.common.LoginAndSignUpDesign
 import com.example.superid.ui.theme.ui.common.SuperIdTitlePainterVerified
 import com.example.superid.ui.theme.ui.common.TextFieldDesignForLoginAndSignUp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.functions.FirebaseFunctionsException
+import com.google.firebase.functions.ktx.functions
 import com.google.firebase.ktx.Firebase
+import java.net.URL
 
 class PasswordReset : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -97,15 +101,9 @@ fun PasswordResetScreen() {
         Button(
             onClick = {
                 val cleanEmail = email.trim().lowercase()
-
-                sendPasswordResetIfEmailVerified("usuario@email.com", "senhaDoUsuario") { success, message ->
-                    if (success) {
-                        Toast.makeText(context, "Email de redefinição enviado!", Toast.LENGTH_LONG).show()
-                    } else {
-                        Toast.makeText(context, "Erro: $message", Toast.LENGTH_LONG).show()
-                    }
-                }
-            },
+                sendPasswordResetIfEmailVerified(cleanEmail, onResultado = {result ->
+                    Toast.makeText(context,result, Toast.LENGTH_LONG).show()
+                })},
             enabled = email.isNotEmpty(),
             border = BorderStroke(2.dp, MaterialTheme.colorScheme.surface),
             colors = ButtonDefaults.buttonColors(
@@ -173,41 +171,52 @@ fun PasswordResetScreen() {
     }
 }
 
-fun sendPasswordResetIfEmailVerified(
-    email: String,
-    password: String,
-    onResult: (Boolean, String?) -> Unit
-) {
-    val auth = Firebase.auth
-
-    // Tenta login com email e senha
-    auth.signInWithEmailAndPassword(email, password)
+fun sendPasswordResetIfEmailVerified(email: String, onResultado: (String) -> Unit) {
+    val functions = Firebase.functions
+    if(!IsEmailValid(email)){
+        onResultado("Digite um email válido")
+        return
+    }
+    Log.d("DEBUG_EMAIL", email)
+    functions
+        .getHttpsCallableFromUrl(URL("https://checkemailisverified-snp2owcvrq-rj.a.run.app"))
+        .call(hashMapOf("email" to email))
         .addOnSuccessListener { result ->
-            val user = result.user
+            val data = result.data as? Map<*,*> ?: run {
+                onResultado("Erro: resposta inválida do servidor.")
+                return@addOnSuccessListener
+            }
+            val isVerified = data.get("verified") as? Boolean ?: false
+            Log.d("DEBUG_EMAIL", "Função chamada")
 
-            if (user != null && user.isEmailVerified) {
-                // Email foi verificado — envia email de redefinição de senha
-                auth.sendPasswordResetEmail(email)
+            if (isVerified) {
+                Firebase.auth.sendPasswordResetEmail(email)
                     .addOnCompleteListener { task ->
                         if (task.isSuccessful) {
-                            Log.d("PasswordReset", "Email de redefinição enviado com sucesso.")
-                            onResult(true, null)
+                            onResultado("Um e-mail de recuperação foi enviado.")
                         } else {
-                            Log.e("PasswordReset", "Erro ao enviar email: ${task.exception?.message}")
-                            onResult(false, task.exception?.message)
+                            onResultado("Erro ao enviar o e-mail: ${task.exception?.message}")
                         }
-
-                        // Faz logout por segurança
-                        auth.signOut()
                     }
             } else {
-                Log.d("PasswordReset", "Email não verificado.")
-                auth.signOut()
-                onResult(false, "O email ainda não foi verificado.")
+                onResultado("Seu e-mail ainda não foi verificado.")
             }
         }
         .addOnFailureListener { exception ->
-            Log.e("PasswordReset", "Erro ao autenticar: ${exception.message}")
-            onResult(false, "Erro ao autenticar: ${exception.message}")
+            if (exception is FirebaseFunctionsException) {
+                when (exception.code) {
+                    FirebaseFunctionsException.Code.NOT_FOUND -> {
+                        onResultado("Nenhum usuário com esse e-mail.")
+                    }
+                    FirebaseFunctionsException.Code.INVALID_ARGUMENT -> {
+                        onResultado("E-mail inválido.")
+                    }
+                    else -> {
+                        onResultado("Erro inesperado: ${exception.message}")
+                    }
+                }
+            } else {
+                onResultado("Erro de conexão: ${exception.message}")
+            }
         }
 }

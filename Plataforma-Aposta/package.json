@@ -9,13 +9,13 @@
     "start": "node ./build/src/server.js",
     "dev": "nodemon src/server.ts"
   },
-  
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
     "@types/node": "^22.7.6",
+    "@types/node-fetch": "^2.6.12",
     "@types/oracledb": "^6.5.1",
     "@types/typescript": "^0.4.29",
     "nodemon": "^3.1.7",
@@ -28,7 +28,10 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
+    "firebase": "^11.7.3",
+    "firebase-admin": "^13.4.0",
     "jsonwebtoken": "^9.0.2",
+    "node-fetch": "^2.7.0",
     "oracledb": "^6.6.0"
   }
 }
