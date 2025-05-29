@@ -192,6 +192,7 @@ fun MainScreenDesign(
     visibleMap: SnapshotStateMap<String, MutableTransitionState<Boolean>>,
     scope: CoroutineScope
 ) {
+    val topBarColor = if(isSystemInDarkTheme()) Color.Transparent else MaterialTheme.colorScheme.surfaceVariant
     StatusAndNavigationBarColors()
     var showVerifyAccountDialog by remember { mutableStateOf(false) }
     var showDialog by remember { mutableStateOf(false) }
@@ -210,7 +211,7 @@ fun MainScreenDesign(
                         SuperIdTitle(modifier = Modifier.size(10.dp))
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant
+                        containerColor = topBarColor
                     ),
                     actions = {
                         IconButton(onClick = {}) {
@@ -222,9 +223,9 @@ fun MainScreenDesign(
                         }
                     }
                 )
-                Divider(
-                    color = Color.White,
-                    thickness = 4.dp
+                HorizontalDivider(
+                    thickness = 4.dp,
+                    color = Color.White
                 )
             }
         },

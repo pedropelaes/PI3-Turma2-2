@@ -150,6 +150,7 @@ fun SignUpScreen() {
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Spacer(modifier = Modifier.height(36.dp))
         SuperIdTitlePainterVerified()
         Spacer(modifier = Modifier.height(24.dp))
 

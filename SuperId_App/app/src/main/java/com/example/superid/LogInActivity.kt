@@ -93,11 +93,12 @@ fun LoginScreen(){
     var success by remember { mutableStateOf(true) }
     val context = LocalContext.current
     Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally){
+        Spacer(modifier = Modifier.height(64.dp))
         SuperIdTitlePainterVerified()
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        Text("Login:",fontFamily = FontFamily.SansSerif ,fontSize = 30.sp, color = MaterialTheme.colorScheme.onBackground,
+        Text("Entrar:",fontFamily = FontFamily.SansSerif ,fontSize = 30.sp, color = MaterialTheme.colorScheme.onBackground,
             fontWeight = FontWeight.Bold, modifier = Modifier.align(Alignment.CenterHorizontally)
         )
 
@@ -132,7 +133,7 @@ fun LoginScreen(){
                 .fillMaxWidth(0.85f) // Igual às caixas de texto
                 .height(50.dp)
         ){
-            Text("Fazer Login")
+            Text("Entrar")
         }
         Spacer(modifier = Modifier.height(2.dp))
 

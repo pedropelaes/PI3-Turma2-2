@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
@@ -76,6 +77,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.superid.PasswordInfo
@@ -208,14 +210,13 @@ fun TextFieldDesignForMainScreen(
 }
 
 @Composable
-fun SuperIdTitlePainter(painter: Int = R.drawable.super_id_title_light ){
+fun SuperIdTitlePainter(painter: Int = R.drawable.logo_clara_transparente ){
     Image(
         painter = painterResource(painter),
         contentDescription = "SuperIdTitle",
         contentScale = ContentScale.Fit,
         modifier = Modifier
-            .fillMaxWidth()
-            .height(48.dp)
+                .size(164.dp)
     )
 }
 
@@ -224,25 +225,26 @@ fun SuperIdTitlePainterVerified(){
     if(isSystemInDarkTheme()){
         SuperIdTitlePainter()
     }else{
-        SuperIdTitlePainter(R.drawable.super_id_title_dark)
+        SuperIdTitlePainter(R.drawable.logo_transparente)
     }
 }
 
 @Preview
 @Composable
-fun SuperIdTitle(modifier: Modifier = Modifier){
+fun SuperIdTitle(modifier: Modifier = Modifier, isOnMainScreen: Boolean = true, fontSize: TextUnit = 28.sp){
     val title_font = FontFamily(Font(R.font.fonte_titulo))
+    val superIdColor = if (isOnMainScreen) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onBackground
     Text(
         buildAnnotatedString {
             withStyle(
-                style = SpanStyle(fontFamily = title_font, fontSize = 28.sp, color = Color.White,
+                style = SpanStyle(fontFamily = title_font, fontSize = fontSize, color = superIdColor,
                     shadow = Shadow(Color.DarkGray, offset = Offset(1f, 1f),blurRadius = 4f)
                 )
             ){
                 append("Super")
             }
             withStyle(
-                style = SpanStyle(fontFamily = title_font, fontSize = 28.sp, color = MaterialTheme.colorScheme.primary,
+                style = SpanStyle(fontFamily = title_font, fontSize = fontSize, color = Color(0xFF014E92),
                     shadow = Shadow(Color.DarkGray, offset = Offset(1f, 1f),blurRadius = 4f)
                 )
             ){
@@ -251,7 +253,6 @@ fun SuperIdTitle(modifier: Modifier = Modifier){
         },
         textAlign = TextAlign.Center,
         modifier = Modifier
-            .wrapContentWidth()
             .padding(horizontal = 16.dp)
     )
 }
@@ -278,11 +279,11 @@ fun LoginAndSignUpDesign(
                         .asPaddingValues()
                         .calculateBottomPadding()
                 ),
-            verticalArrangement = Arrangement.SpaceBetween,
+            verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Box(
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.wrapContentHeight(),
                 contentAlignment = Alignment.Center
             ) {
                 content()

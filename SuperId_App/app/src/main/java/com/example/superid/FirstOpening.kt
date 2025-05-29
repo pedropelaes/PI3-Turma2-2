@@ -229,14 +229,12 @@ fun ViewPagerForInitialScreens(onFinish: () -> Unit) {
 
 @Composable
 fun Screen1(){
-    var superIdTitle = remember { mutableStateOf(R.drawable.super_id_title_light) }
     Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally){
         Text("Bem-vindo ao",fontFamily = FontFamily.SansSerif ,fontSize = 50.sp, color = MaterialTheme.colorScheme.onBackground,
             fontWeight = FontWeight.Bold, modifier = Modifier.align(Alignment.CenterHorizontally)
         )
 
-        SuperIdTitlePainterVerified()
-
+        SuperIdTitle(fontSize = 45.sp, isOnMainScreen = false)
 
         Spacer(modifier = Modifier.height(16.dp))
         Text(stringResource(R.string.app_description), color = MaterialTheme.colorScheme.onBackground ,fontSize = 20.sp,
@@ -340,8 +338,8 @@ fun ScrollableTextWithScrollbar() {
         modifier = Modifier
             .fillMaxWidth()
             .height(boxHeight)
-            .background(Color.LightGray.copy(0.15f))
-            .border(2.dp, shape = RectangleShape, color = Color.White)
+            .background(MaterialTheme.colorScheme.background)
+            .border(2.dp, shape = RectangleShape, color = MaterialTheme.colorScheme.primary)
             .padding(8.dp)
     ) {
         Box {
@@ -367,7 +365,7 @@ fun ScrollableTextWithScrollbar() {
                     .offset(y = Dp(offsetY / LocalDensity.current.density))
                     .width(4.dp)
                     .height(scrollbarHeight)
-                    .background(Color.White.copy(alpha = 0.5f), shape = RoundedCornerShape(2.dp))
+                    .background(Color.Gray, shape = RoundedCornerShape(2.dp))
             )
         }
     }

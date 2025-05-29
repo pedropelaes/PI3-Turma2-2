@@ -21,6 +21,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.superid.ui.theme.SuperIdTheme
@@ -48,7 +49,6 @@ class PasswordReset : ComponentActivity() {
         }
     }
 }
-
 @Composable
 fun PasswordResetScreen() {
     var email by remember { mutableStateOf("") }
@@ -58,8 +58,7 @@ fun PasswordResetScreen() {
 
     Column(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
+            .fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         SuperIdTitlePainterVerified()
