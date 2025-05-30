@@ -516,12 +516,13 @@ fun AddPasswordDialog(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 if(categoria == "sites"){
-                    TextFieldDesignForLoginAndSignUp(value = senha.url, onValueChange = {senha = senha.copy(url = it)}, label = "Url(*obrigatório: www.site.com.br)")
+                    TextFieldDesignForLoginAndSignUp(value = senha.url, onValueChange = {senha = senha.copy(url = it)}, label = "Url(*obrigatório)")
+                    Spacer(modifier = Modifier.size(12.dp))
                 }
                 TextFieldDesignForLoginAndSignUp(value = senha.login, onValueChange = {senha = senha.copy(login = it)}, label = "Login(opcional)")
-                Spacer(modifier = Modifier.size(4.dp))
+                Spacer(modifier = Modifier.size(12.dp))
                 TextFieldDesignForLoginAndSignUp(value = senha.senha, onValueChange = {senha = senha.copy(senha = it)}, label = "Senha(*obrigatório)", isPassword = true)
-                Spacer(modifier = Modifier.size(4.dp))
+                Spacer(modifier = Modifier.size(12.dp))
                 TextFieldDesignForLoginAndSignUp(value = senha.descricao, onValueChange = {senha = senha.copy(descricao = it)}, label = "Descrição(opcional)")
             }
         },

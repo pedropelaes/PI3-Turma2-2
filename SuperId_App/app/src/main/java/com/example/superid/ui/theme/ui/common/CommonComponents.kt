@@ -33,6 +33,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material.icons.filled.Lock
@@ -107,6 +108,8 @@ fun TextFieldDesignForLoginAndSignUp(
     val leadingIcon = when {
         label.contains("nome", ignoreCase = true) -> Icons.Default.Person
         label.contains("email", ignoreCase = true) -> Icons.Default.Email
+        label.contains("login", ignoreCase = true) -> Icons.Default.Person
+        label.contains("descri", ignoreCase = true) -> Icons.Default.Info // cobre "descrição" e "descricao"
         isPassword -> Icons.Default.Lock
         else -> null
     }
@@ -164,6 +167,7 @@ fun TextFieldDesignForLoginAndSignUp(
             )
     )
 }
+
 
 @Composable
 fun TextFieldDesignForMainScreen(
