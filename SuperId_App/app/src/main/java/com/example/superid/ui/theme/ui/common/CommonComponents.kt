@@ -375,7 +375,7 @@ fun DialogVerificarConta(
             Text("Atenção! Verifique seu e-mail")
         },
         modifier = Modifier.wrapContentSize(),
-        text = { Text("Para utilizar a função de login por QR-code, é necessário que o email da sua conta esteja verificado.") },
+        text = { Text("Para utilizar a função de login por QR-code ou recuperar sua senha caso à esqueça, é necessário que o email da sua conta esteja verificado.") },
         confirmButton = {
             TextButton(
                 onClick = onVerificar
