@@ -38,7 +38,7 @@ class SignUpActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            SuperIdTheme(darkTheme = isSystemInDarkTheme()) {
+            SuperIdTheme() {
                 SignUp()
             }
         }

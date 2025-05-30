@@ -47,7 +47,7 @@ class QrCodeAuthActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            SuperIdTheme(darkTheme = isSystemInDarkTheme()) {
+            SuperIdTheme() {
                 QrCodeScannerScreen()
             }
         }

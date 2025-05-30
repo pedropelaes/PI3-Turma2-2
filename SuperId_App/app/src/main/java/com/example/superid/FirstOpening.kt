@@ -84,7 +84,7 @@ class FirstOpeningActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         setContent {
-            SuperIdTheme(darkTheme = isSystemInDarkTheme()) {
+            SuperIdTheme() {
                 FirstOpeningScreen(
                     navToLogIn = {
                         val intent = Intent(this, LogInActivity::class.java)

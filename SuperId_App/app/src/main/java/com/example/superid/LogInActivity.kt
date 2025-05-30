@@ -51,7 +51,7 @@ class LogInActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent{
-            SuperIdTheme(darkTheme = isSystemInDarkTheme()) {
+            SuperIdTheme() {
                 Login()
             }
         }

@@ -56,7 +56,7 @@ class MainActivity : AppCompatActivity() {
         FirebaseApp.initializeApp(this)
         enableEdgeToEdge()
         setContent {
-            SuperIdTheme(darkTheme = isSystemInDarkTheme()) {
+            SuperIdTheme() {
                 MainScreen()
             }
         }

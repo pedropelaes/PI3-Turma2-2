@@ -107,7 +107,7 @@ class PasswordsActivity : AppCompatActivity() {
         setContent{
             val categoria = intent.getStringExtra("categoria")
             val icone = intent.getIntExtra("icone", R.drawable.logo_without_text)
-            SuperIdTheme(darkTheme = isSystemInDarkTheme()) {
+            SuperIdTheme() {
                 PasswordsScreen(categoria, icone, SenhasViewModel())
             }
         }
