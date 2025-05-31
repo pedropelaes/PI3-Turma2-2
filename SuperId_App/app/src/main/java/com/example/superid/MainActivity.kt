@@ -448,6 +448,7 @@ fun MainScreenDesign(
             DialogVerificarConta(
                 onVerificar = {
                     SendEmailVerification(user, context)
+                    showVerifyAccountDialog = false
                 },
                 onDismiss = { showVerifyAccountDialog = false }
             )
