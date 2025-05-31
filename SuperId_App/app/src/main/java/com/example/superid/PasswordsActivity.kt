@@ -613,7 +613,7 @@ fun ViewPasswordInfoDialog(
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ){
-                Text(text = "Informação da senha")
+                Text(text = "Informações da senha")
                 Spacer(modifier = Modifier.weight(1f))
                 IconButton(
                     onClick = onDelete
@@ -845,7 +845,6 @@ fun ColumnSenhas(
             onConfirm = {
                 showInfoDialog = false
                 showEditDialog = true
-                senhaDescriptografada = ""
             },
             categoria = categoria
         )
@@ -881,6 +880,10 @@ fun ColumnSenhas(
             onDismiss = { showEditDialog = false },
             onConfirm = { senhaAtualizada ->
                 val senha = senhaClicada.copy(senha = senhaDescriptografada)
+                if (senhaAtualizada == senha) {
+                    showEditDialog = false
+                    return@EditPasswordDialog
+                }
                 val transitionState = visibleMap[senha.id]
                 showEditDialog = false
 
@@ -900,6 +903,7 @@ fun ColumnSenhas(
                     visibleMap[senha.id] = MutableTransitionState(false)
                     delay(50L)
                     visibleMap[senha.id]?.targetState = true
+                    senhaDescriptografada = ""
                 }
             },
             categoria = categoria

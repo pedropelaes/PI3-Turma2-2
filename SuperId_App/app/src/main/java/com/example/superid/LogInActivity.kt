@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -21,6 +22,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -91,6 +93,7 @@ fun LoginScreen(){
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var success by remember { mutableStateOf(true) }
+    var showErrorToast by remember { mutableStateOf(false) }
     val context = LocalContext.current
     Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally){
         Spacer(modifier = Modifier.height(64.dp))
@@ -120,9 +123,12 @@ fun LoginScreen(){
             onClick = {
                 PerformLogin(email, password, context) { result ->
                     success = result
+                    if(!success){
+                        showErrorToast = true
+                    }
                 }
             },
-            enabled = if(email.isNotEmpty() && password.isNotEmpty()) true else false,
+            enabled = email.isNotEmpty() && password.isNotEmpty(),
             border = BorderStroke(2.dp, MaterialTheme.colorScheme.secondary),
             colors = ButtonDefaults.buttonColors(
                 disabledContainerColor = MaterialTheme.colorScheme.primary.copy(0.5f),
@@ -136,6 +142,12 @@ fun LoginScreen(){
             Text("Entrar")
         }
         Spacer(modifier = Modifier.height(2.dp))
+        if(showErrorToast){
+            LaunchedEffect(Unit) {
+                Toast.makeText(context, context.getString(R.string.login_error), Toast.LENGTH_SHORT).show()
+            }
+            showErrorToast = false
+        }
 
         TextButton(
             onClick = {
@@ -152,9 +164,6 @@ fun LoginScreen(){
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        if(!success){
-            Text(stringResource(R.string.login_error), color = MaterialTheme.colorScheme.tertiary, fontWeight = FontWeight.Bold)
-        }
         Spacer(modifier = Modifier.height(24.dp))
 
         Text("Ainda não possui conta?", color = MaterialTheme.colorScheme.onBackground)
