@@ -203,6 +203,12 @@ fun MainScreenDesign(
     val user = FirebaseAuth.getInstance().currentUser
     val userId = FirebaseAuth.getInstance().currentUser?.uid
 
+    LaunchedEffect(user){
+        if(!user?.isEmailVerified!!){
+            showVerifyAccountDialog = true
+        }
+    }
+
     Scaffold(
         topBar = {
             Column{
