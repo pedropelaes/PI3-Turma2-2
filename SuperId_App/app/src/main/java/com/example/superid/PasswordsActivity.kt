@@ -256,12 +256,12 @@ fun PasswordsScreen(categoria: String?, icone: Int, viewModel: SenhasViewModel){
                 }
             )
         }
-    ) {
+    ) { searchQuery ->
         LaunchedEffect(categoria) { //inicia o view model e busca as senhas
             viewModel.buscarSenhas(categoria)
         }
         val senhas by remember { derivedStateOf { viewModel.listaSenhas } }
-        ColumnSenhas(senhasCriadas = senhas, categoria, viewModel, auth, db)
+        ColumnSenhas(senhasCriadas = senhas, categoria, viewModel, auth, db, searchQuery)
     }
 }
 
@@ -359,7 +359,7 @@ fun PasswordsScreenDesign(
     auth: FirebaseAuth,
     onAddPassword: (Senha) -> Unit,
     iconPainter: Int,
-    content: @Composable () -> Unit,
+    content: @Composable (String) -> Unit,
 ){
     val topBarColor = if(isSystemInDarkTheme()) Color.Transparent else MaterialTheme.colorScheme.surfaceVariant
     StatusAndNavigationBarColors()
@@ -395,25 +395,24 @@ fun PasswordsScreenDesign(
                             )
                         )
                     }else {
-                        SuperIdTitle(modifier = Modifier.size(10.dp))
-                    }
-                    Row(
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ){
-                        Icon(
-                            painter = painterResource(iconPainter),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            contentDescription = "Icone da categoria",
-                            modifier = Modifier
-                                .wrapContentHeight()
-                                .padding(6.dp)
-                        )
-                        Spacer(Modifier.width(8.dp))
-                        if (categoria != null) {
-                            Text("${categoria.replaceFirstChar { it.uppercase() }}:", color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        }else{
-                            Text("Senhas:", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Row(
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically,
+                        ){
+                            Icon(
+                                painter = painterResource(iconPainter),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                contentDescription = "Icone da categoria",
+                                modifier = Modifier
+                                    .wrapContentHeight()
+                                    .padding(6.dp)
+                            )
+                            Spacer(Modifier.width(8.dp))
+                            if (categoria != null) {
+                                Text("${categoria.replaceFirstChar { it.uppercase() }}:", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }else{
+                                Text("Senhas:", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
                         }
                     }
                 },
@@ -435,20 +434,6 @@ fun PasswordsScreenDesign(
                     }
                 },
                 actions = {
-                    Row(
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ){
-                        IconButton(
-                            onClick = {}
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Search,
-                                contentDescription = "Buscar",
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
                     if (isSearching) {
                         TextButton(onClick = {
                             searchQuery = ""
@@ -521,7 +506,7 @@ fun PasswordsScreenDesign(
                 .padding(innerPadding),
             contentAlignment = Alignment.Center
         ) {
-            content()
+            content(searchQuery)
         }
 
         if (showAddPasswordDialog){
