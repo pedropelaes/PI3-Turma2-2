@@ -352,7 +352,7 @@ fun MainScreenDesign(
                     .padding(horizontal = 8.dp)
                     .padding(bottom = 80.dp)
             ) {
-                items(categoriasPredefinidas, key = { it.first }) { (nome, icone, descricao) ->
+                items(categoriasPredefinidas.filter { it.first.contains(searchQuery, ignoreCase = true) }, key = { it.first }) { (nome, icone, descricao) ->
                     val transitionState = visibleMap.getOrPut(nome) {
                         MutableTransitionState(false)
                     }
@@ -376,7 +376,8 @@ fun MainScreenDesign(
                     }
                 }
 
-                items(categoriasCriadas, key = { it }) { nome ->
+
+                items(categoriasCriadas.filter { it.contains(searchQuery, ignoreCase = true) }, key = { it }) { nome ->
                     val transitionState = visibleMap.getOrPut(nome) {
                         MutableTransitionState(false)
                     }
