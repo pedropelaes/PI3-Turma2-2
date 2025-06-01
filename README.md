@@ -20,6 +20,7 @@ O *SuperID* é um aplicativo Android desenvolvido com Kotlin que atua como um ge
 Este projeto foi desenvolvido como parte de um trabalho integrador, com o objetivo de aplicar os conhecimentos adquiridos ao longo do curso na criação de uma solução realista, robusta e tecnicamente alinhada com as práticas modernas de desenvolvimento mobile e segurança da informação.
 
 [Visualizar Documento do Projeto (PDF)](./PI3-SuperID.pdf)
+
 [Prototipo](https://www.figma.com/design/euW5snPDW1cQiOjDelOosU/PI3?node-id=0-1&t=epSWZjk3YpgZP90X-1)
 
 ---
