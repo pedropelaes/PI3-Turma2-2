@@ -1,5 +1,6 @@
 package com.example.superid
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -33,6 +34,7 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import utils.ChaveAesUtils
+import android.provider.Settings
 
 class SignUpActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -54,7 +56,7 @@ fun SignUp() {
 }
 
 fun PerformSignUp(
-    context: android.content.Context,
+    context: Context,
     name: String,
     email: String,
     password: String,
@@ -67,7 +69,7 @@ fun PerformSignUp(
             if (task.isSuccessful) {
                 val user = auth.currentUser
                 user?.let {
-                    SaveNewAccount(name, email, it.uid)
+                    SaveNewAccount(context, name, email, it.uid)
                     SaveUserDefaultCategories(it.uid)
                 }
 
@@ -91,13 +93,15 @@ fun PerformSignUp(
         }
 }
 
-fun SaveNewAccount(name: String, email: String, uid: String, tries: Int = 0) {
+fun SaveNewAccount(context: Context, name: String, email: String, uid: String, tries: Int = 0) {
+    val androidId = Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
     val db = Firebase.firestore
     val chave = ChaveAesUtils.gerarChaveAesBase64()
     val taskDoc = hashMapOf(
         "name" to name,
         "email" to email,
         "AESkey" to chave,
+        "androidId" to androidId
     )
     db.collection("users").document(uid).set(taskDoc)
         .addOnCompleteListener { task ->
@@ -107,7 +111,7 @@ fun SaveNewAccount(name: String, email: String, uid: String, tries: Int = 0) {
         }
         .addOnFailureListener { retry ->
             if (tries < 5) {
-                SaveNewAccount(name, email, uid, tries + 1)
+                SaveNewAccount(context, name, email, uid, tries + 1)
             } else {
                 Log.e("SIGNUP", "Falha ao salvar usuário no banco de dados.")
             }
