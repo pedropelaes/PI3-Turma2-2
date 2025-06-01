@@ -73,8 +73,19 @@ Tecnologias Utilizadas
 
 Instalação e Execução
 ----------------------
+1. Instalação do app:
+Para instalar o nosso aplicativo, é necessário abrir em um dispositivo celular Android
+o arquivo SuperId.apk, disponibilizado em um de nossos releases.
 
-(em desenvolvimento)
-
+3. Login por QR code
+Para usar a nossa simulação de login por QR Code, é necessário rodar nossa plataforma node
+- 1: Tenha o node instalado
+- 2: Clone o nosso repositório,
+- 3: No terminal, entre no diretorio Site_Parceiro
+- 4: Rode os comandos: npm i, npm run dev
+- 5: No seu navegador, abra a página localhost:3000/login
+- 6: Selecione a opção SuperId
+- 7: Escaneie o QR Code pelo aplicativo do SuperId
+- 8: Aguarde um pouco, e se tudo correr corretamente, o login será realizado e você será redirecionado
 ---
 
