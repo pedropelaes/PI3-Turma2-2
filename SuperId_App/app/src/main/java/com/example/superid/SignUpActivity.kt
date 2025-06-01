@@ -117,7 +117,7 @@ fun SaveNewAccount(name: String, email: String, uid: String, tries: Int = 0) {
 fun SaveUserDefaultCategories(uid: String) {
     val db = Firebase.firestore
     val batch = db.batch()
-    val categorias = listOf("aplicativos", "emails", "sites", "teclados")
+    val categorias = listOf("Aplicativos", "E-mails", "Sites", "Teclados de acesso")
     val categoriasRef = db.collection("users").document(uid).collection("categorias")
 
     for (categoria in categorias) {

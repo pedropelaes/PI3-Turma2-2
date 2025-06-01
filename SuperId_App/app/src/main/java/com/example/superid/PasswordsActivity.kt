@@ -207,7 +207,7 @@ fun PasswordsScreen(categoria: String?, icone: Int, viewModel: SenhasViewModel){
                                 "descricao" to novaSenha.descricao,
                                 "id" to novaSenha.id,
                             )
-                            if(categoria == "sites") {
+                            if(categoria == "Sites") {
                                 senhasRef.whereEqualTo("url", novaSenha.url).get()
                                     .addOnSuccessListener { result ->
                                         if (result.isEmpty) {
@@ -238,6 +238,7 @@ fun PasswordsScreen(categoria: String?, icone: Int, viewModel: SenhasViewModel){
                                         viewModel.buscarSenhas(categoria)
                                         Toast.makeText(context, "Senha criada!", Toast.LENGTH_SHORT).show()
                                     }
+
                             }
                         },
                         onFailure = { e ->
@@ -516,7 +517,7 @@ fun AddPasswordDialog(
                 verticalArrangement = Arrangement.SpaceBetween,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                if(categoria == "sites"){
+                if(categoria == "Sites"){
                     TextFieldDesignForLoginAndSignUp(value = senha.url, onValueChange = {senha = senha.copy(url = it)}, label = "Url(*obrigatório)")
                     Spacer(modifier = Modifier.size(12.dp))
                 }
@@ -560,7 +561,7 @@ fun PasswordInfo(
         Column(
             Modifier.padding(bottom = 5.dp)
         ) {
-            if (categoria == "sites") {
+            if (categoria == "Sites") {
                 Text(
                     "Url:",
                     fontWeight = FontWeight.Bold,
@@ -711,7 +712,7 @@ fun EditPasswordDialog(
                 verticalArrangement = Arrangement.SpaceBetween,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                if(categoria == "sites"){
+                if(categoria == "Sites"){
                     TextFieldDesignForLoginAndSignUp(value = senhaState.url, onValueChange = {senhaState = senhaState.copy(url = it)}, label = "Url(*obrigatório)")
                 }
                 TextFieldDesignForLoginAndSignUp(value = senhaState.login, onValueChange = {senhaState = senhaState.copy(login = it)}, label = "Login(opcional)")

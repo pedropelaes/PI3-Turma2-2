@@ -71,7 +71,7 @@ fun MainScreen() {
     var categoriasCriadas by remember { mutableStateOf(listOf<String>()) }
     var categoriaParaExcluir by remember { mutableStateOf<String?>(null) }
     var showDialogExcluir by remember { mutableStateOf(false) }
-    val categoriasFixas = listOf("aplicativos", "emails", "sites", "teclados")
+    val categoriasFixas = listOf("Aplicativos", "E-mails", "Sites", "Teclados de acesso")
 
     val visibleMap = remember { mutableStateMapOf<String, MutableTransitionState<Boolean>>() }
     val scope = rememberCoroutineScope()
@@ -103,9 +103,12 @@ fun MainScreen() {
 
             if (nomeNormalizado in nomesExistentes) {
                 Toast.makeText(context, "Já existe uma categoria com esse nome.", Toast.LENGTH_SHORT).show()
-            }else if(novaCategoria == "sites"){
-                return@MainScreenDesign
-            } else{
+            }else if(nomeNormalizado == "sites"){
+                Toast.makeText(context, "Nome proibido.", Toast.LENGTH_SHORT).show()
+            }else if(nomeNormalizado.length > 17){
+                Toast.makeText(context, "Categorias podem ter no máximo 17 caracteres", Toast.LENGTH_SHORT).show()
+            }
+            else{
                 categoriasCriadas = categoriasCriadas + novaCategoria
                 userId?.let { uid ->
                     db.collection("users")
@@ -290,10 +293,10 @@ fun MainScreenDesign(
             contentAlignment = Alignment.Center
         ) {
             val categoriasPredefinidas = listOf(
-                Triple("sites", R.drawable.world_wide_web, "Categoria Sites"),
-                Triple("aplicativos", R.drawable.smartphone, "Categoria Aplicativos"),
-                Triple("emails", R.drawable.email, "Categoria Emails"),
-                Triple("teclados", R.drawable.numeric_keypad, "Categoria Teclados de acesso físicos")
+                Triple("Sites", R.drawable.world_wide_web, "Categoria Sites"),
+                Triple("Aplicativos", R.drawable.smartphone, "Categoria Aplicativos"),
+                Triple("E-mails", R.drawable.email, "Categoria Emails"),
+                Triple("Teclados de acesso", R.drawable.numeric_keypad, "Categoria Teclados de acesso físicos")
             )
 
 
@@ -332,8 +335,11 @@ fun MainScreenDesign(
                             contentDescripiton = descricao,
                             text = nome,
                             onClick = { OpenPasswordsActivity(nome, icone, context) },
-                            onExcluirCategoria = {},
-                            onEditarCategoria = {}
+                            onExcluirCategoria = {onExcluirCategoria(nome)},
+                            onEditarCategoria = {
+                                showEditDialog = true
+                                categoriaParaEditar = nome
+                            }
                         )
                     }
                 }
@@ -397,7 +403,12 @@ fun MainScreenDesign(
 
                     if (nomeNormalizado in nomesExistentes) {
                         Toast.makeText(context, "Já existe uma categoria com esse nome!", Toast.LENGTH_SHORT).show()
-                    } else {
+                    }else if(nomeNormalizado == "sites"){
+                        Toast.makeText(context, "Nome proibido", Toast.LENGTH_SHORT).show()
+                    }else if(nomeNormalizado.length > 17){
+                        Toast.makeText(context, "Categorias podem ter no máximo 17 caracteres", Toast.LENGTH_SHORT).show()
+                    }
+                    else {
                         if (novoNome.isNotBlank() && userId != null && novoNome != categoriaParaEditar) {
                             val transitionState = visibleMap[categoriaParaEditar]
 
@@ -555,12 +566,12 @@ fun CategoryRow(
     onExcluirCategoria: (String) -> Unit,
     onEditarCategoria: (String) -> Unit,
 ) {
-    val displayText = when (text) {
-        "sites", "aplicativos" -> text.replaceFirstChar { it.uppercase() }
-        "teclados" -> "Teclados de acesso"
-        "emails" -> "E-mails"
-        else -> text
-    }
+//    val displayText = when (text) {
+//        "sites", "aplicativos" -> text.replaceFirstChar { it.uppercase() }
+//        "teclados" -> "Teclados de acesso"
+//        "emails" -> "E-mails"
+//        else -> text
+//    }
     Row(
         modifier = modifier
             .padding(12.dp)
@@ -588,7 +599,7 @@ fun CategoryRow(
         )
         Spacer(modifier = Modifier.width(16.dp))
         Text(
-            displayText,
+            text,
             style = MaterialTheme.typography.bodyLarge
         )
         Spacer(modifier.weight(1f))

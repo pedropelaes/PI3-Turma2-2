@@ -38,6 +38,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.AlertDialog
@@ -110,6 +111,7 @@ fun TextFieldDesignForLoginAndSignUp(
         label.contains("email", ignoreCase = true) -> Icons.Default.Email
         label.contains("login", ignoreCase = true) -> Icons.Default.Person
         label.contains("descri", ignoreCase = true) -> Icons.Default.Info // cobre "descrição" e "descricao"
+        label.contains("url", ignoreCase = true) -> Icons.Default.Public
         isPassword -> Icons.Default.Lock
         else -> null
     }
