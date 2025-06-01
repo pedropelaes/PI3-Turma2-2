@@ -352,6 +352,7 @@ fun PasswordsScreenDesign(
     iconPainter: Int,
     content: @Composable () -> Unit,
 ){
+    val topBarColor = if(isSystemInDarkTheme()) Color.Transparent else MaterialTheme.colorScheme.surfaceVariant
     StatusAndNavigationBarColors()
     var showAddPasswordDialog by remember { mutableStateOf(false) }
     var showVerifyAccountDialog by remember { mutableStateOf(false) }
@@ -382,7 +383,7 @@ fun PasswordsScreenDesign(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+                    containerColor = topBarColor
                 ),
                 navigationIcon = {
                     IconButton(
