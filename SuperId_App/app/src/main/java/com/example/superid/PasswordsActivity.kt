@@ -817,7 +817,8 @@ fun ColumnSenhas(
         ) {
             items(senhasCriadas.filter {
                 it.login.contains(searchQuery, ignoreCase =  true ) ||
-                it.descricao.contains(searchQuery, ignoreCase = true)
+                it.descricao.contains(searchQuery, ignoreCase = true) ||
+                it.url.contains(searchQuery, ignoreCase = true)
             }){senha->
                 val infoSenha = when{
                     senha.url.isNotBlank() -> senha.url
