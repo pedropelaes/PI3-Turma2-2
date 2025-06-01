@@ -99,11 +99,13 @@ fun MainScreen() {
         categoriasCriadas = categoriasCriadas,
         onAdicionarCategoria = { novaCategoria ->
             val nomeNormalizado = novaCategoria.trim().lowercase()
-            val nomesExistentes = categoriasCriadas.map { it.trim().lowercase() }
+            val nomesExistentes = categoriasCriadas.map { it.trim().lowercase() } + categoriasFixas.map { it.trim().lowercase() }
 
             if (nomeNormalizado in nomesExistentes) {
                 Toast.makeText(context, "Já existe uma categoria com esse nome.", Toast.LENGTH_SHORT).show()
-            } else {
+            }else if(novaCategoria == "sites"){
+                return@MainScreenDesign
+            } else{
                 categoriasCriadas = categoriasCriadas + novaCategoria
                 userId?.let { uid ->
                     db.collection("users")
@@ -124,7 +126,7 @@ fun MainScreen() {
         showDialogExcluir = showDialogExcluir,
         onConfirmarExclusao = {
             val nomeExcluir = categoriaParaExcluir
-            if (nomeExcluir != null && userId != null) {
+            if (nomeExcluir != null && userId != null && nomeExcluir != "sites") {
                 val transitionState = visibleMap[nomeExcluir]
                 //atualizando a UI de maneira otimista
                 showDialogExcluir = false
@@ -288,10 +290,10 @@ fun MainScreenDesign(
             contentAlignment = Alignment.Center
         ) {
             val categoriasPredefinidas = listOf(
+                Triple("sites", R.drawable.world_wide_web, "Categoria Sites"),
                 Triple("aplicativos", R.drawable.smartphone, "Categoria Aplicativos"),
                 Triple("emails", R.drawable.email, "Categoria Emails"),
-                Triple("sites", R.drawable.world_wide_web, "Categoria Sites"),
-                Triple("teclados", R.drawable.keyboard, "Categoria Teclados de acesso físicos")
+                Triple("teclados", R.drawable.numeric_keypad, "Categoria Teclados de acesso físicos")
             )
 
 
@@ -348,7 +350,6 @@ fun MainScreenDesign(
                     ) {
                         Box(modifier = Modifier.animateItem()) {
                             CategoryRow(
-                                painter = R.drawable.smartphone,
                                 contentDescripiton = "Categoria $nome",
                                 text = nome,
                                 onClick = {
@@ -358,7 +359,6 @@ fun MainScreenDesign(
                                         context
                                     )
                                 },
-                                isCreatedByUser = true,
                                 onExcluirCategoria = {
                                     onExcluirCategoria(nome)
                                 },
@@ -547,15 +547,20 @@ fun DialogEditarCategoria(
 
 @Composable
 fun CategoryRow(
-    painter: Int,
+    painter: Int = R.drawable.folder_icon,
     contentDescripiton: String,
     text: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    isCreatedByUser: Boolean = false,
     onExcluirCategoria: (String) -> Unit,
     onEditarCategoria: (String) -> Unit,
 ) {
+    val displayText = when (text) {
+        "sites", "aplicativos" -> text.replaceFirstChar { it.uppercase() }
+        "teclados" -> "Teclados de acesso"
+        "emails" -> "E-mails"
+        else -> text
+    }
     Row(
         modifier = modifier
             .padding(12.dp)
@@ -583,11 +588,11 @@ fun CategoryRow(
         )
         Spacer(modifier = Modifier.width(16.dp))
         Text(
-            text,
+            displayText,
             style = MaterialTheme.typography.bodyLarge
         )
         Spacer(modifier.weight(1f))
-        if (isCreatedByUser){
+        if (text != "sites"){
             IconButton(
                 onClick = {
                     onEditarCategoria(text)
