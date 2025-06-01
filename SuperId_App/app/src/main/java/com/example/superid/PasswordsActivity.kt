@@ -712,7 +712,7 @@ fun EditPasswordDialog(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 if(categoria == "sites"){
-                    TextFieldDesignForLoginAndSignUp(value = senha.url, onValueChange = {senhaState = senha.copy(url = it)}, label = "Url(*obrigatório: www.site.com.br)")
+                    TextFieldDesignForLoginAndSignUp(value = senhaState.url, onValueChange = {senhaState = senhaState.copy(url = it)}, label = "Url(*obrigatório)")
                 }
                 TextFieldDesignForLoginAndSignUp(value = senhaState.login, onValueChange = {senhaState = senhaState.copy(login = it)}, label = "Login(opcional)")
                 Spacer(modifier = Modifier.size(4.dp))
@@ -784,6 +784,7 @@ fun ColumnSenhas(
         ) {
             items(senhasCriadas){senha->
                 val infoSenha = when{
+                    senha.url.isNotBlank() -> senha.url
                     senha.descricao.isNotBlank() -> senha.descricao
                     senha.login.isNotBlank() -> senha.login
                     else -> "Senha sem titulo"
