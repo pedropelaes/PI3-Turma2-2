@@ -8,14 +8,12 @@ import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.TextButton
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
@@ -35,12 +33,13 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import utils.ChaveAesUtils
 import android.provider.Settings
+import com.example.superid.ui.theme.ui.common.IsEmailValid
 
 class SignUpActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            SuperIdTheme() {
+            SuperIdTheme {
                 SignUp()
             }
         }
@@ -55,8 +54,8 @@ fun SignUp() {
     }
 }
 
-fun PerformSignUp(
-    context: Context,
+fun PerformSignUp(                                                                                  // função que realiza o cadastro de um usuário
+    context: Context,                                                                               // e envia um email de verificação
     name: String,
     email: String,
     password: String,
@@ -93,10 +92,10 @@ fun PerformSignUp(
         }
 }
 
-fun SaveNewAccount(context: Context, name: String, email: String, uid: String, tries: Int = 0) {
+fun SaveNewAccount(context: Context, name: String, email: String, uid: String, tries: Int = 0) {    // salva no firestore o usuário que foi cadastrado
     val androidId = Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
     val db = Firebase.firestore
-    val chave = ChaveAesUtils.gerarChaveAesBase64()
+    val chave = ChaveAesUtils.gerarChaveAesBase64()                                                 // gera uma chave AES para cada usuário, utilizada para criptografia
     val taskDoc = hashMapOf(
         "name" to name,
         "email" to email,
@@ -109,7 +108,7 @@ fun SaveNewAccount(context: Context, name: String, email: String, uid: String, t
                 Log.d("SIGNUP", "Documento do usuário salvo no banco de dados. ${task.result}")
             }
         }
-        .addOnFailureListener { retry ->
+        .addOnFailureListener {                                                            // em caso de erro, tenta mais algumas vezes
             if (tries < 5) {
                 SaveNewAccount(context, name, email, uid, tries + 1)
             } else {
@@ -118,7 +117,7 @@ fun SaveNewAccount(context: Context, name: String, email: String, uid: String, t
         }
 }
 
-fun SaveUserDefaultCategories(uid: String) {
+fun SaveUserDefaultCategories(uid: String) {                                                        // cria as categorias pré-definidas para cada usuario
     val db = Firebase.firestore
     val batch = db.batch()
     val categorias = listOf("Aplicativos", "E-mails", "Sites", "Teclados de acesso")
@@ -215,7 +214,7 @@ fun SignUpScreen() {
 
         Button(
             onClick = {
-                if (!isValidEmail(email)) {
+                if (!IsEmailValid(email)) {
                     Toast.makeText(context, "Por favor, insira um e-mail válido.", Toast.LENGTH_SHORT).show()
                     return@Button
                 }
@@ -280,12 +279,8 @@ fun SignUpScreen() {
     }
 }
 
-fun isValidEmail(email: String): Boolean {
-    return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
-}
-
-fun checkIfEmailExists(email: String, onResult: (Boolean) -> Unit) {
-    FirebaseAuth.getInstance().fetchSignInMethodsForEmail(email)
+fun checkIfEmailExists(email: String, onResult: (Boolean) -> Unit) {                                // verifica se há algum documento de usuario com o
+    FirebaseAuth.getInstance().fetchSignInMethodsForEmail(email)                                    // email digitado
         .addOnCompleteListener { task ->
             if (task.isSuccessful) {
                 val signInMethods = task.result?.signInMethods

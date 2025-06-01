@@ -14,14 +14,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.superid.ui.theme.SuperIdTheme
@@ -29,9 +27,7 @@ import com.example.superid.ui.theme.ui.common.IsEmailValid
 import com.example.superid.ui.theme.ui.common.LoginAndSignUpDesign
 import com.example.superid.ui.theme.ui.common.SuperIdTitlePainterVerified
 import com.example.superid.ui.theme.ui.common.TextFieldDesignForLoginAndSignUp
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
-import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.functions.FirebaseFunctionsException
 import com.google.firebase.functions.ktx.functions
 import com.google.firebase.ktx.Firebase
@@ -52,8 +48,6 @@ class PasswordReset : ComponentActivity() {
 @Composable
 fun PasswordResetScreen() {
     var email by remember { mutableStateOf("") }
-    var emailSent by remember { mutableStateOf(false) }
-    var errorMessage by remember { mutableStateOf("") }
     val context = LocalContext.current
 
     Column(
@@ -117,32 +111,6 @@ fun PasswordResetScreen() {
         ) {
             Text("Enviar E-mail")
         }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        if (emailSent) {
-            Text(
-                "Um E-mail para redefinição foi enviado!\nVerifique sua caixa de entrada.",
-                color = MaterialTheme.colorScheme.primary,
-                fontWeight = FontWeight.Normal,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentWidth(Alignment.CenterHorizontally),
-                textAlign = TextAlign.Center
-            )
-        }
-
-        if (errorMessage.isNotEmpty()) {
-            Text(
-                errorMessage,
-                color = Color.Red,
-                fontWeight = FontWeight.Normal,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentWidth(Alignment.CenterHorizontally),
-                textAlign = TextAlign.Center
-            )
-        }
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -170,22 +138,22 @@ fun PasswordResetScreen() {
     }
 }
 
-fun sendPasswordResetIfEmailVerified(email: String, onResultado: (String) -> Unit) {
-    val functions = Firebase.functions
+fun sendPasswordResetIfEmailVerified(email: String, onResultado: (String) -> Unit) {                // envia o e-mail de redefinir senha SE o usuário tem
+    val functions = Firebase.functions                                                              // seu e-mail verificado
     if(!IsEmailValid(email)){
         onResultado("Digite um email válido")
         return
     }
     Log.d("DEBUG_EMAIL", email)
     functions
-        .getHttpsCallableFromUrl(URL("https://checkemailisverified-snp2owcvrq-rj.a.run.app"))
-        .call(hashMapOf("email" to email))
+        .getHttpsCallableFromUrl(URL("https://checkemailisverified-snp2owcvrq-rj.a.run.app"))  // chama firebase function que retorna se o email está
+        .call(hashMapOf("email" to email))                                                          // verificado ou não
         .addOnSuccessListener { result ->
             val data = result.data as? Map<*,*> ?: run {
                 onResultado("Erro: resposta inválida do servidor.")
                 return@addOnSuccessListener
             }
-            val isVerified = data.get("verified") as? Boolean ?: false
+            val isVerified = data["verified"] as? Boolean ?: false
             Log.d("DEBUG_EMAIL", "Função chamada")
 
             if (isVerified) {

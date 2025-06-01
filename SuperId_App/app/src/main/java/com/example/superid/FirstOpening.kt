@@ -7,17 +7,13 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -37,14 +33,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.CheckboxDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -55,10 +49,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -70,12 +62,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.superid.ui.theme.SuperIdTheme
 import com.example.superid.ui.theme.ui.common.StatusAndNavigationBarColors
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlinx.coroutines.launch
 import com.example.superid.ui.theme.ui.common.SuperIdTitle
-import com.example.superid.ui.theme.ui.common.SuperIdTitlePainter
-import com.example.superid.ui.theme.ui.common.SuperIdTitlePainterVerified
-import com.example.superid.ui.theme.ui.common.themedBackgroundImage
 
 
 class FirstOpeningActivity : ComponentActivity() {
@@ -84,7 +72,7 @@ class FirstOpeningActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         setContent {
-            SuperIdTheme() {
+            SuperIdTheme {
                 FirstOpeningScreen(
                     navToLogIn = {
                         val intent = Intent(this, LogInActivity::class.java)
@@ -104,17 +92,15 @@ fun SuperID() {
 
 @Composable //Essa função é responsável pelo design das páginas de íniciais
 fun InitialScreensDesign(
-    imageResId: Int = themedBackgroundImage(),
     content: @Composable () -> Unit,
     bottomContent: @Composable () -> Unit
 ) {
-    StatusAndNavigationBarColors()
+    StatusAndNavigationBarColors() // função que define a cor das barras do android
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-
     ) {
 
         Column(
@@ -133,11 +119,10 @@ fun InitialScreensDesign(
 
 }
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun ViewPagerForInitialScreens(onFinish: () -> Unit) {
-    val pagerState = rememberPagerState(pageCount = { 2 })
-    val coroutineScope = rememberCoroutineScope()
+fun ViewPagerForInitialScreens(onFinish: () -> Unit) {                   //view pager das telas iniciais
+    val pagerState = rememberPagerState(pageCount = { 2 })               // 2 páginas
+    val coroutineScope = rememberCoroutineScope()                        // responsável por controlar a rolagem do pager
     var termsAccepted by remember { mutableStateOf(false) }
     val context = LocalContext.current
     Column {
@@ -151,7 +136,7 @@ fun ViewPagerForInitialScreens(onFinish: () -> Unit) {
                     1 -> Screen2(termsAccepted, onTermsAcceptedChange = { termsAccepted = it })
                 }
             }, bottomContent = {
-                HorizontalPagerIndicator(
+                HorizontalPagerIndicator(                               // indicador de páginas
                     pageCount = pagerState.pageCount,
                     currentPage = pagerState.currentPage,
                     modifier = Modifier.wrapContentWidth()
@@ -249,7 +234,6 @@ fun Screen1(){
 
 @Composable
 fun Screen2(termsAccepted: Boolean, onTermsAcceptedChange: (Boolean) -> Unit) {
-    val scrollState = rememberScrollState()
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -272,7 +256,7 @@ fun Screen2(termsAccepted: Boolean, onTermsAcceptedChange: (Boolean) -> Unit) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        ScrollableTextWithScrollbar()
+        ScrollableTextWithScrollbar()  // caixa com o texto dos termos
 
         Row(
             verticalAlignment = Alignment.CenterVertically
@@ -313,10 +297,10 @@ fun HorizontalPagerIndicator(
             .wrapContentWidth()
             .fillMaxWidth()
             .padding(bottom = 0.dp),
-        horizontalArrangement = Arrangement.Center //centraliza os elementos de row
+        horizontalArrangement = Arrangement.Center                                  // centraliza os elementos de row
     ) {
         repeat(pageCount) { index ->
-            val color = if (currentPage == index) activeColor else inactiveColor
+            val color = if (currentPage == index) activeColor else inactiveColor    // muda a cor de acordo com a página que está
             Box(
                 modifier = Modifier
                     .padding(horizontal = spacing)
@@ -353,7 +337,7 @@ fun ScrollableTextWithScrollbar() {
                     .verticalScroll(scrollState)
             )
 
-            // Cálculo do offset com o LocalDensity
+            // Cálculo do offset da barra de rolagem com o LocalDensity
             val scrollProgress = scrollState.value.toFloat() / scrollState.maxValue.toFloat().coerceAtLeast(1f)
             val offsetY = with(LocalDensity.current) {
                 ((boxHeight - scrollbarHeight) * scrollProgress).toPx()
@@ -375,7 +359,7 @@ fun FirstOpeningScreen(navToLogIn: () -> Unit) {
     val context = LocalContext.current
     var shouldShowOnboarding by remember { mutableStateOf(true) }
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(Unit) {                                                                          // checa se o usuário já aceitou os termos de uso
         val prefs = context.getSharedPreferences("onboarding_prefs", Context.MODE_PRIVATE)
         val alreadySeen = prefs.getBoolean("has_seen_onboarding", false)
         if (alreadySeen) {
@@ -384,7 +368,7 @@ fun FirstOpeningScreen(navToLogIn: () -> Unit) {
         }
     }
 
-    if (shouldShowOnboarding) {
+    if (shouldShowOnboarding) {                                                                     // se o usuário não aceitou, mostra as telas iniciais
         ViewPagerForInitialScreens(
             onFinish = {
                 val prefs = context.getSharedPreferences("onboarding_prefs", Context.MODE_PRIVATE)

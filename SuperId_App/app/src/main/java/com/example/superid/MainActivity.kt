@@ -56,7 +56,7 @@ class MainActivity : AppCompatActivity() {
         FirebaseApp.initializeApp(this)
         enableEdgeToEdge()
         setContent {
-            SuperIdTheme() {
+            SuperIdTheme {
                 MainScreen()
             }
         }
@@ -68,15 +68,14 @@ fun MainScreen() {
     val context = LocalContext.current
     val db = FirebaseFirestore.getInstance()
     val userId = FirebaseAuth.getInstance().currentUser?.uid
-    var categoriasCriadas by remember { mutableStateOf(listOf<String>()) }
+    var categoriasCriadas by remember { mutableStateOf(listOf<String>()) }                          // variável que guarda as categorias criadas pelo usuario
     var categoriaParaExcluir by remember { mutableStateOf<String?>(null) }
-    var showDialogExcluir by remember { mutableStateOf(false) }
-    val categoriasFixas = listOf("Aplicativos", "E-mails", "Sites", "Teclados de acesso")
+    var showDialogExcluir by remember { mutableStateOf(false) }                               // variável de estado de exibição do dialog de Exclusão
 
-    val visibleMap = remember { mutableStateMapOf<String, MutableTransitionState<Boolean>>() }
-    val scope = rememberCoroutineScope()
+    val visibleMap = remember { mutableStateMapOf<String, MutableTransitionState<Boolean>>() }      // variável usadas para as animações
+    val scope = rememberCoroutineScope()                                                            // coroutineScope das animações
 
-    LaunchedEffect(userId) {
+    LaunchedEffect(userId) {                                                                        // busca as categorias do usuario
         userId?.let { uid ->
             db.collection("users")
                 .document(uid)
@@ -85,9 +84,9 @@ fun MainScreen() {
                     snapshot?.let {
                         categoriasCriadas = it.documents.mapNotNull { doc ->
                             doc.getString("nome")
-                        }.filterNot { nome-> //filtra as categorias pré criadas para evitar repetição
-                            nome in categoriasFixas
-                        }
+                        }//.filterNot { nome-> //filtra as categorias pré criadas para evitar repetição
+                           // nome in categoriasFixas
+                       // }
                     }
                 }
         }
@@ -97,9 +96,9 @@ fun MainScreen() {
         visibleMap = visibleMap,
         scope = scope,
         categoriasCriadas = categoriasCriadas,
-        onAdicionarCategoria = { novaCategoria ->
+        onAdicionarCategoria = { novaCategoria ->                                                                               // adicionando categorias
             val nomeNormalizado = novaCategoria.trim().lowercase()
-            val nomesExistentes = categoriasCriadas.map { it.trim().lowercase() } + categoriasFixas.map { it.trim().lowercase() }
+            val nomesExistentes = categoriasCriadas.map { it.trim().lowercase() }
 
             if (nomeNormalizado in nomesExistentes) {
                 Toast.makeText(context, "Já existe uma categoria com esse nome.", Toast.LENGTH_SHORT).show()
@@ -127,11 +126,11 @@ fun MainScreen() {
             showDialogExcluir = true
         },
         showDialogExcluir = showDialogExcluir,
-        onConfirmarExclusao = {
+        onConfirmarExclusao = {                                                                     // excluindo categoria
             val nomeExcluir = categoriaParaExcluir
             if (nomeExcluir != null && userId != null && nomeExcluir != "sites") {
                 val transitionState = visibleMap[nomeExcluir]
-                //atualizando a UI de maneira otimista
+                //atualizando a UI de maneira otimista, removendo a categoria a ser excluida da UI antes de ela ser excluida no banco
                 showDialogExcluir = false
                 categoriaParaExcluir = null
 
@@ -193,26 +192,25 @@ fun MainScreenDesign(
     showDialogExcluir: Boolean,
     onConfirmarExclusao: () -> Unit,
     onCancelarExclusao: () -> Unit,
-    content: @Composable () -> Unit = {},
     visibleMap: SnapshotStateMap<String, MutableTransitionState<Boolean>>,
     scope: CoroutineScope
 ) {
     val topBarColor = if(isSystemInDarkTheme()) Color.Transparent else MaterialTheme.colorScheme.surfaceVariant
     StatusAndNavigationBarColors()
-    var isSearching by remember { mutableStateOf(false) }
-    var searchQuery by remember { mutableStateOf("") }
-    var showVerifyAccountDialog by remember { mutableStateOf(false) }
-    var showDialog by remember { mutableStateOf(false) }
-    var showEditDialog by remember { mutableStateOf(false) }
+    var isSearching by remember { mutableStateOf(false) }                                                   // variável de estado da busca
+    var searchQuery by remember { mutableStateOf("") }                                                      // variável para busca
+    var showVerifyAccountDialog by remember { mutableStateOf(false) }                                       // variável de estado
+    var showDialog by remember { mutableStateOf(false) }                                                    // variável de estado
+    var showEditDialog by remember { mutableStateOf(false) }                                                // variável de estado
     var categoriaParaEditar by remember { mutableStateOf("") }
     val context = LocalContext.current
     val db = FirebaseFirestore.getInstance()
     val user = FirebaseAuth.getInstance().currentUser
     val userId = FirebaseAuth.getInstance().currentUser?.uid
 
-    LaunchedEffect(user){
-        user?.reload()
-        if(!user?.isEmailVerified!!){
+    LaunchedEffect(user){                                                                           // verifica se o usuário tem e-mail verificado ao
+        user?.reload()                                                                              // abrir a tela inicial, se não tem, exibe o dialog
+        if(!user?.isEmailVerified!!){                                                               // de verificação
             showVerifyAccountDialog = true
         }
     }
@@ -222,28 +220,8 @@ fun MainScreenDesign(
             Column{
                 TopAppBar(
                     title = {
-                        if(isSearching){
-                            TextField(
-                                value = searchQuery,
-                                onValueChange = { searchQuery = it },
-                                placeholder = { Text("Buscar...") },
-                                singleLine = true,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 6.dp)
-                                    .defaultMinSize(minHeight = 40.dp),
-                                shape = RoundedCornerShape(50),
-                                colors = TextFieldDefaults.colors(
-                                    focusedContainerColor = Color.White,
-                                    unfocusedContainerColor = Color.White,
-                                    cursorColor = MaterialTheme.colorScheme.primary,
-                                    focusedTextColor = MaterialTheme.colorScheme.surfaceVariant,
-                                    unfocusedTextColor = MaterialTheme.colorScheme.surfaceVariant,
-                                    focusedIndicatorColor = Color.Transparent,
-                                    unfocusedIndicatorColor = Color.Transparent
-
-                                )
-                            )
+                        if(isSearching){                                                                        // troca o titulo pela barra de busca se
+                            TextFieldDesignForMainScreen(searchQuery, {searchQuery = it}, "Buscar")       // estiver pesquisando
                         } else {
                         SuperIdTitle(modifier = Modifier.size(10.dp))
                         }
@@ -282,8 +260,8 @@ fun MainScreenDesign(
             ) {
                 FloatingActionButton(
                     onClick = {
-                        if (user != null) {
-                            user.reload()
+                        if (user != null) {                                                         // permite abrir a tela de login por QR-Code apenas se
+                            user.reload()                                                           // o usuario tiver e-mail verificado
                             if(user.isEmailVerified){
                                 val intent = Intent(context, QrCodeAuthActivity::class.java)
                                 context.startActivity(intent)
@@ -324,15 +302,16 @@ fun MainScreenDesign(
                 .padding(innerPadding),
             contentAlignment = Alignment.Center
         ) {
-            val categoriasPredefinidas = listOf(
+            val categoriasPredefinidas = listOf(                                                    // lista para exibição das categorias default
                 Triple("Sites", R.drawable.world_wide_web, "Categoria Sites"),
                 Triple("Aplicativos", R.drawable.smartphone, "Categoria Aplicativos"),
                 Triple("E-mails", R.drawable.email, "Categoria Emails"),
                 Triple("Teclados de acesso", R.drawable.numeric_keypad, "Categoria Teclados de acesso físicos")
             )
+            val nomesPredefinidos = categoriasPredefinidas.map{it.first}                            // lista com os nomes das categorias default
 
 
-            LaunchedEffect(categoriasCriadas.size) {
+            LaunchedEffect(categoriasCriadas.size) {                                                          // lança as animações das categorias
                 (categoriasPredefinidas.map { it.first } + categoriasCriadas).forEachIndexed { index, nome ->
                     scope.launch {
                         delay(100L * index)
@@ -344,7 +323,7 @@ fun MainScreenDesign(
                 }
             }
 
-            LazyColumn(
+            LazyColumn(                                                                             // lazy column que exibe as categorias
                 verticalArrangement = Arrangement.Top,
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
@@ -352,7 +331,8 @@ fun MainScreenDesign(
                     .padding(horizontal = 8.dp)
                     .padding(bottom = 80.dp)
             ) {
-                items(categoriasPredefinidas.filter { it.first.contains(searchQuery, ignoreCase = true) }, key = { it.first }) { (nome, icone, descricao) ->
+                items(categoriasPredefinidas.filter { it.first.contains(searchQuery, ignoreCase = true)             // categorias são filtradas com a busca
+                        && it.first in categoriasCriadas }, key = { it.first }) { (nome, icone, descricao) ->
                     val transitionState = visibleMap.getOrPut(nome) {
                         MutableTransitionState(false)
                     }
@@ -377,7 +357,7 @@ fun MainScreenDesign(
                 }
 
 
-                items(categoriasCriadas.filter { it.contains(searchQuery, ignoreCase = true) }, key = { it }) { nome ->
+                items(categoriasCriadas.filter { it.contains(searchQuery, ignoreCase = true) }.filterNot {it in nomesPredefinidos }, key = { it }) { nome ->
                     val transitionState = visibleMap.getOrPut(nome) {
                         MutableTransitionState(false)
                     }
@@ -412,7 +392,7 @@ fun MainScreenDesign(
             }
         }
 
-        if (showDialog) {
+        if (showDialog) {                                                                           // exibição dos dialogs
             DialogCriarCategoria(
                 onDismiss = { showDialog = false },
                 onConfirm = { nome ->
@@ -428,7 +408,7 @@ fun MainScreenDesign(
             DialogEditarCategoria(
                 nomeAtual = categoriaParaEditar,
                 onDismiss = { showEditDialog = false },
-                onConfirm = { novoNome ->
+                onConfirm = { novoNome ->                                                           // editando categorias
                     val nomeNormalizado = novoNome.trim().lowercase()
                     val nomesExistentes = categoriasCriadas
                         .filter { it != categoriaParaEditar }
@@ -523,7 +503,7 @@ fun MainScreenDesign(
 }
 
 @Composable
-fun DialogCriarCategoria(
+fun DialogCriarCategoria(                                                                           // Composable do dialog de criar categoria
     onDismiss: () -> Unit,
     onConfirm: (String) -> Unit
 ) {
@@ -555,7 +535,7 @@ fun DialogCriarCategoria(
 }
 
 @Composable
-fun DialogEditarCategoria(
+fun DialogEditarCategoria(                                                                          // Composabçe do dialog de editar categoria
     nomeAtual: String,
     onDismiss: () -> Unit,
     onConfirm: (String) -> Unit
@@ -590,7 +570,7 @@ fun DialogEditarCategoria(
 }
 
 @Composable
-fun CategoryRow(
+fun CategoryRow(                                                                                    // Composable das categorias
     painter: Int = R.drawable.folder_icon,
     contentDescripiton: String,
     text: String,
@@ -599,12 +579,6 @@ fun CategoryRow(
     onExcluirCategoria: (String) -> Unit,
     onEditarCategoria: (String) -> Unit,
 ) {
-//    val displayText = when (text) {
-//        "sites", "aplicativos" -> text.replaceFirstChar { it.uppercase() }
-//        "teclados" -> "Teclados de acesso"
-//        "emails" -> "E-mails"
-//        else -> text
-//    }
     Row(
         modifier = modifier
             .padding(12.dp)
@@ -636,8 +610,8 @@ fun CategoryRow(
             style = MaterialTheme.typography.bodyLarge
         )
         Spacer(modifier.weight(1f))
-        if (text != "Sites"){
-            IconButton(
+        if (text != "Sites"){                                                                       // exibe botões de apagar e editar somente se a categoria
+            IconButton(                                                                             // não for Sites
                 onClick = {
                     onEditarCategoria(text)
                 }
@@ -670,7 +644,7 @@ fun CategoryRow(
     }
 }
 
-fun OpenPasswordsActivity(categoria: String, icone: Int = R.drawable.logo_without_text, context: Context) {
+fun OpenPasswordsActivity(categoria: String, icone: Int = R.drawable.logo_without_text, context: Context) {  // Abre a tela de senhas da categoria clicada
     val intent = Intent(context, PasswordsActivity::class.java).apply {
         putExtra("categoria", categoria)
         putExtra("icone", icone)
