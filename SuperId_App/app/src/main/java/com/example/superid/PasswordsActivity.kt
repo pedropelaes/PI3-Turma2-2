@@ -272,18 +272,21 @@ fun EditPasswordOnFirestore(categoria: String?, senha: Senha, novaSenha: Senha, 
                 // Criptografa a senha que o usuário digitou
                 val (senhaCripto, iv, accessToken) = CriptoUtils.encrypt(novaSenha.senha, secretKey)
 
-                val doc = mapOf(
+                val doc = mutableMapOf(
                     "senha" to senhaCripto,
                     "login" to novaSenha.login,
                     "iv" to iv,
                     "accessToken" to accessToken,
                     "descricao" to novaSenha.descricao,
                 )
+                if(categoria == "Sites"){
+                    doc["url"] = novaSenha.url
+                }
 
                 getSenhasRef(db, uid, categoria,
                     onSuccess = { senhasRef ->
                         senhasRef.document(senha.id)
-                            .update(doc)
+                            .update(doc as Map<String, Any>)
                             .addOnSuccessListener {
                                 Log.d("UPDATEPASSWORD", "Senha atualizada")
                                 Toast.makeText(

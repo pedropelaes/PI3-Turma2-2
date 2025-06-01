@@ -254,7 +254,7 @@ fun GetAccessToken(
     db.collection("users")
         .document(uid)
         .collection("categorias")
-        .document("sites")
+        .document("Sites")
         .collection("senhas")
         .whereEqualTo("url", url)
         .get()

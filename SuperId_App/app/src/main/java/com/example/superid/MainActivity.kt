@@ -209,6 +209,7 @@ fun MainScreenDesign(
     val userId = FirebaseAuth.getInstance().currentUser?.uid
 
     LaunchedEffect(user){
+        user?.reload()
         if(!user?.isEmailVerified!!){
             showVerifyAccountDialog = true
         }
@@ -603,7 +604,7 @@ fun CategoryRow(
             style = MaterialTheme.typography.bodyLarge
         )
         Spacer(modifier.weight(1f))
-        if (text != "sites"){
+        if (text != "Sites"){
             IconButton(
                 onClick = {
                     onEditarCategoria(text)
