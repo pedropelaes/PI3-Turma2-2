@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -32,6 +33,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
@@ -48,6 +50,8 @@ import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -76,6 +80,7 @@ import com.example.superid.ui.theme.ui.common.DialogVerificarConta
 import com.example.superid.ui.theme.ui.common.PasswordRow
 import com.example.superid.ui.theme.ui.common.SendEmailVerification
 import com.example.superid.ui.theme.ui.common.StatusAndNavigationBarColors
+import com.example.superid.ui.theme.ui.common.SuperIdTitle
 import com.example.superid.ui.theme.ui.common.TextFieldDesignForLoginAndSignUp
 import com.example.superid.ui.theme.ui.common.TextFieldDesignForMainScreen
 import com.google.firebase.auth.FirebaseAuth
@@ -358,6 +363,8 @@ fun PasswordsScreenDesign(
 ){
     val topBarColor = if(isSystemInDarkTheme()) Color.Transparent else MaterialTheme.colorScheme.surfaceVariant
     StatusAndNavigationBarColors()
+    var isSearching by remember { mutableStateOf(false) }
+    var searchQuery by remember { mutableStateOf("") }
     var showAddPasswordDialog by remember { mutableStateOf(false) }
     var showVerifyAccountDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current
@@ -366,6 +373,30 @@ fun PasswordsScreenDesign(
         topBar = {
             TopAppBar(
                 title = {
+                    if(isSearching){
+                        TextField(
+                            value = searchQuery,
+                            onValueChange = { searchQuery = it },
+                            placeholder = { Text("Buscar...") },
+                            singleLine = true,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 6.dp)
+                                .defaultMinSize(minHeight = 40.dp),
+                            shape = RoundedCornerShape(50),
+                            colors = TextFieldDefaults.colors(
+                                focusedContainerColor = Color.White,
+                                unfocusedContainerColor = Color.White,
+                                cursorColor = MaterialTheme.colorScheme.primary,
+                                focusedTextColor = MaterialTheme.colorScheme.surfaceVariant,
+                                unfocusedTextColor = MaterialTheme.colorScheme.surfaceVariant,
+                                focusedIndicatorColor = Color.Transparent,
+                                unfocusedIndicatorColor = Color.Transparent
+                            )
+                        )
+                    }else {
+                        SuperIdTitle(modifier = Modifier.size(10.dp))
+                    }
                     Row(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically,
@@ -416,6 +447,18 @@ fun PasswordsScreenDesign(
                                 contentDescription = "Buscar",
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant
                             )
+                        }
+                    }
+                    if (isSearching) {
+                        TextButton(onClick = {
+                            searchQuery = ""
+                            isSearching = false
+                        }) {
+                            Text("Cancelar", color = MaterialTheme.colorScheme.onPrimary)
+                        }
+                    } else {
+                        IconButton(onClick = { isSearching = true }) {
+                            Icon(Icons.Default.Search, contentDescription = "Buscar", tint = MaterialTheme.colorScheme.onPrimary)
                         }
                     }
                 }
@@ -752,7 +795,8 @@ fun ColumnSenhas(
     categoria: String?, //nome da categoria
     viewModel: SenhasViewModel,
     auth: FirebaseAuth,
-    db: FirebaseFirestore
+    db: FirebaseFirestore,
+    searchQuery : String
 ){
     val context = LocalContext.current
     var senhaDescriptografada by remember { mutableStateOf("") }
@@ -786,7 +830,10 @@ fun ColumnSenhas(
         LazyColumn(
             modifier = Modifier.padding(bottom = 80.dp)
         ) {
-            items(senhasCriadas){senha->
+            items(senhasCriadas.filter {
+                it.login.contains(searchQuery, ignoreCase =  true ) ||
+                it.descricao.contains(searchQuery, ignoreCase = true)
+            }){senha->
                 val infoSenha = when{
                     senha.url.isNotBlank() -> senha.url
                     senha.descricao.isNotBlank() -> senha.descricao
