@@ -104,8 +104,8 @@ fun MainScreen() {
                 Toast.makeText(context, "Já existe uma categoria com esse nome.", Toast.LENGTH_SHORT).show()
             }else if(nomeNormalizado == "sites"){
                 Toast.makeText(context, "Nome proibido.", Toast.LENGTH_SHORT).show()
-            }else if(nomeNormalizado.length > 17){
-                Toast.makeText(context, "Categorias podem ter no máximo 17 caracteres", Toast.LENGTH_SHORT).show()
+            }else if(nomeNormalizado.length > 18){
+                Toast.makeText(context, "Categorias podem ter no máximo 18 caracteres", Toast.LENGTH_SHORT).show()
             }
             else{
                 categoriasCriadas = categoriasCriadas + novaCategoria
@@ -418,8 +418,8 @@ fun MainScreenDesign(
                         Toast.makeText(context, "Já existe uma categoria com esse nome!", Toast.LENGTH_SHORT).show()
                     }else if(nomeNormalizado == "sites"){
                         Toast.makeText(context, "Nome proibido", Toast.LENGTH_SHORT).show()
-                    }else if(nomeNormalizado.length > 17){
-                        Toast.makeText(context, "Categorias podem ter no máximo 17 caracteres", Toast.LENGTH_SHORT).show()
+                    }else if(nomeNormalizado.length > 18){
+                        Toast.makeText(context, "Categorias podem ter no máximo 18 caracteres", Toast.LENGTH_SHORT).show()
                     }
                     else {
                         if (novoNome.isNotBlank() && userId != null && novoNome != categoriaParaEditar) {

@@ -83,6 +83,20 @@ fun PasswordResetScreen() {
 
         Spacer(modifier = Modifier.height(24.dp))
 
+        Text(
+            text = "Atenção: Apenas contas com e-mail verificado poderão alterar a senha.",
+            fontFamily = FontFamily.SansSerif,
+            fontSize = 12.sp,
+            color = MaterialTheme.colorScheme.onBackground,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .fillMaxWidth(0.9f)
+                .padding(horizontal = 16.dp)
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
         TextFieldDesignForLoginAndSignUp(
             value = email,
             onValueChange = { email = it },
