@@ -199,6 +199,8 @@ fun MainScreenDesign(
 ) {
     val topBarColor = if(isSystemInDarkTheme()) Color.Transparent else MaterialTheme.colorScheme.surfaceVariant
     StatusAndNavigationBarColors()
+    var isSearching by remember { mutableStateOf(false) }
+    var searchQuery by remember { mutableStateOf("") }
     var showVerifyAccountDialog by remember { mutableStateOf(false) }
     var showDialog by remember { mutableStateOf(false) }
     var showEditDialog by remember { mutableStateOf(false) }
@@ -220,18 +222,47 @@ fun MainScreenDesign(
             Column{
                 TopAppBar(
                     title = {
+                        if(isSearching){
+                            TextField(
+                                value = searchQuery,
+                                onValueChange = { searchQuery = it },
+                                placeholder = { Text("Buscar...") },
+                                singleLine = true,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 6.dp)
+                                    .defaultMinSize(minHeight = 40.dp),
+                                shape = RoundedCornerShape(50),
+                                colors = TextFieldDefaults.colors(
+                                    focusedContainerColor = Color.White,
+                                    unfocusedContainerColor = Color.White,
+                                    cursorColor = MaterialTheme.colorScheme.primary,
+                                    focusedTextColor = MaterialTheme.colorScheme.surfaceVariant,
+                                    unfocusedTextColor = MaterialTheme.colorScheme.surfaceVariant,
+                                    focusedIndicatorColor = Color.Transparent,
+                                    unfocusedIndicatorColor = Color.Transparent
+
+                                )
+                            )
+                        } else {
                         SuperIdTitle(modifier = Modifier.size(10.dp))
+                        }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = topBarColor
                     ),
                     actions = {
-                        IconButton(onClick = {}) {
-                            Icon(
-                                imageVector = Icons.Default.Search,
-                                contentDescription = "Buscar",
-                                tint = MaterialTheme.colorScheme.onPrimary
-                            )
+                        if (isSearching) {
+                            TextButton(onClick = {
+                                searchQuery = ""
+                                isSearching = false
+                            }) {
+                                Text("Cancelar", color = MaterialTheme.colorScheme.onPrimary)
+                            }
+                        } else {
+                            IconButton(onClick = { isSearching = true }) {
+                                Icon(Icons.Default.Search, contentDescription = "Buscar", tint = MaterialTheme.colorScheme.onPrimary)
+                            }
                         }
                     }
                 )
