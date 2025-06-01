@@ -20,10 +20,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -31,9 +29,7 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
@@ -46,12 +42,9 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -68,10 +61,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
@@ -80,12 +70,10 @@ import com.example.superid.ui.theme.ui.common.DialogVerificarConta
 import com.example.superid.ui.theme.ui.common.PasswordRow
 import com.example.superid.ui.theme.ui.common.SendEmailVerification
 import com.example.superid.ui.theme.ui.common.StatusAndNavigationBarColors
-import com.example.superid.ui.theme.ui.common.SuperIdTitle
 import com.example.superid.ui.theme.ui.common.TextFieldDesignForLoginAndSignUp
 import com.example.superid.ui.theme.ui.common.TextFieldDesignForMainScreen
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
-import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
@@ -97,12 +85,12 @@ import utils.CriptoUtils
 import utils.getSenhasRef
 import utils.getSenhasRefDireto
 
-data class Senha(
+data class Senha(                                                                                   // classe de dados Senha
     var login: String = "",
     var senha: String = "",
     var descricao: String = "",
     var id: String = "",
-    var iv:  String = "",
+    var iv:  String = "",                                                                           // utilizado para criptografia
     var url: String = ""
 )
 
@@ -110,8 +98,8 @@ class PasswordsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent{
-            val categoria = intent.getStringExtra("categoria")
-            val icone = intent.getIntExtra("icone", R.drawable.logo_without_text)
+            val categoria = intent.getStringExtra("categoria")                                // nome da categoria que foi aberta na tela principal
+            val icone = intent.getIntExtra("icone", R.drawable.logo_without_text)             // icone da categoria que foi aberta
             SuperIdTheme() {
                 PasswordsScreen(categoria, icone, SenhasViewModel())
             }
@@ -119,17 +107,17 @@ class PasswordsActivity : AppCompatActivity() {
     }
 }
 
-class SenhasViewModel : ViewModel() {  //view model para buscar as senhas que estão no banco de dados
+class SenhasViewModel : ViewModel() {                                                               //view model para buscar as senhas que estão no banco de dados
     private val db = Firebase.firestore
     private val auth = Firebase.auth
 
-    var listaSenhas by mutableStateOf<List<Senha>>(emptyList()) //lista que guarda as senhas vindas do banco
+    var listaSenhas by mutableStateOf<List<Senha>>(emptyList())                                     //lista que guarda as senhas vindas do banco
         private set
 
 
     fun buscarSenhas(categoria: String?) {
         val uid = auth.currentUser?.uid
-        if (uid != null && categoria != null) { //verifica se há um usuario logado e se a categoria existe
+        if (uid != null && categoria != null) {                                                     //verifica se há um usuario logado e se a categoria existe
             val categoriasRef = db.collection("users")
                 .document(uid)
                 .collection("categorias")
@@ -171,13 +159,13 @@ class SenhasViewModel : ViewModel() {  //view model para buscar as senhas que es
 
 @Composable
 fun PasswordsScreen(categoria: String?, icone: Int, viewModel: SenhasViewModel){
-    var context = LocalContext.current
+    val context = LocalContext.current
     val db = Firebase.firestore
     val auth = Firebase.auth
     PasswordsScreenDesign(
-        categoria = categoria, //nome da categoria
+        categoria = categoria,                                                                      //nome da categoria
         auth = auth,
-        iconPainter = icone, //icone da categoria
+        iconPainter = icone,                                                                        //icone da categoria
         onAddPassword = { novaSenha ->
             val uid = auth.currentUser?.uid
             if (uid == null || categoria == null) {
@@ -185,17 +173,17 @@ fun PasswordsScreen(categoria: String?, icone: Int, viewModel: SenhasViewModel){
                 context.startActivity(Intent(context, LogInActivity::class.java))
                 return@PasswordsScreenDesign
             }
-            getSenhasRef(
+            getSenhasRef(                                                                           // caminho para as senhas da categoria
                 db = db,
                 uid = uid,
                 categoria = categoria,
                 onSuccess = { senhasRef ->
-                    ChaveAesUtils.recuperarChaveDoUsuario(
+                    ChaveAesUtils.recuperarChaveDoUsuario(                                          // utiliza a chave AES do usuário para criptografar
                         uid,
                         db,
                         onSuccess = { chaveBase64 ->
-                            val secretKey = CriptoUtils.base64ToSecretKey(chaveBase64)
-                            val (senhaCripto, iv, accessToken) = CriptoUtils.encrypt(novaSenha.senha, secretKey)
+                            val secretKey = CriptoUtils.base64ToSecretKey(chaveBase64)                           // converte a chave AES do firestore
+                            val (senhaCripto, iv, accessToken) = CriptoUtils.encrypt(novaSenha.senha, secretKey) // gera a senha criptografada, iv e accesstoken
                             val novoId = senhasRef.document().id
 
 
@@ -212,7 +200,7 @@ fun PasswordsScreen(categoria: String?, icone: Int, viewModel: SenhasViewModel){
                                 "descricao" to novaSenha.descricao,
                                 "id" to novaSenha.id,
                             )
-                            if(categoria == "Sites") {
+                            if(categoria == "Sites") {                                              // se a categoria for sites, salva o campo url
                                 senhasRef.whereEqualTo("url", novaSenha.url).get()
                                     .addOnSuccessListener { result ->
                                         if (result.isEmpty) {
@@ -243,7 +231,14 @@ fun PasswordsScreen(categoria: String?, icone: Int, viewModel: SenhasViewModel){
                                         viewModel.buscarSenhas(categoria)
                                         Toast.makeText(context, "Senha criada!", Toast.LENGTH_SHORT).show()
                                     }
-
+                                // Remove placeholder, se ainda existir
+                                senhasRef.document("placeholder").delete()
+                                    .addOnSuccessListener {
+                                        Log.d("ADDPASSWORD", "Placeholder deletado")
+                                    }
+                                    .addOnFailureListener {
+                                        Log.w("ADDPASSWORD", "Erro ao deletar placeholder", it)
+                                    }
                             }
                         },
                         onFailure = { e ->
@@ -257,7 +252,7 @@ fun PasswordsScreen(categoria: String?, icone: Int, viewModel: SenhasViewModel){
             )
         }
     ) { searchQuery ->
-        LaunchedEffect(categoria) { //inicia o view model e busca as senhas
+        LaunchedEffect(categoria) {                                                                 //inicia o view model e busca as senhas
             viewModel.buscarSenhas(categoria)
         }
         val senhas by remember { derivedStateOf { viewModel.listaSenhas } }
@@ -275,7 +270,7 @@ fun EditPasswordOnFirestore(categoria: String?, senha: Senha, novaSenha: Senha, 
                 val secretKey = CriptoUtils.base64ToSecretKey(chaveBase64)
 
                 // Criptografa a senha que o usuário digitou
-                val (senhaCripto, iv, accessToken) = CriptoUtils.encrypt(novaSenha.senha, secretKey)
+                val (senhaCripto, iv, accessToken) = CriptoUtils.encrypt(novaSenha.senha, secretKey)  // criptografa a nova senha e gera um novo iv e accessToken
 
                 val doc = mutableMapOf(
                     "senha" to senhaCripto,
@@ -284,7 +279,7 @@ fun EditPasswordOnFirestore(categoria: String?, senha: Senha, novaSenha: Senha, 
                     "accessToken" to accessToken,
                     "descricao" to novaSenha.descricao,
                 )
-                if(categoria == "Sites"){
+                if(categoria == "Sites"){                                                           // se a categoria for sites, adiciona o campo url
                     doc["url"] = novaSenha.url
                 }
 
@@ -363,10 +358,10 @@ fun PasswordsScreenDesign(
 ){
     val topBarColor = if(isSystemInDarkTheme()) Color.Transparent else MaterialTheme.colorScheme.surfaceVariant
     StatusAndNavigationBarColors()
-    var isSearching by remember { mutableStateOf(false) }
-    var searchQuery by remember { mutableStateOf("") }
-    var showAddPasswordDialog by remember { mutableStateOf(false) }
-    var showVerifyAccountDialog by remember { mutableStateOf(false) }
+    var isSearching by remember { mutableStateOf(false) }                                       // variável de estado para a busca
+    var searchQuery by remember { mutableStateOf("") }                                          // variável que guarda a busca
+    var showAddPasswordDialog by remember { mutableStateOf(false) }                             // variável de estado para dialog
+    var showVerifyAccountDialog by remember { mutableStateOf(false) }                           // variável de estado para dialog
     val context = LocalContext.current
     val user = auth.currentUser
     Scaffold(
@@ -374,26 +369,7 @@ fun PasswordsScreenDesign(
             TopAppBar(
                 title = {
                     if(isSearching){
-                        TextField(
-                            value = searchQuery,
-                            onValueChange = { searchQuery = it },
-                            placeholder = { Text("Buscar...") },
-                            singleLine = true,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 6.dp)
-                                .defaultMinSize(minHeight = 40.dp),
-                            shape = RoundedCornerShape(50),
-                            colors = TextFieldDefaults.colors(
-                                focusedContainerColor = Color.White,
-                                unfocusedContainerColor = Color.White,
-                                cursorColor = MaterialTheme.colorScheme.primary,
-                                focusedTextColor = MaterialTheme.colorScheme.surfaceVariant,
-                                unfocusedTextColor = MaterialTheme.colorScheme.surfaceVariant,
-                                focusedIndicatorColor = Color.Transparent,
-                                unfocusedIndicatorColor = Color.Transparent
-                            )
-                        )
+                        TextFieldDesignForMainScreen(searchQuery, {searchQuery = it}, "Buscar")
                     }else {
                         Row(
                             horizontalArrangement = Arrangement.SpaceBetween,
@@ -457,8 +433,8 @@ fun PasswordsScreenDesign(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ){
-                FloatingActionButton(
-                    onClick = {
+                FloatingActionButton(                                                               // só permite o usuario abrir a tela de login por qr code
+                    onClick = {                                                                     // se ele tiver o e-mail verificado
                         if (user != null) {
                             user.reload()
                             if(user.isEmailVerified){
@@ -506,7 +482,7 @@ fun PasswordsScreenDesign(
                 .padding(innerPadding),
             contentAlignment = Alignment.Center
         ) {
-            content(searchQuery)
+            content(searchQuery)                                                                    // conteudo da busca é passado para a tela de senhas
         }
 
         if (showAddPasswordDialog){
@@ -582,7 +558,7 @@ fun AddPasswordDialog(
 
 
 @Composable
-fun PasswordInfo(
+fun PasswordInfo(                                                                                   // composable para a informação da senha clicada
     senha: Senha,
     categoria: String?
 ){
@@ -775,9 +751,9 @@ fun EditPasswordDialog(
 }
 
 @Composable
-fun ColumnSenhas(
+fun ColumnSenhas(                                                                                   // composable das senhas
     senhasCriadas: List<Senha>,
-    categoria: String?, //nome da categoria
+    categoria: String?,                                                                             //nome da categoria
     viewModel: SenhasViewModel,
     auth: FirebaseAuth,
     db: FirebaseFirestore,
@@ -792,7 +768,7 @@ fun ColumnSenhas(
     var showConfirmDelete by remember { mutableStateOf(false) } //variavel do estado de exibição do dialog de confirmação de deletar senha
     val visibleMap = remember { mutableStateMapOf<String, MutableTransitionState<Boolean>>() }
     val scope = rememberCoroutineScope()
-    LaunchedEffect(senhasCriadas) {
+    LaunchedEffect(senhasCriadas) {                                                                 // efeito de animações para as senhas
         senhasCriadas.forEachIndexed { index, senha ->
             val state = visibleMap.getOrPut(senha.id) {
                 MutableTransitionState(false)
@@ -815,13 +791,13 @@ fun ColumnSenhas(
         LazyColumn(
             modifier = Modifier.padding(bottom = 80.dp)
         ) {
-            items(senhasCriadas.filter {
+            items(senhasCriadas.filter {                                                            // filtra as senhas de acordo com a busca
                 it.login.contains(searchQuery, ignoreCase =  true ) ||
                 it.descricao.contains(searchQuery, ignoreCase = true) ||
                 it.url.contains(searchQuery, ignoreCase = true)
             }){senha->
-                val infoSenha = when{
-                    senha.url.isNotBlank() -> senha.url
+                val infoSenha = when{                                                               // exibe o "nome" da senha por uma ordem de prioridade
+                    senha.url.isNotBlank() -> senha.url                                             // url -> descrição -> login
                     senha.descricao.isNotBlank() -> senha.descricao
                     senha.login.isNotBlank() -> senha.login
                     else -> "Senha sem titulo"
@@ -841,7 +817,7 @@ fun ColumnSenhas(
                             onClick = {
                                 senhaClicada = senha
                                 if (uid != null) {
-                                    ChaveAesUtils.recuperarChaveDoUsuario(
+                                    ChaveAesUtils.recuperarChaveDoUsuario(                          // descriptografa a senha para exibição
                                         uid,
                                         onSuccess = { chaveBase64 ->
                                             val secretKey =
@@ -870,7 +846,7 @@ fun ColumnSenhas(
             }
         }
     }
-    if(showInfoDialog){  //exibe o dialog de informações da senha
+    if(showInfoDialog){                                                                             //exibe o dialog de informações da senha
         ViewPasswordInfoDialog(
             senha = senhaClicada.copy(senha = senhaDescriptografada),
             onDismiss = {
@@ -888,7 +864,7 @@ fun ColumnSenhas(
             categoria = categoria
         )
     }
-    if(showConfirmDelete){
+    if(showConfirmDelete){                                                                          // exibe o dialog de confirmar o apagamento da senha
         ConfirmDeletePasswordDialog(
             senha = senhaClicada.copy(senha = senhaDescriptografada),
             onDelete = {
@@ -896,7 +872,7 @@ fun ColumnSenhas(
                 val transitionState = visibleMap[senhaId]
                 showConfirmDelete = false
 
-                scope.launch {
+                scope.launch {                                                                      // anima o desaparecimento da senha
                     delay(200L)
                     transitionState?.targetState = false
                     delay(300L)
@@ -913,7 +889,7 @@ fun ColumnSenhas(
         )
     }
 
-    if(showEditDialog){ //exibe o dialog de editar senha
+    if(showEditDialog){                                                                             //exibe o dialog de editar senha
         EditPasswordDialog(
             senha = senhaClicada.copy(senha = senhaDescriptografada),
             onDismiss = { showEditDialog = false },
@@ -926,7 +902,7 @@ fun ColumnSenhas(
                 val transitionState = visibleMap[senha.id]
                 showEditDialog = false
 
-                scope.launch {
+                scope.launch {                                                                      // anima a troca da senha
                     transitionState?.targetState = false
                     delay(300L)
                     EditPasswordOnFirestore(

@@ -1,10 +1,8 @@
 package com.example.superid.ui.theme.ui.common
 
 import android.content.Context
-import android.content.Intent
 import android.util.Log
 import android.widget.Toast
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -17,17 +15,15 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -41,8 +37,6 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -61,13 +55,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.Font
@@ -82,35 +72,29 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.superid.PasswordInfo
-import com.example.superid.PasswordsActivity
 import com.example.superid.R
-import com.example.superid.SignUpActivity
-import com.example.superid.SuperID
-import com.example.superid.ui.theme.SuperIdTheme
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.firestore.auth.User
 
+// nesse arquivo, se encontra funções que são utilizadas em mais de 1 activity, ou usadas várias vezes
 
-fun IsEmailValid(email: String): Boolean = android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
+fun IsEmailValid(email: String): Boolean = android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()  //retorna se um email é valido ou não
 
 
 @Composable
-fun TextFieldDesignForLoginAndSignUp(
-    value: String,
+fun TextFieldDesignForLoginAndSignUp(                                                               // Composable de design de textfield usado nas
+    value: String,                                                                                  // telas de login, cadastro e recuperar senha
     onValueChange: (String) -> Unit,
     label: String,
-    isPassword: Boolean = false
-) {
+    isPassword: Boolean = false                                                                     // se for senha, esconde os caracteres e dispõe um botão
+) {                                                                                                 // para alternar sua visibilidade
     var passwordVisible by remember { mutableStateOf(false) }
 
-    val leadingIcon = when {
+    val leadingIcon = when {                                                                        // definição dos icones de acordo com a label
         label.contains("nome", ignoreCase = true) -> Icons.Default.Person
         label.contains("email", ignoreCase = true) -> Icons.Default.Email
         label.contains("login", ignoreCase = true) -> Icons.Default.Person
-        label.contains("descri", ignoreCase = true) -> Icons.Default.Info // cobre "descrição" e "descricao"
+        label.contains("descri", ignoreCase = true) -> Icons.Default.Info                     // cobre "descrição" e "descricao"
         label.contains("url", ignoreCase = true) -> Icons.Default.Public
         isPassword -> Icons.Default.Lock
         else -> null
@@ -160,7 +144,7 @@ fun TextFieldDesignForLoginAndSignUp(
         ),
         modifier = Modifier
             .fillMaxWidth()
-            .height(52.dp)
+            .defaultMinSize(52.dp)
             .padding(horizontal = 25.dp)
             .border(
                 width = 1.dp,
@@ -172,8 +156,8 @@ fun TextFieldDesignForLoginAndSignUp(
 
 
 @Composable
-fun TextFieldDesignForMainScreen(
-    value: String,
+fun TextFieldDesignForMainScreen(                                                                   // Composable de design de textFIeld usado
+    value: String,                                                                                  // nas telas de categorias e senhas
     onValueChange: (String) -> Unit,
     label: String,
     isPassword: Boolean = false,
@@ -182,13 +166,13 @@ fun TextFieldDesignForMainScreen(
     TextField(
         value = value,
         onValueChange = onValueChange,
-        label = { Text(label) },
+        placeholder = { Text(label) },
         singleLine = true,
         visualTransformation = if (isPassword) PasswordVisualTransformation() else VisualTransformation.None,
         leadingIcon = leadingIcon,
         modifier = Modifier
             .fillMaxWidth()
-            .height(56.dp)
+            .defaultMinSize(56.dp)
             .border(
                 width = 1.dp,
                 color = MaterialTheme.colorScheme.onBackground,
@@ -216,7 +200,7 @@ fun TextFieldDesignForMainScreen(
 }
 
 @Composable
-fun SuperIdTitlePainter(painter: Int = R.drawable.logo_clara_transparente ){
+fun SuperIdTitlePainter(painter: Int = R.drawable.logo_clara_transparente ){                        // Composable da logo do SuperId
     Image(
         painter = painterResource(painter),
         contentDescription = "SuperIdTitle",
@@ -227,8 +211,8 @@ fun SuperIdTitlePainter(painter: Int = R.drawable.logo_clara_transparente ){
 }
 
 @Composable
-fun SuperIdTitlePainterVerified(){
-    if(isSystemInDarkTheme()){
+fun SuperIdTitlePainterVerified(){                                                                  // Composable de logo dinâmica do SuperId, que muda
+    if(isSystemInDarkTheme()){                                                                      // a logo de acordo com o tema do sistema(escuro ou claroa)
         SuperIdTitlePainter()
     }else{
         SuperIdTitlePainter(R.drawable.logo_transparente)
@@ -237,13 +221,13 @@ fun SuperIdTitlePainterVerified(){
 
 @Preview
 @Composable
-fun SuperIdTitle(modifier: Modifier = Modifier, isOnMainScreen: Boolean = true, fontSize: TextUnit = 28.sp){
-    val title_font = FontFamily(Font(R.font.fonte_titulo))
-    val superIdColor = if (isOnMainScreen) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onBackground
-    Text(
-        buildAnnotatedString {
-            withStyle(
-                style = SpanStyle(fontFamily = title_font, fontSize = fontSize, color = superIdColor,
+fun SuperIdTitle(modifier: Modifier = Modifier, isOnMainScreen: Boolean = true, fontSize: TextUnit = 28.sp){                        // Composable do titulo
+    val title_font = FontFamily(Font(R.font.fonte_titulo))                                                                          // da logo do SuperId
+    val superIdColor = if (isOnMainScreen) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onBackground   // que também varia
+    Text(                                                                                                                           // de acordo com o tema
+        buildAnnotatedString {                                                                                                      // usa string anotada
+            withStyle(                                                                                                              // para combinar diferentes
+                style = SpanStyle(fontFamily = title_font, fontSize = fontSize, color = superIdColor,                               // estilos
                     shadow = Shadow(Color.DarkGray, offset = Offset(1f, 1f),blurRadius = 4f)
                 )
             ){
@@ -264,10 +248,10 @@ fun SuperIdTitle(modifier: Modifier = Modifier, isOnMainScreen: Boolean = true, 
 }
 
 @Composable
-fun LoginAndSignUpDesign(
-    content: @Composable () -> Unit,
+fun LoginAndSignUpDesign(                                                                           // Composable de design de tela usado nas telas de logi,
+    content: @Composable () -> Unit,                                                                // qr code, cadastro e redefinir senha
 ) {
-    StatusAndNavigationBarColors(
+    StatusAndNavigationBarColors(                                                                   // define as cores das barras do android
         MaterialTheme.colorScheme.background,
         MaterialTheme.colorScheme.background
     )
@@ -281,7 +265,7 @@ fun LoginAndSignUpDesign(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(
-                    bottom = WindowInsets.navigationBars
+                    bottom = WindowInsets.navigationBars                                            // define o padding da barra de navegação do android
                         .asPaddingValues()
                         .calculateBottomPadding()
                 ),
@@ -299,16 +283,7 @@ fun LoginAndSignUpDesign(
 }
 
 @Composable
-fun themedBackgroundImage(): Int {
-    return if (isSystemInDarkTheme()){
-        R.drawable.lockers_background_dark
-    } else{
-        R.drawable.lockers_backgroud_light
-    }
-}
-
-@Composable
-fun PasswordRow(contentDescripiton: String, text: String, onClick: () -> Unit){
+fun PasswordRow(contentDescripiton: String, text: String, onClick: () -> Unit){                     // Composable de design das senhas
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -358,12 +333,12 @@ fun PasswordRow(contentDescripiton: String, text: String, onClick: () -> Unit){
 }
 
 @Composable
-fun StatusAndNavigationBarColors(
-    statusBarColor: Color = Color.Transparent,
+fun StatusAndNavigationBarColors(                                                                   // Composable que define as cores das barras do android
+    statusBarColor: Color = Color.Transparent,                                                      // de acordo com o tema
     navigationBarColor: Color = Color.Transparent,
 ){
     val systemUiController = rememberSystemUiController()
-    val darkIcons = isSystemInDarkTheme()
+    val darkIcons = !isSystemInDarkTheme()
     SideEffect {
         systemUiController.setStatusBarColor(statusBarColor, darkIcons = darkIcons)
         systemUiController.setNavigationBarColor(navigationBarColor, darkIcons = darkIcons)
@@ -371,8 +346,8 @@ fun StatusAndNavigationBarColors(
 }
 
 @Composable
-fun DialogVerificarConta(
-    onVerificar: () -> Unit,
+fun DialogVerificarConta(                                                                           // Composable de um dialog que exibe mensagem sobre verificar
+    onVerificar: () -> Unit,                                                                        // e-mail e envia e-mail de verificação
     onDismiss: () -> Unit,
 ){
     AlertDialog(
@@ -402,7 +377,7 @@ fun DialogVerificarConta(
     )
 }
 
-fun SendEmailVerification(user: FirebaseUser?, context: Context) {
+fun SendEmailVerification(user: FirebaseUser?, context: Context) {                                  // função que envia um e-mail de verificação para o usuario
     if (user != null) {
         user.sendEmailVerification()
             .addOnCompleteListener { verification ->

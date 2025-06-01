@@ -9,9 +9,9 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
@@ -29,7 +29,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
@@ -40,12 +39,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.superid.ui.theme.SuperIdTheme
 import com.example.superid.ui.theme.ui.common.LoginAndSignUpDesign
-import com.example.superid.ui.theme.ui.common.SuperIdTitle
-import com.example.superid.ui.theme.ui.common.SuperIdTitlePainter
 import com.example.superid.ui.theme.ui.common.SuperIdTitlePainterVerified
 import com.example.superid.ui.theme.ui.common.TextFieldDesignForLoginAndSignUp
 import com.google.firebase.auth.ktx.auth
-import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 
 class LogInActivity : AppCompatActivity() {
@@ -53,14 +49,14 @@ class LogInActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent{
-            SuperIdTheme() {
+            SuperIdTheme {
                 Login()
             }
         }
     }
 }
 
-fun PerformLogin(email: String, password: String, context: Context, onResult: (Boolean) -> Unit){
+fun PerformLogin(email: String, password: String, context: Context, onResult: (Boolean) -> Unit){   // função que realiza login
     val auth = Firebase.auth
 
     val currentUser = auth.currentUser
@@ -108,7 +104,7 @@ fun LoginScreen(){
         Spacer(modifier = Modifier.height(24.dp))
 
         TextFieldDesignForLoginAndSignUp(value = email, onValueChange = { email = it },
-            label = stringResource(R.string.type_your_email,)
+            label = stringResource(R.string.type_your_email)
         )
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -142,8 +138,8 @@ fun LoginScreen(){
             Text("Entrar")
         }
         Spacer(modifier = Modifier.height(2.dp))
-        if(showErrorToast){
-            LaunchedEffect(Unit) {
+        if(showErrorToast){                                                                                     // exibe mensagem de erro para o usuario caso
+            LaunchedEffect(Unit) {                                                                              // o login falhe
                 Toast.makeText(context, context.getString(R.string.login_error), Toast.LENGTH_SHORT).show()
             }
             showErrorToast = false
@@ -156,7 +152,7 @@ fun LoginScreen(){
             },
             modifier = Modifier
                 .height(45.dp)
-                .width(190.dp)
+                .defaultMinSize(minWidth = 190.dp)
                 .wrapContentSize()
         ) {
             Text("Esqueceu sua senha?", textDecoration = TextDecoration.Underline, color = MaterialTheme.colorScheme.onBackground)
@@ -174,7 +170,7 @@ fun LoginScreen(){
             },
             modifier = Modifier
                 .height(45.dp)
-                .width(160.dp)
+                .defaultMinSize(minWidth = 160.dp)
         ) {
             Text("Fazer Cadastro", textDecoration = TextDecoration.Underline, color = MaterialTheme.colorScheme.onBackground)
         }
