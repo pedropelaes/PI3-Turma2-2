@@ -89,7 +89,8 @@ Para usar a nossa simulação de login por QR Code, é necessário rodar nossa p
 - 4: Rode os comandos: npm i, npm run dev
 - 5: No seu navegador, abra a página localhost:3000/login
 - 6: Selecione a opção SuperId
-- 7: Escaneie o QR Code pelo aplicativo do SuperId
-- 8: Aguarde um pouco, e se tudo correr corretamente, o login será realizado e você será redirecionado
+- 7: No aplicativo SuperId, crie uma senha na categoria Sites com a url: www.donabet.com.br
+- 8: Escaneie o QR Code pelo aplicativo do SuperId
+- 9: Aguarde um pouco, e se tudo correr corretamente, o login será realizado e você será redirecionado
 ---
 
