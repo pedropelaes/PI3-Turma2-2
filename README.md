@@ -89,10 +89,11 @@ Para usar a nossa simulação de login por QR Code, é necessário rodar nossa p
 - 2: Clone o nosso repositório,
 - 3: No terminal, entre no diretorio Plataforma_aposta
 - 4: Rode os comandos: npm i, npm run dev
-- 5: No seu navegador, abra a página localhost:3000/login
-- 6: Selecione a opção SuperId
-- 7: No aplicativo SuperId, crie uma senha na categoria Sites com a url: www.donabet.com.br
-- 8: Escaneie o QR Code pelo aplicativo do SuperId
-- 9: Aguarde um pouco, e se tudo correr corretamente, o login será realizado e você será redirecionado
+- 5: adicione um arquivo .env, e dentro dele coloque: PARTNER_API_KEY=8/sE2zcHgwOlGZdnRKVg1MYmNv5t1TiHHz29dOWwlwyB2PlvhZDp230VX3TdxUZhClsvDw3pHhnxWu2oURqbfiHxcv2SEqQt0QZeeMLR+AVAMjcWV7SXYe3gbJiR/2sa
+- 6: No seu navegador, abra a página localhost:3000/login
+- 7: Selecione a opção SuperId
+- 8: No aplicativo SuperId, crie uma senha na categoria Sites com a url: www.donabet.com.br
+- 9: Escaneie o QR Code pelo aplicativo do SuperId
+- 10: Aguarde um pouco, e se tudo correr corretamente, o login será realizado e você será redirecionado
 ---
 
